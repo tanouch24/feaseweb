@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
 import { DemoLeadForm } from "@/components/home/DemoLeadForm";
+
+export const metadata: Metadata = {
+  title: "Créer mon site — 0 € de frais de création | FeaseWeb",
+  description:
+    "Parlez-nous de votre entreprise : FeaseWeb prépare votre site, sans frais de création. Vous validez avant toute mise en ligne.",
+  alternates: { canonical: "/creer-mon-site" },
+};
 
 export default function CreerMonSitePage() {
   return (

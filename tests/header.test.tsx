@@ -12,7 +12,11 @@ describe("Header", () => {
     );
     expect(screen.getAllByRole("link", { name: "FAQ" })[0]).toHaveAttribute(
       "href",
-      "/#faq"
+      "/faq"
+    );
+    expect(screen.getAllByRole("link", { name: "Blog" })[0]).toHaveAttribute(
+      "href",
+      "/blog"
     );
   });
 

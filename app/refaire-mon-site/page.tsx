@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
 import { DemoLeadForm } from "@/components/home/DemoLeadForm";
+
+export const metadata: Metadata = {
+  title: "Refaire mon site — Refonte sans frais | FeaseWeb",
+  description:
+    "Donnez-nous l'adresse de votre site actuel : FeaseWeb prépare sa refonte, sans frais, avec la même formule à 49 €/mois.",
+  alternates: { canonical: "/refaire-mon-site" },
+};
 
 export default function RefaireMonSitePage() {
   return (

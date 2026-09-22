@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync, statSync } from "fs";
 import { join } from "path";
 
-const SCAN_DIRS = ["app", "components", "lib"];
+const SCAN_DIRS = ["app", "components", "lib", "content"];
 const FORBIDDEN_PATTERNS = [/39\s?€/, /78\s?€/, /98\s?€/, /SEO\s*\+\s*49/i];
 const FORBIDDEN_PROOF_WORDS = [/témoignage/i, /★/, /\bavis\s+client/i];
 
@@ -12,7 +12,7 @@ function walk(dir: string): string[] {
     const fullPath = join(dir, entry);
     const stats = statSync(fullPath);
     if (stats.isDirectory()) return walk(fullPath);
-    if (!/\.(tsx?|ts)$/.test(fullPath)) return [];
+    if (!/\.(tsx?|ts|mdx)$/.test(fullPath)) return [];
     return [fullPath];
   });
 }

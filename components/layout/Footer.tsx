@@ -1,9 +1,14 @@
+import Link from "next/link";
 import { Logo } from "@/components/layout/Logo";
 
 const navLinks = [
-  { label: "Offre", href: "/#tarif" },
-  { label: "Exemples", href: "/#exemples" },
-  { label: "FAQ", href: "/#faq" },
+  { label: "Comment ça marche", href: "/comment-ca-marche" },
+  { label: "Offre", href: "/tarifs" },
+  { label: "Exemples", href: "/exemples" },
+  { label: "Référencement", href: "/seo" },
+  { label: "Blog", href: "/blog" },
+  { label: "FAQ", href: "/faq" },
+  { label: "Espace client", href: "/espace-client" },
   { label: "Contact", href: "/creer-mon-site" },
   { label: "Connexion", href: "/connexion" },
 ];
@@ -28,22 +33,22 @@ export function Footer() {
           </div>
           <nav className="flex flex-wrap gap-x-8 gap-y-3">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.href}
                 href={link.href}
                 className="text-sm text-ink-soft hover:text-ink"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </nav>
         </div>
         <div className="mt-12 flex flex-col gap-4 border-t border-line pt-6 text-xs text-ink-soft md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             {legalLinks.map((link) => (
-              <a key={link.href} href={link.href} className="hover:text-ink">
+              <Link key={link.href} href={link.href} className="hover:text-ink">
                 {link.label}
-              </a>
+              </Link>
             ))}
           </div>
           <p>

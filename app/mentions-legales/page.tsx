@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { LegalPageLayout } from "@/components/layout/LegalPageLayout";
+
+export const metadata: Metadata = {
+  title: "Mentions légales — FeaseWeb",
+  description: "Mentions légales du site FeaseWeb.",
+  alternates: { canonical: "/mentions-legales" },
+};
 
 export default function MentionsLegalesPage() {
   return (

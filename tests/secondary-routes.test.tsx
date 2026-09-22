@@ -44,6 +44,6 @@ describe("Exemples pages", () => {
 describe("EspaceClientPage", () => {
   it("labels itself explicitly as a preview, not the real client space", () => {
     render(<EspaceClientPage />);
-    expect(screen.getByText(/aperçu/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/aperçu/i).length).toBeGreaterThan(0);
   });
 });

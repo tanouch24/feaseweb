@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { LegalPageLayout } from "@/components/layout/LegalPageLayout";
+
+export const metadata: Metadata = {
+  title: "Conditions générales de vente — FeaseWeb",
+  description: "Conditions générales de vente du service FeaseWeb.",
+  alternates: { canonical: "/cgv" },
+};
 
 export default function CGVPage() {
   return (

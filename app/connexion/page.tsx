@@ -1,4 +1,11 @@
-"use client";
+import type { Metadata } from "next";
+import { ConnexionForm } from "@/components/layout/ConnexionForm";
+
+export const metadata: Metadata = {
+  title: "Connexion — Espace client FeaseWeb",
+  description: "Connexion à votre espace client FeaseWeb.",
+  robots: { index: false, follow: false },
+};
 
 export default function ConnexionPage() {
   return (
@@ -7,39 +14,7 @@ export default function ConnexionPage() {
       <p className="mt-2 text-sm text-ink-soft">
         Démonstration — aucune authentification réelle.
       </p>
-      <form
-        className="mt-8 space-y-5"
-        onSubmit={(event) => event.preventDefault()}
-      >
-        <div>
-          <label htmlFor="login-email" className="text-sm font-medium text-ink">
-            Email
-          </label>
-          <input
-            id="login-email"
-            name="email"
-            type="email"
-            className="mt-1.5 w-full rounded-sm border border-line px-3 py-2 focus:outline-brand"
-          />
-        </div>
-        <div>
-          <label htmlFor="login-password" className="text-sm font-medium text-ink">
-            Mot de passe
-          </label>
-          <input
-            id="login-password"
-            name="password"
-            type="password"
-            className="mt-1.5 w-full rounded-sm border border-line px-3 py-2 focus:outline-brand"
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full rounded-sm bg-brand px-6 py-3 text-[15px] font-medium text-white transition-colors hover:bg-brand-dark"
-        >
-          Se connecter
-        </button>
-      </form>
+      <ConnexionForm />
     </main>
   );
 }

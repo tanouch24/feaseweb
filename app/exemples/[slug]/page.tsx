@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SiteMockup } from "@/components/mockups/SiteMockup";
 import { PhoneMockup } from "@/components/mockups/PhoneMockup";
@@ -5,6 +6,22 @@ import { demoSites } from "@/lib/demo-sites.demo";
 
 export function generateStaticParams() {
   return demoSites.map((site) => ({ slug: site.slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const site = demoSites.find((candidate) => candidate.slug === slug);
+  if (!site) return {};
+
+  return {
+    title: `${site.name} — Exemple de site FeaseWeb`,
+    description: site.description,
+    alternates: { canonical: `/exemples/${slug}` },
+  };
 }
 
 export default async function ExempleDetailPage({

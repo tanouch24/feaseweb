@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Logo } from "@/components/layout/Logo";
 import { CTAButton } from "@/components/ui/CTAButton";
 
 const navLinks = [
-  { label: "Comment ça marche", href: "/#comment-ca-marche" },
-  { label: "Tout compris", href: "/#tout-compris" },
-  { label: "Exemples", href: "/#exemples" },
-  { label: "Tarif", href: "/#tarif" },
-  { label: "FAQ", href: "/#faq" },
+  { label: "Comment ça marche", href: "/comment-ca-marche" },
+  { label: "Tarif", href: "/tarifs" },
+  { label: "Exemples", href: "/exemples" },
+  { label: "Blog", href: "/blog" },
+  { label: "FAQ", href: "/faq" },
 ];
 
 export function Header() {
@@ -35,20 +36,20 @@ export function Header() {
         <Logo />
         <nav className="hidden items-center gap-8 md:flex">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
               className="group relative text-sm text-ink-soft transition-colors hover:text-ink"
             >
               {link.label}
               <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-brand transition-transform duration-200 group-hover:scale-x-100" />
-            </a>
+            </Link>
           ))}
         </nav>
         <div className="hidden items-center gap-4 md:flex">
-          <a href="/connexion" className="text-sm text-ink-soft hover:text-ink">
+          <Link href="/connexion" className="text-sm text-ink-soft hover:text-ink">
             Connexion
-          </a>
+          </Link>
           <CTAButton href="/creer-mon-site">Créer mon site</CTAButton>
         </div>
         <button
@@ -70,18 +71,18 @@ export function Header() {
           className="flex flex-col gap-4 border-t border-line bg-bg px-6 py-6 md:hidden"
         >
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
               onClick={() => setMobileOpen(false)}
               className="text-base text-ink"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
-          <a href="/connexion" className="text-base text-ink-soft">
+          <Link href="/connexion" className="text-base text-ink-soft">
             Connexion
-          </a>
+          </Link>
           <CTAButton href="/creer-mon-site">Créer mon site</CTAButton>
         </nav>
       )}

@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { LegalPageLayout } from "@/components/layout/LegalPageLayout";
+
+export const metadata: Metadata = {
+  title: "Politique de confidentialité — FeaseWeb",
+  description: "Politique de confidentialité du site FeaseWeb.",
+  alternates: { canonical: "/confidentialite" },
+};
 
 export default function ConfidentialitePage() {
   return (
