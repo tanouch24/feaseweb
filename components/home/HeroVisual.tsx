@@ -18,7 +18,7 @@ export function HeroVisual() {
   const { ref, offset } = useParallax(10);
 
   return (
-    <div ref={ref} className="relative pb-8 sm:pb-32">
+    <div ref={ref} className="relative min-w-0 pb-8 sm:pb-32">
       <div
         className="relative"
         style={{ transform: `translate(${offset.x * 0.5}px, ${offset.y * 0.5}px)` }}

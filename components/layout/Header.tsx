@@ -7,8 +7,9 @@ import { CTAButton } from "@/components/ui/CTAButton";
 
 const navLinks = [
   { label: "Comment ça marche", href: "/comment-ca-marche" },
-  { label: "Tarif", href: "/tarifs" },
+  { label: "Offre", href: "/tarifs" },
   { label: "Exemples", href: "/exemples" },
+  { label: "Référencement", href: "/seo" },
   { label: "Blog", href: "/blog" },
   { label: "FAQ", href: "/faq" },
 ];
@@ -48,7 +49,7 @@ export function Header() {
         </nav>
         <div className="hidden items-center gap-4 md:flex">
           <Link href="/connexion" className="text-sm text-ink-soft hover:text-ink">
-            Connexion
+            Espace client
           </Link>
           <CTAButton href="/creer-mon-site">Créer mon site</CTAButton>
         </div>
@@ -81,7 +82,7 @@ export function Header() {
             </Link>
           ))}
           <Link href="/connexion" className="text-base text-ink-soft">
-            Connexion
+            Espace client
           </Link>
           <CTAButton href="/creer-mon-site">Créer mon site</CTAButton>
         </nav>

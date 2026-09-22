@@ -2,7 +2,6 @@ import type { MetadataRoute } from "next";
 import { demoSites } from "@/lib/demo-sites.demo";
 import { getAllSlugs } from "@/lib/blog";
 
-// TODO: remplacer par le nom de domaine de production réel avant mise en ligne.
 const SITE_URL = "https://feaseweb.fr";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -16,6 +15,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/blog", priority: 0.7, changeFrequency: "weekly" as const },
     { path: "/creer-mon-site", priority: 0.7, changeFrequency: "yearly" as const },
     { path: "/refaire-mon-site", priority: 0.7, changeFrequency: "yearly" as const },
+    { path: "/creation-site-internet", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/refonte-site-internet", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/a-propos", priority: 0.3, changeFrequency: "yearly" as const },
+    { path: "/contact", priority: 0.5, changeFrequency: "yearly" as const },
     { path: "/mentions-legales", priority: 0.2, changeFrequency: "yearly" as const },
     { path: "/confidentialite", priority: 0.2, changeFrequency: "yearly" as const },
     { path: "/cgv", priority: 0.2, changeFrequency: "yearly" as const },

@@ -6,7 +6,7 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden bg-bg pt-14 pb-24 md:pt-20 md:pb-32">
       <div className="mx-auto grid max-w-6xl gap-16 px-6 md:grid-cols-2 md:items-center md:gap-10">
-        <div>
+        <div className="min-w-0">
           <p
             className="animate-rise text-xs font-medium uppercase tracking-widest text-brand-dark"
           >
@@ -21,17 +21,17 @@ export function Hero() {
             Sans avoir à vous en occuper.
           </h1>
           <p
-            className="animate-rise mt-6 max-w-md text-lg text-ink-soft"
+            className="animate-rise mt-6 max-w-md break-words text-lg text-ink-soft"
             style={{ animationDelay: "150ms" }}
           >
-            FeaseWeb crée ou refait votre site, l&apos;héberge, le maintient et
-            travaille son référencement. Vous vous concentrez sur votre métier.
+            On le crée. On le met en ligne. On le maintient. Vous vous
+            concentrez sur votre métier.
           </p>
           <div className="animate-rise mt-8" style={{ animationDelay: "230ms" }}>
             <PriceBadge />
           </div>
           <div
-            className="animate-rise mt-8 flex flex-wrap gap-4"
+            className="animate-rise mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4"
             style={{ animationDelay: "310ms" }}
           >
             <CTAButton href="/creer-mon-site">Créer mon site</CTAButton>

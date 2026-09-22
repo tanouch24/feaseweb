@@ -18,6 +18,10 @@ describe("Header", () => {
       "href",
       "/blog"
     );
+    expect(screen.getAllByRole("link", { name: "Référencement" })[0]).toHaveAttribute(
+      "href",
+      "/seo"
+    );
   });
 
   it("toggles the mobile menu on button click", async () => {

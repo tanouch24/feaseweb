@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import type { Metadata } from "next";
 import { LegalPageLayout } from "@/components/layout/LegalPageLayout";
 
@@ -11,13 +12,13 @@ export default function CookiesPage() {
   return (
     <LegalPageLayout title="Politique de cookies">
       <p>
-        Cette page décrit l&apos;utilisation de cookies sur le site FeaseWeb.
-        Le contenu ci-dessous est une maquette de démonstration.
+        Le site FeaseWeb n'active pas volontairement de cookie publicitaire ou
+        analytique dans cette version.
       </p>
       <p>
-        [TODO: politique de cookies complète à rédiger et valider avant mise
-        en production — liste des cookies utilisés, finalités, durées de
-        conservation, gestion du consentement.]
+        Si des outils de mesure ou de personnalisation sont ajoutés plus tard,
+        leurs finalités, durées et modalités de consentement seront documentées
+        avant activation.
       </p>
     </LegalPageLayout>
   );

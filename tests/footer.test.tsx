@@ -15,8 +15,9 @@ describe("Footer", () => {
     );
   });
 
-  it("marks missing legal info as TODO instead of inventing it", () => {
+  it("shows the verified operating identity without publishing placeholders", () => {
     render(<Footer />);
-    expect(screen.getByText(/TODO/)).toBeInTheDocument();
+    expect(screen.getByText(/NB CONSULTING/)).toBeInTheDocument();
+    expect(screen.queryByText(/TODO/)).not.toBeInTheDocument();
   });
 });

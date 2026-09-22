@@ -6,7 +6,7 @@ import { FinalCTA } from "@/components/home/FinalCTA";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 
 export const metadata: Metadata = {
-  title: "Tarif — 0 € de création, puis 49 €/mois tout compris | FeaseWeb",
+  title: "Tarifs — 0 € de création, puis 49 €/mois tout compris | FeaseWeb",
   description:
     "0 € de frais de création ou de refonte, puis 49 €/mois tout compris : site, hébergement, maintenance, sécurité, modifications et référencement SEO inclus.",
   alternates: { canonical: "/tarifs" },

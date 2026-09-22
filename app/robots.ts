@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
 
-// TODO: remplacer par le nom de domaine de production réel avant mise en ligne.
 const SITE_URL = "https://feaseweb.fr";
 
 export default function robots(): MetadataRoute.Robots {
@@ -8,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/connexion"],
+      disallow: ["/admin", "/api", "/connexion", "/espace-client"],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
   };

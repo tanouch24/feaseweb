@@ -41,6 +41,6 @@ export const faqItems: FAQItem[] = [
   {
     question: "Que se passe-t-il si je souhaite arrêter ?",
     answer:
-      "[À VALIDER AVANT PRODUCTION] Nous envisageons un modèle de mise à disposition du site avec possibilité de rachat ou de transfert à la sortie. Les modalités juridiques précises et le prix de rachat ne sont pas encore définitivement validés — cette réponse sera mise à jour avant la mise en production.",
+      "Les modalités de résiliation et de transfert sont définies dans le contrat applicable. Elles seront précisées avant toute souscription.",
   },
 ];

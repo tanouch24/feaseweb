@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   description:
     "Suivez l'état de votre site, votre référencement et vos demandes de modification depuis votre espace client FeaseWeb.",
   alternates: { canonical: "/espace-client" },
+  robots: { index: false, follow: false },
 };
 export const dynamic = "force-dynamic";
 

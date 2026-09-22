@@ -14,12 +14,7 @@ export default function FAQPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    // Answers not yet legally validated (marked "[À VALIDER AVANT
-    // PRODUCTION]") are excluded from structured data — we never want a
-    // placeholder to be indexed as a real answer.
-    mainEntity: faqItems
-      .filter((item) => !item.answer.includes("À VALIDER AVANT PRODUCTION"))
-      .map((item) => ({
+    mainEntity: faqItems.map((item) => ({
         "@type": "Question",
         name: item.question,
         acceptedAnswer: {

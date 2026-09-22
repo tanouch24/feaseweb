@@ -16,9 +16,9 @@ describe("FAQSection", () => {
     expect(screen.getByText(/vrai produit FeaseWeb/)).toBeInTheDocument();
   });
 
-  it("flags the cancellation answer as not yet legally validated", () => {
+  it("keeps the cancellation answer contract-neutral", () => {
     render(<FAQSection />);
-    expect(screen.getByText(/À VALIDER AVANT PRODUCTION/)).toBeInTheDocument();
+    expect(screen.getByText(/modalités de résiliation et de transfert/)).toBeInTheDocument();
   });
 });
 

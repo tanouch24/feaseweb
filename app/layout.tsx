@@ -16,7 +16,6 @@ const publicSans = Public_Sans({
   weight: ["400", "500", "600"],
 });
 
-// TODO: remplacer par le nom de domaine de production réel avant mise en ligne.
 const SITE_URL = "https://feaseweb.fr";
 
 export const metadata: Metadata = {
@@ -25,6 +24,14 @@ export const metadata: Metadata = {
   description:
     "FeaseWeb crée ou refait votre site, l'héberge, le maintient et travaille son référencement. 0 € de frais de création, puis 49 €/mois tout compris.",
   alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "FeaseWeb",
+    title: "FeaseWeb — Votre site internet, sans avoir à vous en occuper",
+    description: "Création ou refonte sans frais, puis 49 €/mois tout compris avec SEO inclus.",
+    url: SITE_URL,
+  },
+  twitter: { card: "summary_large_image", title: "FeaseWeb — Votre site internet, sans avoir à vous en occuper", description: "Création ou refonte sans frais, puis 49 €/mois tout compris." },
 };
 
 const organizationJsonLd = {

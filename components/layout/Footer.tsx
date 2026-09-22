@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/layout/Logo";
+import { feasewebConfig } from "@/lib/feaseweb-config";
 
 const navLinks = [
   { label: "Comment ça marche", href: "/comment-ca-marche" },
@@ -9,8 +10,9 @@ const navLinks = [
   { label: "Blog", href: "/blog" },
   { label: "FAQ", href: "/faq" },
   { label: "Espace client", href: "/espace-client" },
-  { label: "Contact", href: "/creer-mon-site" },
-  { label: "Connexion", href: "/connexion" },
+  { label: "Créer mon site", href: "/creer-mon-site" },
+  { label: "À propos", href: "/a-propos" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const legalLinks = [
@@ -52,8 +54,7 @@ export function Footer() {
             ))}
           </div>
           <p>
-            © {new Date().getFullYear()} FeaseWeb — [TODO: raison sociale, SIREN,
-            adresse, capital social à compléter avant mise en production]
+            © {new Date().getFullYear()} {feasewebConfig.brand} — {feasewebConfig.operator.tradeName}
           </p>
         </div>
       </div>

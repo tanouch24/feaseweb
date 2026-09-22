@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import type { Metadata } from "next";
 import { LegalPageLayout } from "@/components/layout/LegalPageLayout";
 
@@ -11,14 +12,16 @@ export default function ConfidentialitePage() {
   return (
     <LegalPageLayout title="Politique de confidentialité">
       <p>
-        Cette page décrit comment FeaseWeb traite les données personnelles de
-        ses clients et visiteurs. Le contenu ci-dessous est une maquette de
-        démonstration.
+        FeaseWeb reçoit les informations transmises dans le formulaire de prise
+        de contact afin d'étudier une demande de création ou de refonte de site.
+        Ces informations sont destinées à FeaseWeb et ne sont pas utilisées pour
+        afficher des métriques ou des publicités.
       </p>
       <p>
-        [TODO: politique de confidentialité complète à rédiger et valider
-        avant mise en production — données collectées, finalités, durées de
-        conservation, sous-traitants, coordonnées du DPO, droits RGPD.]
+        Le formulaire demande notamment une identité, une entreprise, un email
+        et les éléments utiles au projet. Le détail des durées de conservation,
+        des sous-traitants et des modalités d'exercice des droits doit être
+        complété et validé avant la mise en production juridique du service.
       </p>
     </LegalPageLayout>
   );
