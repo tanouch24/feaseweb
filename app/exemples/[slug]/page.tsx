@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { SiteMockup } from "@/components/mockups/SiteMockup";
-import { PhoneMockup } from "@/components/mockups/PhoneMockup";
+import { DemoSitePreview, type DemoSiteSlug } from "@/components/demo-sites/DemoSitePreview";
 import { demoSites } from "@/lib/demo-sites.demo";
 
 export function generateStaticParams() {
@@ -34,18 +34,17 @@ export default async function ExempleDetailPage({
   if (!site) notFound();
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-20">
-      <span className="rounded-sm bg-bg-alt px-2.5 py-1 text-xs text-ink-soft">
-        Exemple de site FeaseWeb
-      </span>
-      <h1 className="mt-4 font-serif text-3xl text-ink md:text-4xl">
-        {site.name}
-      </h1>
-      <p className="mt-2 text-ink-soft">{site.description}</p>
-      <div className="mt-10 grid gap-10 md:grid-cols-[1fr_auto] md:items-start">
-        <SiteMockup businessName={site.name} tagline={site.tagline} />
-        <PhoneMockup businessName={site.name} />
+    <main>
+      <h1 className="sr-only">{site.name} — Exemple de site FeaseWeb</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-bg-alt px-6 py-3 text-sm">
+        <span className="text-ink-soft">
+          Démonstration FeaseWeb — entreprise fictive
+        </span>
+        <Link href="/exemples" className="font-medium text-brand-dark hover:text-brand">
+          ← Retour aux exemples
+        </Link>
       </div>
+      <DemoSitePreview slug={slug as DemoSiteSlug} variant="detail" frame={false} />
     </main>
   );
 }

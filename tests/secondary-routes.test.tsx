@@ -30,14 +30,21 @@ describe("Exemples pages", () => {
     ).toBeGreaterThan(0);
   });
 
-  it("renders a single demo site detail page", async () => {
+  it("renders a full immersive demo site with a discreet disclosure banner", async () => {
     const Page = await ExempleDetailPage({
       params: Promise.resolve({ slug: "dupont-plomberie" }),
     });
     render(Page);
     expect(
-      screen.getByRole("heading", { name: "Dupont Plomberie" })
+      screen.getByRole("heading", { name: /Dupont Plomberie/ })
     ).toBeInTheDocument();
+    expect(
+      screen.getByText("Démonstration FeaseWeb — entreprise fictive")
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Retour aux exemples/ })).toHaveAttribute(
+      "href",
+      "/exemples"
+    );
   });
 });
 

@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { MockupFrame } from "@/components/ui/MockupFrame";
+import { DupontPlomberieSite } from "@/components/demo-sites/DupontPlomberieSite";
+import { demoSiteImages } from "@/lib/demo-site-images";
 
 function BeforeSitePreview() {
   return (
     <div
-      className="flex h-full w-full flex-col bg-[#eaeaea] p-4"
+      className="flex h-full w-full flex-col overflow-y-auto bg-[#eaeaea] p-4"
       style={{ fontFamily: "'Times New Roman', Times, serif" }}
     >
       <p className="text-[11px] text-gray-600 underline">
@@ -19,37 +22,19 @@ function BeforeSitePreview() {
         Bienvenue sur notre site. Nous intervenons pour tous vos problemes de
         plomberie. Devis gratuit au 04.XX.XX.XX.XX.
       </p>
-      <div className="mt-3 flex h-16 w-24 items-center justify-center border border-gray-400 bg-gray-300 text-center text-[10px] text-gray-500">
-        photo.jpg
+      <div className="relative mt-3 h-16 w-24 overflow-hidden border border-gray-400">
+        <Image
+          src={demoSiteImages.plumbingHero.src}
+          alt=""
+          fill
+          sizes="96px"
+          className="object-cover"
+          style={{ filter: "grayscale(0.4) contrast(0.85) brightness(0.95)" }}
+        />
       </div>
       <p className="mt-4 text-[10px] text-gray-500">
         Optimisé pour Internet Explorer — 800x600
       </p>
-    </div>
-  );
-}
-
-function AfterSitePreview() {
-  return (
-    <div className="flex h-full w-full flex-col bg-white p-6">
-      <div className="flex items-center justify-between">
-        <span className="font-serif text-base text-ink">Dupont Plomberie</span>
-        <span className="rounded-sm bg-brand px-3 py-1.5 text-xs font-medium text-white">
-          Devis gratuit
-        </span>
-      </div>
-      <p className="mt-6 font-serif text-2xl text-ink">
-        Plombier à Lyon,
-        <br />
-        disponible 7j/7
-      </p>
-      <p className="mt-2 max-w-xs text-sm text-ink-soft">
-        Dépannage rapide, devis clair, intervention le jour même.
-      </p>
-      <div className="mt-5 grid grid-cols-2 gap-3">
-        <div className="h-16 rounded-sm bg-gradient-to-br from-brand/25 via-brand/10 to-bg-alt" />
-        <div className="h-16 rounded-sm bg-gradient-to-br from-accent/25 via-accent/10 to-bg-alt" />
-      </div>
     </div>
   );
 }
@@ -76,10 +61,10 @@ export function BeforeAfterSlider() {
             <BeforeSitePreview />
           </div>
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 overflow-y-auto"
             style={{ clipPath: `inset(0 ${100 - percent}% 0 0)` }}
           >
-            <AfterSitePreview />
+            <DupontPlomberieSite variant="detail" />
           </div>
           <div
             className="pointer-events-none absolute inset-y-0"
