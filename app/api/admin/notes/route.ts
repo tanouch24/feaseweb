@@ -1,0 +1,6 @@
+import { NextResponse } from "next/server";
+import { requireApiAdmin } from "@/lib/authz";
+import { createClient } from "@/lib/supabase/server";
+import { noteSchema } from "@/lib/validation";
+
+export async function POST(request: Request) { const auth = await requireApiAdmin(); if ("response" in auth) return auth.response; const supabase = await createClient(); if (!supabase) return NextResponse.json({ error: "Supabase n'est pas configuré." }, { status: 503 }); const body = await request.json().catch(() => null); const parsed = noteSchema.safeParse(body); if (!parsed.success || (!body?.clientId && !body?.prospectId)) return NextResponse.json({ error: "Note invalide." }, { status: 422 }); const { error } = await supabase.from("internal_notes").insert({ author_id: auth.user.id, client_id: body.clientId ?? null, prospect_id: body.prospectId ?? null, body: parsed.data.body }); if (error) return NextResponse.json({ error: "Impossible d'enregistrer la note." }, { status: 500 }); const entityId = body.clientId ?? body.prospectId; await supabase.from("activity_log").insert({ actor_id: auth.user.id, entity_type: body.clientId ? "client" : "prospect", entity_id: entityId, message: "Note interne ajoutée." }); return NextResponse.json({ ok: true }); }

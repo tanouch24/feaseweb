@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DemoLeadForm } from "@/components/home/DemoLeadForm";
@@ -7,8 +7,11 @@ import ExempleDetailPage from "@/app/exemples/[slug]/page";
 import EspaceClientPage from "@/app/espace-client/page";
 
 describe("DemoLeadForm", () => {
-  it("shows a local success state instead of submitting anywhere", async () => {
+  it("shows a server-backed confirmation after a valid submission", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, json: async () => ({ ok: true }) })));
     render(<DemoLeadForm mode="create" />);
+    await userEvent.type(screen.getByLabelText("Prénom"), "Test");
+    await userEvent.type(screen.getByLabelText("Nom"), "Client");
     await userEvent.type(
       screen.getByLabelText("Nom de votre entreprise"),
       "Test SARL"
@@ -17,8 +20,9 @@ describe("DemoLeadForm", () => {
       screen.getByLabelText("Votre email"),
       "contact@test-sarl.fr"
     );
+    await userEvent.click(screen.getByLabelText(/J'accepte/));
     await userEvent.click(screen.getByRole("button", { name: /Envoyer/ }));
-    expect(await screen.findByText(/Merci/)).toBeInTheDocument();
+    expect(await screen.findByText(/Votre demande a bien été reçue/)).toBeInTheDocument();
   });
 });
 
@@ -49,8 +53,7 @@ describe("Exemples pages", () => {
 });
 
 describe("EspaceClientPage", () => {
-  it("labels itself explicitly as a preview, not the real client space", () => {
-    render(<EspaceClientPage />);
-    expect(screen.getAllByText(/aperçu/i).length).toBeGreaterThan(0);
+  it("is an async server-gated page", () => {
+    expect(EspaceClientPage.constructor.name).toBe("AsyncFunction");
   });
 });

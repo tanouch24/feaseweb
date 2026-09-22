@@ -2,19 +2,19 @@
 
 ## État du lot
 
-Le dépôt était une maquette Next.js sans backend, base de données ni authentification. Le back-office V1 ajoute une console locale sous `/admin`, un modèle relationnel TypeScript et un schéma PostgreSQL de référence dans `schema.sql`. Les écrans utilisent un store navigateur `localStorage` pour permettre de tester le workflow sans créer arbitrairement de projet cloud.
+Le dépôt V4 remplace le store `localStorage` par des Route Handlers protégés et Supabase/PostgreSQL. Le schéma exécutable est la migration `supabase/migrations/20260922140000_backoffice_v4.sql`; `docs/backoffice/schema.sql` est un point d'entrée documentaire vers cette migration. Tant que les variables Supabase ne sont pas fournies, aucune donnée métier n'est lue ou écrite.
 
 Les données de démonstration sont explicitement marquées et chargées uniquement par action utilisateur. Elles ne sont pas rendues sur le site public.
 
 ## Séparation des espaces
 
 - Site public : routes marketing existantes, inchangées.
-- Espace client : `/espace-client` reste une preview explicitement fictive ; il devra lire les mêmes tables après branchement de l'authentification.
-- Back-office interne : `/admin`, avec navigation prospects, clients, sites, demandes, SEO, paiements et domaines.
+- Espace client : `/espace-client` vérifie la session et le rôle `client`, puis ne lit que le client rattaché à `auth.uid()`.
+- Back-office interne : `/admin`, protégé par une vérification serveur `admin` dans le layout, un proxy de refresh de session et RLS.
 
 ## Modèle de données
 
-Le modèle comporte `users`, `prospects`, `clients`, `sites`, `subscriptions`, `payments`, `modification_requests`, `seo_actions`, `seo_metrics`, `domains`, `internal_notes` et `activity_log`. Les clés étrangères et les enum métier sont regroupés dans `schema.sql`. Les données personnelles sont rattachées au client, les notes internes et l'activité ne doivent jamais être exposées au rôle client.
+Le modèle comporte `profiles`, `prospects`, `clients`, `sites`, `subscriptions`, `payments`, `modification_requests`, `seo_actions`, `seo_metrics`, `domains`, `internal_notes` et `activity_log`. Les clés étrangères, enum, contraintes, index, triggers, fonction de conversion atomique et policies RLS sont dans la migration. Les données personnelles sont rattachées au client, les notes internes et l'activité ne sont jamais exposées au rôle client.
 
 ## Workflows
 
@@ -22,12 +22,12 @@ Prospect : formulaire → nouveau → qualification → preview → gagné → c
 
 Site : informations reçues → à préparer → en création → preview → corrections → validé → mise en ligne → actif → maintenance. La génération avec Codex, la preview et la mise en ligne restent manuelles.
 
-Abonnement : le modèle porte l'offre 49 €/mois, le provider et les identifiants externes, sans appel Stripe. Le MRR est calculé exclusivement par somme des abonnements `actif`.
+Abonnement : le modèle porte 4900 EUR/mois, le provider et les identifiants externes, sans appel Stripe. Le MRR est calculé exclusivement par somme des abonnements `actif`. Le traitement TVA est volontairement `A_CONFIRMER`.
 
 ## Authentification et sécurité
 
-La V1 locale n'est pas une authentification de production : les routes `/admin` ne doivent pas être déployées telles quelles. Avant production, ajouter une authentification serveur, une session cookie `HttpOnly/Secure/SameSite`, un contrôle de rôle `admin` à chaque route serveur et des contrôles de propriété côté espace client. Les secrets doivent rester dans l'environnement, jamais dans Git. Les numéros de carte ne seront jamais stockés.
+Supabase Auth gère les mots de passe et les cookies SSR via `@supabase/ssr`. `proxy.ts` rafraîchit la session, mais chaque layout et Route Handler revalide l'utilisateur et son rôle. La secret key est uniquement serveur. Les secrets doivent rester dans l'environnement, jamais dans Git. Les numéros de carte ne seront jamais stockés.
 
 ## Points avant production
 
-Base PostgreSQL migrée et sauvegardée, authentification et RBAC, API serveur avec validation, CSRF selon stratégie, audit des logs, upload sécurisé des pièces jointes, rate limiting, tests d'intégration, monitoring et revue RGPD. Aucun DNS, email, Stripe ou GSC n'est connecté dans ce lot.
+Fournir le projet Supabase et les quatre variables documentées, appliquer la migration, créer le premier admin, exécuter les tests RLS et le test d'intégration réel. Restent aussi SMTP de production, rate limiting distribué, upload sécurisé, monitoring, revue RGPD, Stripe et GSC. Aucun DNS, email transactionnel, Stripe ou GSC métier n'est connecté dans ce lot.

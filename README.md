@@ -1,11 +1,9 @@
-# FeaseWeb — maquette
+# FeaseWeb — site public et back-office
 
-Maquette front-end (Next.js/TypeScript/Tailwind) du site FeaseWeb : un
-service géré de site internet pour artisans, TPE et indépendants.
-
-Aucun backend réel dans cette version : pas de paiement, pas
-d'authentification, pas de base de données. Les formulaires affichent un
-état de succès local uniquement.
+Application Next.js/TypeScript/Tailwind du site FeaseWeb et de son back-office.
+Le frontend public est conservé, tandis que le lot V4 prépare le backend réel
+Supabase/PostgreSQL, Supabase Auth, RLS et les formulaires serveur. Stripe et
+Search Console ne sont pas connectés.
 
 ## Lancer le projet
 
@@ -13,6 +11,10 @@ d'authentification, pas de base de données. Les formulaires affichent un
 npm install
 npm run dev
 ```
+
+Sans variables Supabase, les routes protégées indiquent une configuration
+manquante et aucune donnée métier n'est simulée. Voir
+[`docs/backoffice/supabase-setup.md`](docs/backoffice/supabase-setup.md).
 
 Ouvrir [http://localhost:3000](http://localhost:3000).
 

@@ -1,32 +1,48 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { BackofficeData, ClientStatus, ModificationRequest, ProspectStatus, SiteStatus, demoData, emptyData } from "@/lib/backoffice";
+import { createContext, useContext, useEffect, useState } from "react";
+import type { BackofficeData, ClientStatus, ModificationRequest, ProspectStatus, SiteStatus } from "@/lib/backoffice";
 
-type Store = { data: BackofficeData; demoMode: boolean; update: (fn: (current: BackofficeData) => BackofficeData) => void; loadDemo: () => void; setProspectStatus: (id: string, status: ProspectStatus) => void; convertProspect: (id: string) => void; setClientStatus: (id: string, status: ClientStatus) => void; setSiteStatus: (id: string, status: SiteStatus) => void; setSitePreview: (id: string, previewUrl: string) => void; addClientNote: (id: string, note: string) => void; addProspectNote: (id: string, note: string) => void; setRequestStatus: (id: string, status: ModificationRequest["status"]) => void; addSeoAction: (siteId: string, action: string, description: string) => void; };
+type Store = {
+  data: BackofficeData; ready: boolean; error: string | null; refresh: () => Promise<void>;
+  setProspectStatus: (id: string, status: ProspectStatus) => Promise<void>;
+  convertProspect: (id: string) => Promise<void>;
+  setClientStatus: (id: string, status: ClientStatus) => Promise<void>;
+  setSiteStatus: (id: string, status: SiteStatus) => Promise<void>;
+  setSitePreview: (id: string, previewUrl: string) => Promise<void>;
+  addClientNote: (id: string, note: string) => Promise<void>;
+  addProspectNote: (id: string, note: string) => Promise<void>;
+  setRequestStatus: (id: string, status: ModificationRequest["status"]) => Promise<void>;
+  addSeoAction: (siteId: string, action: string, description: string) => Promise<void>;
+};
 const Context = createContext<Store | null>(null);
-const STORAGE_KEY = "feaseweb-backoffice-v1";
-const id = (prefix: string) => `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
+
+async function api(path: string, init?: RequestInit) {
+  const response = await fetch(path, { ...init, headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) } });
+  if (!response.ok) { const body = await response.json().catch(() => null); throw new Error(body?.error ?? "Une erreur est survenue."); }
+  return response.json().catch(() => null);
+}
 
 export function BackofficeProvider({ children }: { children: React.ReactNode }) {
-  const [data, setData] = useState<BackofficeData>(emptyData);
-  const [demoMode, setDemoMode] = useState(false);
-  // localStorage is the intentionally local persistence boundary for this pre-backend lot.
+  const [data, setData] = useState<BackofficeData>({ prospects: [], clients: [], sites: [], subscriptions: [], payments: [], requests: [], seoActions: [], seoMetrics: [], domains: [], activity: [] });
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const refresh = async () => { try { const result = await api("/api/admin/bootstrap", { headers: {} }); setData(result.data); setError(null); } catch (caught) { setError(caught instanceof Error ? caught.message : "Impossible de charger les données."); } finally { setReady(true); } };
+  // The effect synchronizes this client store with the protected server endpoint.
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { const stored = window.localStorage.getItem(STORAGE_KEY); if (stored) { try { setData(JSON.parse(stored)); setDemoMode(stored.includes("DONNÉE DE DÉMONSTRATION")); } catch { setData(emptyData); } } }, []);
-  const update = (fn: (current: BackofficeData) => BackofficeData) => setData((current) => { const next = fn(current); window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); return next; });
-  const loadDemo = () => { const next = demoData(); setData(next); setDemoMode(true); window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); };
-  const store = useMemo<Store>(() => ({ data, demoMode, update, loadDemo,
-    setProspectStatus: (prospectId, status) => update((current) => ({ ...current, prospects: current.prospects.map((p) => p.id === prospectId ? { ...p, status } : p), activity: [{ id: id("activity"), occurredAt: new Date().toISOString(), actor: "admin", entityType: "prospect", entityId: prospectId, message: `Statut prospect → ${status}` }, ...current.activity] })),
-    convertProspect: (prospectId) => update((current) => { const prospect = current.prospects.find((item) => item.id === prospectId); if (!prospect || current.clients.some((client) => client.prospectId === prospectId)) return current; const clientId = id("client"); const siteId = id("site"); return { ...current, prospects: current.prospects.map((item) => item.id === prospectId ? { ...item, status: "gagne" } : item), clients: [...current.clients, { id: clientId, prospectId, firstName: prospect.firstName, lastName: prospect.lastName, company: prospect.company, email: prospect.email, phone: prospect.phone, startedAt: new Date().toISOString(), status: "en_attente", offer: "FeaseWeb — 49 €/mois", siteId, notes: [] }], sites: [...current.sites, { id: siteId, clientId, name: prospect.company, slug: prospect.company.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""), previewUrl: "", finalDomain: "", repository: "", host: "", createdAt: new Date().toISOString(), status: "a_preparer", technicalNotes: "" }], activity: [{ id: id("activity"), occurredAt: new Date().toISOString(), actor: "admin", entityType: "prospect", entityId: prospectId, message: "Prospect converti en client." }, ...current.activity] }; }),
-    setClientStatus: (clientId, status) => update((current) => ({ ...current, clients: current.clients.map((client) => client.id === clientId ? { ...client, status } : client) })),
-    setSiteStatus: (siteId, status) => update((current) => ({ ...current, sites: current.sites.map((site) => site.id === siteId ? { ...site, status } : site), activity: [{ id: id("activity"), occurredAt: new Date().toISOString(), actor: "admin", entityType: "site", entityId: siteId, message: `Étape de production → ${status}` }, ...current.activity] })),
-    setSitePreview: (siteId, previewUrl) => update((current) => ({ ...current, sites: current.sites.map((site) => site.id === siteId ? { ...site, previewUrl } : site), activity: [{ id: id("activity"), occurredAt: new Date().toISOString(), actor: "admin", entityType: "site", entityId: siteId, message: "URL de preview renseignée." }, ...current.activity] })),
-    addClientNote: (clientId, note) => update((current) => ({ ...current, clients: current.clients.map((client) => client.id === clientId ? { ...client, notes: [...client.notes, note] } : client), activity: [{ id: id("activity"), occurredAt: new Date().toISOString(), actor: "admin", entityType: "client", entityId: clientId, message: "Note interne ajoutée." }, ...current.activity] })),
-    addProspectNote: (prospectId, note) => update((current) => ({ ...current, prospects: current.prospects.map((prospect) => prospect.id === prospectId ? { ...prospect, notes: [...prospect.notes, note] } : prospect), activity: [{ id: id("activity"), occurredAt: new Date().toISOString(), actor: "admin", entityType: "prospect", entityId: prospectId, message: "Note interne ajoutée." }, ...current.activity] })),
-    setRequestStatus: (requestId, status) => update((current) => ({ ...current, requests: current.requests.map((request) => request.id === requestId ? { ...request, status, resolvedAt: status === "terminee" ? new Date().toISOString() : request.resolvedAt } : request) })),
-    addSeoAction: (siteId, action, description) => update((current) => ({ ...current, seoActions: [{ id: id("seo"), siteId, date: new Date().toISOString(), action, description, status: "terminee" }, ...current.seoActions] })),
-  }), [data, demoMode]);
+  useEffect(() => { void refresh(); }, []);
+  const mutate = async (path: string, body: unknown) => { await api(path, { method: "PATCH", body: JSON.stringify(body) }); await refresh(); };
+  const store: Store = { data, ready, error, refresh,
+    setProspectStatus: (id, status) => mutate(`/api/admin/prospects/${id}`, { status }),
+    convertProspect: async (id) => { await api(`/api/admin/prospects/${id}/convert`, { method: "POST", body: JSON.stringify({}) }); await refresh(); },
+    setClientStatus: (id, status) => mutate(`/api/admin/clients/${id}`, { status }),
+    setSiteStatus: (id, status) => mutate(`/api/admin/sites/${id}`, { status }),
+    setSitePreview: async (id, previewUrl) => { await mutate(`/api/admin/sites/${id}`, { previewUrl }); },
+    addClientNote: async (id, body) => { await api("/api/admin/notes", { method: "POST", body: JSON.stringify({ clientId: id, body }) }); await refresh(); },
+    addProspectNote: async (id, body) => { await api("/api/admin/notes", { method: "POST", body: JSON.stringify({ prospectId: id, body }) }); await refresh(); },
+    setRequestStatus: (id, status) => mutate(`/api/admin/requests/${id}`, { status }),
+    addSeoAction: async (siteId, action, description) => { await api("/api/admin/seo/actions", { method: "POST", body: JSON.stringify({ siteId, action, description }) }); await refresh(); },
+  };
   return <Context.Provider value={store}>{children}</Context.Provider>;
 }
 export function useBackoffice() { const context = useContext(Context); if (!context) throw new Error("useBackoffice doit être utilisé dans BackofficeProvider"); return context; }
