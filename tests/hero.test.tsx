@@ -19,6 +19,8 @@ describe("Hero", () => {
     render(<Hero />);
     expect(screen.getByText(/49\s?€/)).toBeInTheDocument();
     expect(screen.getByText("Site en ligne")).toBeInTheDocument();
-    expect(screen.getByText("SEO suivi")).toBeInTheDocument();
+    expect(screen.getByText("SEO actif")).toBeInTheDocument();
+    expect(screen.getByText("SSL sécurisé")).toBeInTheDocument();
+    expect(screen.getByText("Mobile optimisé")).toBeInTheDocument();
   });
 });

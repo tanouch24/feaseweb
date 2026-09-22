@@ -10,6 +10,11 @@ describe("DashboardPreview", () => {
     expect(screen.getByText("1 modification en cours")).toBeInTheDocument();
     expect(screen.getByText(/49\s?€\s?\/\s?mois — Actif/)).toBeInTheDocument();
   });
+
+  it("labels its data explicitly as a demonstration, never as real performance", () => {
+    render(<DashboardPreview />);
+    expect(screen.getByText("Données de démonstration")).toBeInTheDocument();
+  });
 });
 
 describe("ClientSpaceSection", () => {

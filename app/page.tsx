@@ -1,7 +1,9 @@
 import { Hero } from "@/components/home/Hero";
 import { BreakSection } from "@/components/home/BreakSection";
 import { TwoPathsCards } from "@/components/home/TwoPathsCards";
+import { TransformationSection } from "@/components/home/TransformationSection";
 import { ProcessSteps } from "@/components/home/ProcessSteps";
+import { KineticWords } from "@/components/home/KineticWords";
 import { OfferSection } from "@/components/home/OfferSection";
 import { ComparisonBlock } from "@/components/home/ComparisonBlock";
 import { ClientSpaceSection } from "@/components/home/ClientSpaceSection";
@@ -24,7 +26,14 @@ export default function HomePage() {
         <TwoPathsCards />
       </RevealOnScroll>
       <RevealOnScroll>
-        <ProcessSteps />
+        <TransformationSection />
+      </RevealOnScroll>
+      {/* Not wrapped in RevealOnScroll: its sticky visual panel needs an
+          ancestor with no transform, and the section already carries its
+          own scroll-driven motion. */}
+      <ProcessSteps />
+      <RevealOnScroll>
+        <KineticWords />
       </RevealOnScroll>
       <RevealOnScroll>
         <OfferSection />

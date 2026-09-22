@@ -8,6 +8,6 @@ describe("BreakSection", () => {
     expect(
       screen.getByText("Votre métier n'est pas de gérer un site internet.")
     ).toBeInTheDocument();
-    expect(screen.getByText("Et ça tombe bien : c'est le nôtre.")).toBeInTheDocument();
+    expect(screen.getByText("Ça tombe bien. C'est le nôtre.")).toBeInTheDocument();
   });
 });

@@ -10,17 +10,14 @@ describe("FAQSection", () => {
     const question = screen.getByRole("button", {
       name: /Pourquoi la création est-elle à 0 €/,
     });
-    expect(screen.queryByText(/vrai produit FeaseWeb/)).not.toBeInTheDocument();
+    expect(question).toHaveAttribute("aria-expanded", "false");
     await userEvent.click(question);
+    expect(question).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByText(/vrai produit FeaseWeb/)).toBeInTheDocument();
   });
 
-  it("flags the cancellation answer as not yet legally validated", async () => {
+  it("flags the cancellation answer as not yet legally validated", () => {
     render(<FAQSection />);
-    const question = screen.getByRole("button", {
-      name: /Que se passe-t-il si je souhaite arrêter/,
-    });
-    await userEvent.click(question);
     expect(screen.getByText(/À VALIDER AVANT PRODUCTION/)).toBeInTheDocument();
   });
 });

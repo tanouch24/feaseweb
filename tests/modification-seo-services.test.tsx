@@ -7,7 +7,8 @@ import { ServiceEditorialGrid } from "@/components/home/ServiceEditorialGrid";
 describe("ModificationFlow", () => {
   it("shows the three-step request workflow", () => {
     render(<ModificationFlow />);
-    expect(screen.getByText("Demande envoyée")).toBeInTheDocument();
+    expect(screen.getByText("Envoyée")).toBeInTheDocument();
+    expect(screen.getByText("En cours")).toBeInTheDocument();
     expect(screen.getByText("Terminée")).toBeInTheDocument();
   });
 });

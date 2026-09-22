@@ -1,4 +1,10 @@
+"use client";
+
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { SiteMockup } from "@/components/mockups/SiteMockup";
+import { MockupFrame } from "@/components/ui/MockupFrame";
+import { CheckIcon } from "@/components/ui/icons";
+import { useActiveStep } from "@/hooks/useActiveStep";
 
 const steps = [
   {
@@ -23,38 +29,146 @@ const steps = [
   },
 ];
 
+function QuestionnaireVisual() {
+  return (
+    <MockupFrame>
+      <div className="rounded-md border border-line bg-white p-6 shadow-sm">
+        <p className="text-xs font-medium uppercase tracking-wide text-ink-soft">
+          Parlez-nous de votre activité
+        </p>
+        <div className="mt-4 space-y-3">
+          <div className="rounded-sm border border-line px-3 py-2.5 text-sm text-ink-soft">
+            Nom de l&apos;entreprise
+          </div>
+          <div className="rounded-sm border border-line px-3 py-2.5 text-sm text-ink-soft">
+            Métier
+          </div>
+          <div className="rounded-sm border border-line px-3 py-2.5 text-sm text-ink-soft">
+            Zone d&apos;intervention
+          </div>
+        </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+function WireframeVisual() {
+  return (
+    <MockupFrame>
+      <div className="overflow-hidden rounded-md border border-line bg-white shadow-sm">
+        <div className="flex items-center gap-2 border-b border-line bg-bg-alt px-4 py-2.5">
+          <div className="flex gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-line" />
+            <span className="h-2.5 w-2.5 rounded-full bg-line" />
+            <span className="h-2.5 w-2.5 rounded-full bg-line" />
+          </div>
+        </div>
+        <div className="space-y-3 px-6 py-8">
+          <div className="h-5 w-1/2 animate-pulse rounded-sm bg-line" />
+          <div className="h-3 w-1/3 animate-pulse rounded-sm bg-line" />
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="h-16 animate-pulse rounded-sm bg-line" />
+            <div className="h-16 animate-pulse rounded-sm bg-line" />
+          </div>
+          <p className="pt-2 text-xs text-ink-soft">
+            Structure et design en cours de construction…
+          </p>
+        </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+function ValidationVisual() {
+  return (
+    <MockupFrame>
+      <div className="relative">
+        <SiteMockup
+          businessName="Dupont Plomberie"
+          tagline="Dépannage 7j/7 dans tout le secteur"
+        />
+        <div className="mt-4 flex items-center justify-between rounded-md border border-line bg-white px-4 py-3">
+          <span className="text-sm text-ink-soft">En attente de votre validation</span>
+          <span className="rounded-sm bg-brand px-3 py-1.5 text-xs font-medium text-white">
+            Valider
+          </span>
+        </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+function LiveVisual() {
+  const items = ["SEO", "Maintenance", "Sécurité"];
+  return (
+    <MockupFrame>
+      <div className="rounded-md border border-line bg-white p-6 shadow-sm">
+        <div className="inline-flex items-center gap-2 rounded-sm bg-brand/10 px-3 py-1.5 text-sm font-medium text-brand-dark">
+          <CheckIcon className="h-4 w-4 text-brand" />
+          EN LIGNE
+        </div>
+        <div className="mt-5 flex flex-wrap gap-4">
+          {items.map((item) => (
+            <span key={item} className="flex items-center gap-1.5 text-sm text-ink-soft">
+              <CheckIcon className="h-3.5 w-3.5 text-brand" />
+              {item}
+            </span>
+          ))}
+        </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+const visuals = [QuestionnaireVisual, WireframeVisual, ValidationVisual, LiveVisual];
+
 export function ProcessSteps() {
+  const { active, setStepRef } = useActiveStep(steps.length);
+  const ActiveVisual = visuals[active];
+
   return (
     <section id="comment-ca-marche" className="bg-bg-alt py-20 md:py-28">
       <div className="mx-auto max-w-6xl px-6">
         <SectionHeading title="Comment ça marche" />
-        <div className="mt-12 grid gap-6 md:grid-cols-4">
-          {steps.map((step) => (
-            <div
-              key={step.number}
-              className={`rounded-lg p-6 ${
-                step.number === "04"
-                  ? "bg-brand text-white"
-                  : "border border-line bg-white text-ink"
-              }`}
-            >
-              <p
-                className={`font-serif text-3xl ${
-                  step.number === "04" ? "text-white/70" : "text-line"
-                }`}
+        <div className="mt-12 grid gap-10 md:grid-cols-2 md:gap-16">
+          <div>
+            {steps.map((step, index) => (
+              <div
+                key={step.number}
+                ref={setStepRef(index)}
+                className="flex min-h-[45vh] flex-col justify-center border-l-2 pl-6 transition-colors duration-300 md:min-h-[55vh]"
+                style={{
+                  borderColor:
+                    index === active
+                      ? "var(--color-brand)"
+                      : "var(--color-line)",
+                }}
               >
-                {step.number}
-              </p>
-              <p className="mt-3 font-medium">{step.title}</p>
-              <p
-                className={`mt-2 text-sm ${
-                  step.number === "04" ? "text-white/80" : "text-ink-soft"
-                }`}
-              >
-                {step.body}
-              </p>
+                <p
+                  className={`font-serif text-3xl transition-colors duration-300 ${
+                    index === active ? "text-brand-dark" : "text-line"
+                  }`}
+                >
+                  {step.number}
+                </p>
+                <p className="mt-3 text-xl font-medium text-ink">{step.title}</p>
+                <p className="mt-2 text-ink-soft">{step.body}</p>
+                <div className="mt-6 md:hidden">
+                  {(() => {
+                    const StepVisual = visuals[index];
+                    return <StepVisual />;
+                  })()}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="hidden md:block">
+            <div className="sticky top-32">
+              <div key={active} className="animate-rise">
+                <ActiveVisual />
+              </div>
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </section>
