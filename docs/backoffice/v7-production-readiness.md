@@ -6,7 +6,6 @@ Le code utilise les variables suivantes :
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-- `SUPABASE_URL`
 - `SUPABASE_SECRET_KEY` (serveur uniquement)
 - `STRIPE_SECRET_KEY` (serveur uniquement, clé LIVE restreinte)
 - `STRIPE_PRICE_ID` (Price LIVE 49 €/mois)

@@ -17,7 +17,10 @@ describe("server auth boundaries", () => {
 
   it("keeps server secrets out of the public environment namespace", () => {
     const source = readFileSync(resolve(process.cwd(), "lib/supabase/config.ts"), "utf8");
-    expect(source).toContain("SUPABASE_SECRET_KEY");
+    const serverConfig = readFileSync(resolve(process.cwd(), "lib/supabase/server-config.ts"), "utf8");
+    expect(serverConfig).toContain("SUPABASE_SECRET_KEY");
+    expect(source).not.toContain("SUPABASE_SECRET_KEY");
+    expect(source).not.toContain("process.env.SUPABASE_URL");
     expect(source).not.toContain("NEXT_PUBLIC_SUPABASE_SECRET_KEY");
   });
 
