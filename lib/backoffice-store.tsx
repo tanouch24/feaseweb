@@ -11,6 +11,7 @@ type Store = {
   setSiteStatus: (id: string, status: SiteStatus) => Promise<void>;
   setSitePreview: (id: string, previewUrl: string) => Promise<void>;
   addClientNote: (id: string, note: string) => Promise<void>;
+  inviteClient: (id: string) => Promise<void>;
   addProspectNote: (id: string, note: string) => Promise<void>;
   setRequestStatus: (id: string, status: ModificationRequest["status"]) => Promise<void>;
   addSeoAction: (siteId: string, action: string, description: string) => Promise<void>;
@@ -42,6 +43,7 @@ export function BackofficeProvider({ children }: { children: React.ReactNode }) 
     setSiteStatus: (id, status) => mutate(`/api/admin/sites/${id}`, { status }),
     setSitePreview: async (id, previewUrl) => { await mutate(`/api/admin/sites/${id}`, { previewUrl }); },
     addClientNote: async (id, body) => { await api("/api/admin/notes", { method: "POST", body: JSON.stringify({ clientId: id, body }) }); await refresh(); },
+    inviteClient: async (id) => { await api(`/api/admin/clients/${id}/invite`, { method: "POST", body: JSON.stringify({}) }); await refresh(); },
     addProspectNote: async (id, body) => { await api("/api/admin/notes", { method: "POST", body: JSON.stringify({ prospectId: id, body }) }); await refresh(); },
     setRequestStatus: (id, status) => mutate(`/api/admin/requests/${id}`, { status }),
     addSeoAction: async (siteId, action, description) => { await api("/api/admin/seo/actions", { method: "POST", body: JSON.stringify({ siteId, action, description }) }); await refresh(); },

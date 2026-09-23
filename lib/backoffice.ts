@@ -8,6 +8,7 @@ export type ProspectStatus =
   | "gagne"
   | "perdu";
 export type ClientStatus = "actif" | "en_attente" | "suspendu" | "resilie";
+export type ClientAccessStatus = "non_invite" | "invitation_envoyee" | "actif";
 export type SiteStatus =
   | "a_preparer"
   | "en_creation"
@@ -46,6 +47,7 @@ export type Prospect = {
 export type Client = {
   id: string; prospectId?: string; firstName: string; lastName: string; company: string;
   email: string; phone: string; startedAt: string; status: ClientStatus; offer: string;
+  accessStatus: ClientAccessStatus; invitedAt?: string; activatedAt?: string;
   siteId?: string; subscriptionId?: string; domainId?: string; notes: string[];
 };
 export type Site = {
@@ -85,7 +87,7 @@ export const emptyData: BackofficeData = { prospects: [], clients: [], sites: []
 export const labelMap: Record<string, string> = {
   nouveau: "Nouveau", a_contacter: "À contacter", contacte: "Contacté", qualifie: "Qualifié",
   preview_en_cours: "Preview à préparer", preview_envoyee: "Preview envoyée", gagne: "Gagné", perdu: "Perdu",
-  actif: "Actif", en_attente: "En attente", suspendu: "Suspendu", resilie: "Résilié", a_preparer: "À préparer",
+  actif: "Actif", en_attente: "En attente", suspendu: "Suspendu", resilie: "Résilié", non_invite: "Non invité", invitation_envoyee: "Invitation envoyée", a_preparer: "À préparer",
   en_creation: "En création", preview: "Preview prête", corrections: "Corrections", valide: "Validé",
   mise_en_ligne: "Mise en ligne", archive: "Archivé", recue: "Reçue", en_cours: "En cours",
   besoin_information: "Besoin d'information", terminee: "Terminée", hors_perimetre: "Hors périmètre",
@@ -107,7 +109,7 @@ export function demoData(): BackofficeData {
       { id: "prospect-demo-1", createdAt: now, firstName: "Camille", lastName: "Martin", company: "Atelier Martin", email: "camille@atelier-martin.test", phone: "06 00 00 00 01", activity: "Menuiserie", city: "Nantes", currentSite: "", hasSite: false, objective: "Présenter l'atelier et recevoir des demandes de devis.", message: "Besoin d'un site clair pour les particuliers.", source: "Formulaire FeaseWeb", status: "nouveau", notes: ["DONNÉE DE DÉMONSTRATION — ne pas contacter."] },
       { id: "prospect-demo-2", createdAt: now, firstName: "Nora", lastName: "Bernard", company: "Studio Nora", email: "nora@studio-nora.test", phone: "06 00 00 00 02", activity: "Photographie", city: "Lyon", currentSite: "https://example.test", hasSite: true, objective: "Refondre un site trop ancien.", message: "Souhaite une preview avant décision.", source: "Recommandation", status: "preview_en_cours", notes: ["DONNÉE DE DÉMONSTRATION — ne pas contacter."] },
     ],
-    clients: [{ id: "client-demo-1", firstName: "Léa", lastName: "Dupont", company: "Dupont Plomberie", email: "lea@dupont-plomberie.test", phone: "06 00 00 00 03", startedAt: now, status: "actif", offer: "FeaseWeb — 49 €/mois", siteId: "site-demo-1", subscriptionId: "subscription-demo-1", domainId: "domain-demo-1", notes: ["DONNÉE DE DÉMONSTRATION — ne pas contacter."] }],
+    clients: [{ id: "client-demo-1", firstName: "Léa", lastName: "Dupont", company: "Dupont Plomberie", email: "lea@dupont-plomberie.test", phone: "06 00 00 00 03", startedAt: now, status: "actif", offer: "FeaseWeb — 49 €/mois", accessStatus: "non_invite", siteId: "site-demo-1", subscriptionId: "subscription-demo-1", domainId: "domain-demo-1", notes: ["DONNÉE DE DÉMONSTRATION — ne pas contacter."] }],
     sites: [{ id: "site-demo-1", clientId: "client-demo-1", name: "Dupont Plomberie", slug: "dupont-plomberie", previewUrl: "https://preview.example.test/dupont-plomberie", finalDomain: "dupont-plomberie.example.test", repository: "", host: "À définir", createdAt: now, status: "actif", technicalNotes: "Site de démonstration." }],
     subscriptions: [{ id: "subscription-demo-1", clientId: "client-demo-1", status: "actif", amountCents: 4900, startedAt: now, nextDueAt: now, provider: "none", lastPaymentStatus: "paye" }],
     payments: [{ id: "payment-demo-1", clientId: "client-demo-1", amountCents: 4900, paidAt: now, status: "paye", invoice: "DÉMO-0001", period: "Mois de démonstration", provider: "none" }],

@@ -24,6 +24,33 @@ describe("server auth boundaries", () => {
     expect(source).not.toContain("NEXT_PUBLIC_SUPABASE_SECRET_KEY");
   });
 
+  it("keeps onboarding closed and role-driven", () => {
+    const loginPage = readFileSync(resolve(process.cwd(), "app/connexion/page.tsx"), "utf8");
+    const inviteRoute = readFileSync(resolve(process.cwd(), "app/api/admin/clients/[id]/invite/route.ts"), "utf8");
+    const migration = readFileSync(resolve(process.cwd(), "supabase/migrations/20260923190000_client_onboarding.sql"), "utf8");
+    expect(loginPage).toContain('href="/mot-de-passe-oublie"');
+    expect(loginPage).toContain('href="/creer-mon-site"');
+    expect(loginPage).not.toContain("signUp");
+    expect(inviteRoute).toContain("requireApiAdmin");
+    expect(inviteRoute).toContain("inviteUserByEmail");
+    expect(inviteRoute).toContain('role: "client"');
+    expect(inviteRoute).not.toContain('role: "admin"');
+    expect(migration).toContain("access_status");
+    expect(migration).toContain("invitation_envoyee");
+  });
+
+  it("keeps recovery responses non-enumerating and callback destinations closed", () => {
+    const resetRoute = readFileSync(resolve(process.cwd(), "app/api/auth/password-reset/route.ts"), "utf8");
+    const callbackRoute = readFileSync(resolve(process.cwd(), "app/auth/callback/route.ts"), "utf8");
+    const updateRoute = readFileSync(resolve(process.cwd(), "app/api/auth/update-password/route.ts"), "utf8");
+    expect(resetRoute).toContain("Si un compte correspond");
+    expect(resetRoute).not.toContain("user.email");
+    expect(callbackRoute).toContain("allowedDestinations");
+    expect(callbackRoute).toContain("exchangeCodeForSession");
+    expect(updateRoute).toContain("updateUser({ password:");
+    expect(updateRoute).toContain('current.role !== "client" && current.role !== "admin"');
+  });
+
   it("protects activity writes and client requests on the server", () => {
     const adminRoute = readFileSync(resolve(process.cwd(), "app/api/admin/client-updates/route.ts"), "utf8");
     const clientRoute = readFileSync(resolve(process.cwd(), "app/api/client/requests/route.ts"), "utf8");

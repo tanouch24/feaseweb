@@ -26,7 +26,7 @@ Dans Supabase Authentication, ajouter les URLs du site :
 - Redirect URL : `https://fease.fr/**`
 - conserver `http://localhost:3000/**` pour le développement local
 
-Le parcours mot de passe oublié/reset n'est pas implémenté dans cette version : l'onboarding réel doit prévoir une procédure d'invitation ou de création de compte séparée avant ouverture commerciale.
+Le parcours V8 prévoit l'invitation administrateur, l'activation du compte et la récupération du mot de passe. Le SMTP et les templates Supabase restent à configurer et tester dans le projet distant avant l'onboarding réel.
 
 ## Stripe après déploiement
 

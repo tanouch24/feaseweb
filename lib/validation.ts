@@ -22,6 +22,8 @@ export const prospectInputSchema = z.object({
 
 export type ProspectInput = z.infer<typeof prospectInputSchema>;
 export const loginSchema = z.object({ email: z.string().trim().toLowerCase().email(), password: z.string().min(8).max(200) });
+export const passwordSchema = z.object({ password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères.").max(200), confirmation: z.string().max(200) }).superRefine((value, context) => { if (value.password !== value.confirmation) context.addIssue({ code: "custom", path: ["confirmation"], message: "Les deux mots de passe doivent correspondre." }); });
+export const emailSchema = z.object({ email: z.string().trim().toLowerCase().email("L'adresse email n'est pas valide.").max(320) });
 export const noteSchema = z.object({ body: z.string().trim().min(1).max(5000) });
 export const sitePatchSchema = z.object({ previewUrl: z.string().trim().url().optional(), productionUrl: z.string().trim().url().optional(), domain: z.string().trim().max(253).optional(), repository: z.string().trim().max(500).optional(), hostingProvider: z.string().trim().max(120).optional(), status: z.enum(["a_preparer", "en_creation", "preview", "corrections", "valide", "mise_en_ligne", "actif", "suspendu", "archive"]).optional() }).strict();
 export const statusSchema = z.object({ status: z.string().min(1).max(40) });
