@@ -8,10 +8,21 @@ const migration = () => readFileSync(resolve(process.cwd(), "supabase/migrations
 describe("guided onboarding safeguards", () => {
   it("validates account creation and never accepts a role", () => {
     expect(accountCreationSchema.safeParse({ firstName: "A", lastName: "B", company: "Entreprise", email: "a@example.com", password: "correct-horse", confirmation: "correct-horse", privacyConsent: true }).success).toBe(true);
-    expect(accountCreationSchema.safeParse({ firstName: "A", lastName: "B", company: "Entreprise", email: "a@example.com", password: "correct-horse", confirmation: "correct-horse", privacyConsent: true, role: "admin" }).success).toBe(true);
+    const formValue = accountCreationSchema.safeParse({ firstName: "A", lastName: "B", company: "Entreprise", email: "a@example.com", phone: "06 12 34 56 78", password: "correct-horse", confirmation: "correct-horse", privacyConsent: "true" });
+    expect(formValue.success).toBe(true);
+    if (formValue.success) expect(formValue.data.privacyConsent).toBe(true);
+    expect(accountCreationSchema.safeParse({ firstName: "A", lastName: "B", company: "Entreprise", email: "a@example.com", password: "correct-horse", confirmation: "correct-horse", privacyConsent: false }).success).toBe(false);
+    expect(accountCreationSchema.safeParse({ firstName: "A", lastName: "B", company: "Entreprise", email: "a@example.com", password: "correct-horse", confirmation: "correct-horse" }).success).toBe(false);
     const route = readFileSync(resolve(process.cwd(), "app/api/onboarding/account/route.ts"), "utf8");
     expect(route).not.toContain("role: parsed");
     expect(route).not.toContain("client_id");
+    expect(route).not.toContain("parsed.error.issues[0]?.message");
+    expect(route).toContain("Vous devez accepter");
+  });
+
+  it("keeps phone and password errors human-readable", () => {
+    expect(accountCreationSchema.safeParse({ firstName: "A", lastName: "B", company: "Entreprise", email: "a@example.com", phone: "06 12 34 56 78", password: "correct-horse", confirmation: "different", privacyConsent: "true" }).success).toBe(false);
+    expect(accountCreationSchema.safeParse({ firstName: "A", lastName: "B", company: "Entreprise", email: "a@example.com", phone: "abc", password: "correct-horse", confirmation: "correct-horse", privacyConsent: "true" }).success).toBe(false);
   });
 
   it("models existing websites without credential fields", () => {

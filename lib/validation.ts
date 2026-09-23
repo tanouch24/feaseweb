@@ -54,7 +54,8 @@ export const clientRequestSchema = z.object({ title: z.string().trim().min(1).ma
 export const accountCreationSchema = z.object({
   firstName: z.string().trim().min(1).max(100), lastName: z.string().trim().min(1).max(100), company: z.string().trim().min(1).max(180),
   email: z.string().trim().toLowerCase().email().max(320), phone: optionalText(40).refine((value) => !value || /^[+()\d\s.-]{7,40}$/.test(value), "Le téléphone n'est pas valide."),
-  password: z.string().min(8).max(200), confirmation: z.string().max(200), privacyConsent: z.literal(true),
+  password: z.string().min(8).max(200), confirmation: z.string().max(200),
+  privacyConsent: z.preprocess((value) => value === true || value === "true" ? true : value, z.literal(true, { error: "Vous devez accepter l'utilisation de vos informations." })),
 }).superRefine((value, context) => { if (value.password !== value.confirmation) context.addIssue({ code: "custom", path: ["confirmation"], message: "Les deux mots de passe doivent correspondre." }); });
 export const onboardingPatchSchema = z.object({
   firstName: z.string().trim().min(1).max(100).optional(), lastName: z.string().trim().min(1).max(100).optional(), company: z.string().trim().min(1).max(180).optional(), email: z.string().trim().toLowerCase().email().max(320).optional(), phone: optionalText(40),

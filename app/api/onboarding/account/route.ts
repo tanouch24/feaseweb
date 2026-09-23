@@ -8,7 +8,11 @@ export async function POST(request: Request) {
   const supabase = await createClient();
   if (!supabase) return NextResponse.json({ error: "Supabase n'est pas configuré." }, { status: 503 });
   const parsed = accountCreationSchema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Informations invalides." }, { status: 422 });
+  if (!parsed.success) {
+    const field = parsed.error.issues[0]?.path[0];
+    const message = field === "privacyConsent" ? "Vous devez accepter l'utilisation de vos informations pour créer votre espace." : field === "phone" ? "Veuillez saisir un numéro de téléphone valide." : field === "confirmation" ? "Les deux mots de passe doivent correspondre." : "Vérifiez les informations saisies.";
+    return NextResponse.json({ error: message }, { status: 422 });
+  }
   const { data: existing } = await supabase.auth.getUser();
   if (existing.user) return NextResponse.json({ error: "Un compte est déjà connecté." }, { status: 409 });
   const appUrl = getSafeAppUrl();
