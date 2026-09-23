@@ -68,4 +68,16 @@ describe("server auth boundaries", () => {
     expect(nextConfig).toContain("X-Content-Type-Options");
     expect(nextConfig).toContain("Referrer-Policy");
   });
+
+  it("omits only the intentionally public Netlify environment keys", () => {
+    const netlifyConfig = readFileSync(resolve(process.cwd(), "netlify.toml"), "utf8");
+    expect(netlifyConfig).toContain("SECRETS_SCAN_OMIT_KEYS");
+    expect(netlifyConfig).toContain("NEXT_PUBLIC_APP_URL");
+    expect(netlifyConfig).toContain("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
+    expect(netlifyConfig).toContain("NEXT_PUBLIC_SUPABASE_URL");
+    expect(netlifyConfig).not.toContain("SUPABASE_SECRET_KEY");
+    expect(netlifyConfig).not.toContain("STRIPE_SECRET_KEY");
+    expect(netlifyConfig).not.toContain("STRIPE_WEBHOOK_SECRET");
+    expect(netlifyConfig).not.toContain("SECRETS_SCAN_ENABLED");
+  });
 });
