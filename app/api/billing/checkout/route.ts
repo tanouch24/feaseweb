@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/server";
 import { getSafeAppUrl, stripePriceId } from "@/lib/stripe/config";
 import { ensureStripeCustomer, getActiveOrPendingSubscription } from "@/lib/stripe/customer";
+import { isOnboardingComplete, mapProjectIntake, onboardingProjectSelect } from "@/lib/onboarding";
 
 /**
  * Creates a Stripe Checkout Session for the single FeaseWeb subscription
@@ -29,13 +30,13 @@ export async function POST() {
     .select("id, email, company")
     .eq("user_id", user.id)
     .maybeSingle();
-  let project: { id: string; email: string; company: string; current_step: number; project_status: string } | null = null;
+  let project: { id: string; email: string; company: string; current_step: number; project_status: string; completed_at: string | null; intake: ReturnType<typeof mapProjectIntake> } | null = null;
   if (!client) {
-    try { const result = await supabase.from("project_intakes").select("id, email, company, current_step, project_status").eq("user_id", user.id).maybeSingle(); project = result.data; } catch { project = null; }
+    try { const result = await supabase.from("project_intakes").select(`id, ${onboardingProjectSelect}`).eq("user_id", user.id).maybeSingle(); project = result.data ? { ...result.data, intake: mapProjectIntake(result.data) } : null; } catch { project = null; }
   }
   if (!client && !project) return NextResponse.json({ error: "Aucun projet FeaseWeb associé à ce compte." }, { status: 404 });
 
-  if (project && (project.current_step < 8 || project.project_status === "subscription_active")) return NextResponse.json({ error: "Terminez la configuration de votre projet avant de démarrer." }, { status: 409 });
+  if (project && (!isOnboardingComplete(project.intake) || !project.completed_at || project.project_status === "subscription_active")) return NextResponse.json({ error: "Terminez la configuration de votre projet avant de démarrer." }, { status: 409 });
 
   const blocking = client ? await getActiveOrPendingSubscription(client.id) : null;
   if (blocking) {
