@@ -1,6 +1,5 @@
 -- FeaseWeb V8.1: public account onboarding and project configuration.
 
-alter type public.app_role add value if not exists 'prospect';
 alter table public.profiles alter column role set default 'prospect';
 
 create table public.project_intakes (
