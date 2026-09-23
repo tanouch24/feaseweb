@@ -18,6 +18,11 @@ describe("guided onboarding safeguards", () => {
     expect(route).not.toContain("client_id");
     expect(route).not.toContain("parsed.error.issues[0]?.message");
     expect(route).toContain("Vous devez accepter");
+    const accountComponent = readFileSync(resolve(process.cwd(), "components/onboarding/AccountCreationForm.tsx"), "utf8");
+    expect(accountComponent).toContain("Confirmez votre adresse email");
+    expect(accountComponent).toContain("Renvoyer l’email");
+    expect(accountComponent).not.toContain("Si la confirmation email est activée");
+    expect(accountComponent).not.toContain("Aller à la connexion");
   });
 
   it("keeps phone and password errors human-readable", () => {
@@ -47,5 +52,20 @@ describe("guided onboarding safeguards", () => {
     expect(route).toContain("stripePriceId");
     expect(route).toContain("feaseweb_project_intake_id");
     expect(route).not.toContain("request.json");
+  });
+
+  it("keeps confirmation links internal and uses the onboarding callback", () => {
+    const accountRoute = readFileSync(resolve(process.cwd(), "app/api/onboarding/account/route.ts"), "utf8");
+    const resendRoute = readFileSync(resolve(process.cwd(), "app/api/onboarding/confirmation/resend/route.ts"), "utf8");
+    const callbackRoute = readFileSync(resolve(process.cwd(), "app/auth/callback/route.ts"), "utf8");
+    expect(accountRoute).toContain("emailRedirectTo");
+    expect(accountRoute).toContain("/auth/callback?next=/creer-mon-site");
+    expect(resendRoute).toContain('auth.resend({ type: "signup"');
+    expect(resendRoute).toContain("/auth/callback?next=/creer-mon-site");
+    expect(callbackRoute).toContain('allowedDestinations = new Set');
+    expect(callbackRoute).toContain('"/creer-mon-site"');
+    expect(callbackRoute).toContain("exchangeCodeForSession");
+    expect(callbackRoute).toContain('profile?.role !== "prospect"');
+    expect(callbackRoute).not.toContain("console.log");
   });
 });
