@@ -34,4 +34,4 @@ L'espace client interroge uniquement les lignes qui lui appartiennent via RLS. `
 
 ## Points avant production
 
-Fournir le projet Supabase et les quatre variables documentées, appliquer la migration, créer le premier admin, exécuter les tests RLS et le test d'intégration réel. Restent aussi SMTP de production, rate limiting distribué, upload sécurisé, monitoring, revue RGPD, Stripe et GSC. Aucun DNS, email transactionnel, Stripe ou GSC métier n'est connecté dans ce lot.
+Le projet Supabase FeaseWeb est désormais configuré localement et les migrations V4/V5/V6 sont versionnées dans `supabase/migrations/`. Les tests RLS et l'intégration réelle ont été validés lors de la QA V6.1. Restent avant la production : configuration Supabase Auth pour `fease.fr`, SMTP/reset password, rate limiting distribué, upload sécurisé, monitoring, revue RGPD, configuration du webhook Stripe public et connexion GSC. Aucun DNS ni déploiement n'est réalisé par le dépôt.

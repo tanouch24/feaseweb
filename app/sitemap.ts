@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 import { demoSites } from "@/lib/demo-sites.demo";
 import { getAllSlugs } from "@/lib/blog";
+import { siteUrl } from "@/lib/site-config";
 
-const SITE_URL = "https://feaseweb.fr";
+const SITE_URL = siteUrl;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes = [

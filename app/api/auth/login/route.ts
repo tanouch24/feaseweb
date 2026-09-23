@@ -12,5 +12,9 @@ export async function POST(request: Request) {
   const { data: authData, error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error || !authData.user) return NextResponse.json({ error: "Email ou mot de passe incorrect." }, { status: 401 });
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", authData.user.id).maybeSingle();
+  if (profile?.role !== "admin" && profile?.role !== "client") {
+    await supabase.auth.signOut();
+    return NextResponse.json({ error: "Ce compte n'a pas de rôle FeaseWeb valide." }, { status: 403 });
+  }
   return NextResponse.json({ redirect: profile?.role === "admin" ? "/admin" : "/espace-client" });
 }

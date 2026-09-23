@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Public_Sans } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { siteUrl } from "@/lib/site-config";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -16,7 +17,7 @@ const publicSans = Public_Sans({
   weight: ["400", "500", "600"],
 });
 
-const SITE_URL = "https://feaseweb.fr";
+const SITE_URL = siteUrl;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { ConnexionForm } from "@/components/layout/ConnexionForm";
+import { getAuthenticatedProfile } from "@/lib/authz";
 
 export const metadata: Metadata = {
   title: "Connexion — Espace client FeaseWeb",
@@ -7,7 +9,12 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function ConnexionPage() {
+export const dynamic = "force-dynamic";
+
+export default async function ConnexionPage() {
+  const current = await getAuthenticatedProfile();
+  if (current.role === "admin") redirect("/admin");
+  if (current.role === "client") redirect("/espace-client");
   return (
     <main className="mx-auto max-w-sm px-6 py-24">
       <h1 className="font-serif text-3xl text-ink">Connexion</h1>

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
+import { siteUrl } from "@/lib/site-config";
 
-const SITE_URL = "https://feaseweb.fr";
+const SITE_URL = siteUrl;
 
 export default function robots(): MetadataRoute.Robots {
   return {
