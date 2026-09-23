@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-const allowedDestinations = new Set(["/activation-compte", "/nouveau-mot-de-passe"]);
+const allowedDestinations = new Set(["/activation-compte", "/nouveau-mot-de-passe", "/creer-mon-site"]);
 
 function destination(request: Request) {
   const next = new URL(request.url).searchParams.get("next") ?? "/connexion";
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
   const { data: { user } } = await supabase.auth.getUser();
   const admin = createAdminClient();
   if (user && admin) {
-    await admin.from("clients").update({ access_status: "actif", activated_at: new Date().toISOString() }).eq("user_id", user.id);
+    if (next !== "/creer-mon-site") await admin.from("clients").update({ access_status: "actif", activated_at: new Date().toISOString() }).eq("user_id", user.id);
   }
   return NextResponse.redirect(new URL(next, request.url));
 }

@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   const current = await getAuthenticatedProfile();
   if (!current.configured) return NextResponse.json({ error: "Supabase n'est pas configuré." }, { status: 503 });
   if (!current.user) return NextResponse.json({ error: "Lien invalide ou expiré." }, { status: 401 });
-  if (current.role !== "client" && current.role !== "admin") return NextResponse.json({ error: "Ce compte n'a pas de rôle FeaseWeb valide." }, { status: 403 });
+  if (current.role !== "client" && current.role !== "admin" && current.role !== "prospect") return NextResponse.json({ error: "Ce compte n'a pas de rôle FeaseWeb valide." }, { status: 403 });
   const parsed = passwordSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Mot de passe invalide." }, { status: 422 });
   const supabase = await createClient();

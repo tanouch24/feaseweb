@@ -40,6 +40,9 @@ export async function resolveClientId(subscription: Stripe.Subscription): Promis
   const fromMetadata = subscription.metadata?.feaseweb_client_id;
   if (fromMetadata) return fromMetadata;
 
+  const projectId = subscription.metadata?.feaseweb_project_intake_id;
+  if (projectId) return ensureClientForProject(projectId);
+
   const admin = createAdminClient();
   if (!admin) return null;
   const customerId = typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
@@ -49,6 +52,34 @@ export async function resolveClientId(subscription: Stripe.Subscription): Promis
     .eq("external_customer_id", customerId)
     .maybeSingle();
   return data?.client_id ?? null;
+}
+
+export async function ensureClientForProject(projectId: string): Promise<string | null> {
+  const admin = createAdminClient();
+  if (!admin) throw new Error("Supabase admin client not configured.");
+  const { data: project, error: projectError } = await admin.from("project_intakes").select("*").eq("id", projectId).maybeSingle();
+  if (projectError || !project) return null;
+  if (project.client_id) return project.client_id;
+  const { data: existing } = await admin.from("clients").select("id").eq("user_id", project.user_id).maybeSingle();
+  let clientId = existing?.id as string | undefined;
+  if (!clientId) {
+    const created = await admin.from("clients").insert({ user_id: project.user_id, first_name: project.first_name, last_name: project.last_name, company: project.company, email: project.email, phone: project.phone, status: "actif", started_at: new Date().toISOString(), access_status: "actif", activated_at: new Date().toISOString() }).select("id").single();
+    if (created.error?.code === "23505") {
+      const retry = await admin.from("clients").select("id").eq("user_id", project.user_id).single();
+      clientId = retry.data?.id;
+    } else if (created.error) throw created.error;
+    else clientId = created.data.id;
+  }
+  if (!clientId) return null;
+  const { data: site } = await admin.from("sites").select("id").eq("client_id", clientId).maybeSingle();
+  if (!site) {
+    const slug = `${String(project.company).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "site"}-${clientId.slice(0, 8)}`;
+    await admin.from("sites").insert({ client_id: clientId, name: project.company, slug, status: "a_preparer" });
+  }
+  await admin.from("profiles").update({ role: "client" }).eq("id", project.user_id);
+  if (project.prospect_id) await admin.from("prospects").update({ status: "gagne" }).eq("id", project.prospect_id);
+  await admin.from("project_intakes").update({ client_id: clientId, project_status: "subscription_active", completed_at: project.completed_at ?? new Date().toISOString() }).eq("id", projectId);
+  return clientId;
 }
 
 /**

@@ -1,10 +1,11 @@
 /* eslint-disable react/no-unescaped-entities */
 import type { Metadata } from "next";
-import { requireClient } from "@/lib/authz";
+import { requireClientSpace } from "@/lib/authz";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/layout/LogoutButton";
 import { StartSubscriptionButton, ManageSubscriptionButton } from "@/components/billing/BillingActions";
 import { ClientRequestForm } from "@/components/client/ClientRequestForm";
+import { ProspectProjectDashboard } from "@/components/client/ProspectProjectDashboard";
 
 export const metadata: Metadata = { title: "Espace client — FeaseWeb", description: "Suivez le travail réalisé par FeaseWeb sur votre site.", alternates: { canonical: "/espace-client" }, robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -16,8 +17,10 @@ const formatMonthDay = (value: string) => new Date(value).toLocaleDateString("fr
 
 export default async function EspaceClientPage({ searchParams }: { searchParams: Promise<{ checkout?: string }> }) {
   const { checkout } = await searchParams;
-  const current = await requireClient();
+  const current = await requireClientSpace();
   const supabase = await createClient();
+  const { data: intake } = supabase ? await supabase.from("project_intakes").select("*").eq("user_id", current.user.id).maybeSingle() : { data: null };
+  if (current.role === "prospect" && intake) return <ProspectProjectDashboard project={intake} />;
   const { data: client } = supabase ? await supabase.from("clients").select("id, company, first_name, status").eq("user_id", current.user.id).maybeSingle() : { data: null };
   const { data: site } = client && supabase ? await supabase.from("sites").select("id, name, domain, production_url, status").eq("client_id", client.id).order("created_at").limit(1).maybeSingle() : { data: null };
   const { data: subscription } = client && supabase ? await supabase.from("subscriptions").select("status, next_billing_at, cancel_at_period_end").eq("client_id", client.id).maybeSingle() : { data: null };

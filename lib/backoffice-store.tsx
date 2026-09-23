@@ -18,6 +18,7 @@ type Store = {
   createClientUpdate: (input: Omit<ClientUpdate, "id" | "createdAt" | "updatedAt">) => Promise<void>;
   updateClientUpdate: (id: string, input: Partial<Omit<ClientUpdate, "id" | "clientId" | "createdAt" | "updatedAt">>) => Promise<void>;
   deleteClientUpdate: (id: string) => Promise<void>;
+  setProjectStatus: (id: string, status: string) => Promise<void>;
 };
 const Context = createContext<Store | null>(null);
 
@@ -28,7 +29,7 @@ async function api(path: string, init?: RequestInit) {
 }
 
 export function BackofficeProvider({ children }: { children: React.ReactNode }) {
-  const [data, setData] = useState<BackofficeData>({ prospects: [], clients: [], sites: [], subscriptions: [], payments: [], requests: [], clientUpdates: [], seoActions: [], seoMetrics: [], domains: [], activity: [] });
+  const [data, setData] = useState<BackofficeData>({ prospects: [], clients: [], sites: [], subscriptions: [], payments: [], requests: [], clientUpdates: [], projectIntakes: [], seoActions: [], seoMetrics: [], domains: [], activity: [] });
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const refresh = async () => { try { const result = await api("/api/admin/bootstrap", { headers: {} }); setData(result.data); setError(null); } catch (caught) { setError(caught instanceof Error ? caught.message : "Impossible de charger les données."); } finally { setReady(true); } };
@@ -50,6 +51,7 @@ export function BackofficeProvider({ children }: { children: React.ReactNode }) 
     createClientUpdate: async (input) => { await api("/api/admin/client-updates", { method: "POST", body: JSON.stringify({ clientId: input.clientId, siteId: input.siteId ?? null, category: input.category, title: input.title, description: input.description, status: input.status, visibleToClient: input.visibleToClient, activityDate: input.activityDate }) }); await refresh(); },
     updateClientUpdate: async (id, input) => { await api(`/api/admin/client-updates/${id}`, { method: "PATCH", body: JSON.stringify({ ...(input.siteId !== undefined ? { siteId: input.siteId } : {}), ...(input.category ? { category: input.category } : {}), ...(input.title ? { title: input.title } : {}), ...(input.description ? { description: input.description } : {}), ...(input.status ? { status: input.status } : {}), ...(input.visibleToClient !== undefined ? { visibleToClient: input.visibleToClient } : {}), ...(input.activityDate ? { activityDate: input.activityDate } : {}) }) }); await refresh(); },
     deleteClientUpdate: async (id) => { await api(`/api/admin/client-updates/${id}`, { method: "DELETE" }); await refresh(); },
+    setProjectStatus: (id, status) => mutate(`/api/admin/project-intakes/${id}`, { status }),
   };
   return <Context.Provider value={store}>{children}</Context.Provider>;
 }

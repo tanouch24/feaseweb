@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 export default async function ConnexionPage() {
   const current = await getAuthenticatedProfile();
   if (current.role === "admin") redirect("/admin");
-  if (current.role === "client") redirect("/espace-client");
+  if (current.role === "client" || current.role === "prospect") redirect("/espace-client");
   return (
     <main className="mx-auto max-w-sm px-6 py-24">
       <h1 className="font-serif text-3xl text-ink">Connexion</h1>

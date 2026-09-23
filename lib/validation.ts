@@ -51,3 +51,19 @@ export const clientUpdatePatchSchema = z.object({
   ({ siteId: "site_id", visibleToClient: "visible_to_client", activityDate: "activity_date" } as Record<string, string>)[key] ?? key, entry,
 ])));
 export const clientRequestSchema = z.object({ title: z.string().trim().min(1).max(180), category: z.string().trim().min(1).max(120), message: z.string().trim().min(1).max(5000) });
+export const accountCreationSchema = z.object({
+  firstName: z.string().trim().min(1).max(100), lastName: z.string().trim().min(1).max(100), company: z.string().trim().min(1).max(180),
+  email: z.string().trim().toLowerCase().email().max(320), phone: optionalText(40).refine((value) => !value || /^[+()\d\s.-]{7,40}$/.test(value), "Le téléphone n'est pas valide."),
+  password: z.string().min(8).max(200), confirmation: z.string().max(200), privacyConsent: z.literal(true),
+}).superRefine((value, context) => { if (value.password !== value.confirmation) context.addIssue({ code: "custom", path: ["confirmation"], message: "Les deux mots de passe doivent correspondre." }); });
+export const onboardingPatchSchema = z.object({
+  firstName: z.string().trim().min(1).max(100).optional(), lastName: z.string().trim().min(1).max(100).optional(), company: z.string().trim().min(1).max(180).optional(), email: z.string().trim().toLowerCase().email().max(320).optional(), phone: optionalText(40),
+  activity: z.enum(["artisan_btp","commerce","restaurant","beaute","sante","immobilier","automobile","services_entreprises","profession_liberale","autre"]).nullable().optional(),
+  hasExistingSite: z.boolean().optional(), existingSiteUrl: z.string().trim().url().max(2048).nullable().optional(), existingSiteProject: z.enum(["refonte_complete","modernisation","conseil"]).nullable().optional(),
+  primaryObjective: z.enum(["devis","appels","presentation","rendez_vous","vente","visite"]).nullable().optional(), requestedPages: z.array(z.enum(["accueil","services","realisations","a_propos","avis","tarifs","contact","rendez_vous"])).min(1).max(8).optional(),
+  styleDirection: z.enum(["elegant_premium","moderne_epure","artisan_rassurant","dynamique_commercial","sobre_professionnel","chaleureux_humain"]).nullable().optional(), colorMood: z.enum(["clair_minimal","noir_premium","bleu_professionnel","vert_naturel","tons_chauds","laisser_feaseweb"]).nullable().optional(),
+  availableAssets: z.array(z.enum(["logo","photos","textes","avis","aucun"])).max(5).optional(), contactChannel: z.enum(["telephone","whatsapp","email"]).nullable().optional(), contactSlot: z.enum(["matin","apres_midi","fin_journee"]).nullable().optional(), currentStep: z.number().int().min(1).max(8).optional(),
+}).strict();
+export const supportMessageSchema = z.object({ message: z.string().trim().min(1).max(2000) });
+export const projectStatusSchema = z.object({ status: z.enum(["project_configured","subscription_active","preparation","building","preview_ready","client_feedback","finalizing","live"]) });
+export const accessRequirementSchema = z.object({ category: z.enum(["cms","hebergement","domaine","dns","ftp_sftp"]), status: z.enum(["non_necessaire","a_fournir","aide_demandee","recu","valide"]) });

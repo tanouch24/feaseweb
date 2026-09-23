@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-export type Role = "admin" | "client";
+export type Role = "admin" | "client" | "prospect";
 
 export async function getAuthenticatedProfile() {
   const supabase = await createClient();
@@ -27,6 +27,15 @@ export async function requireClient() {
   if (!current.user) redirect("/connexion");
   if (current.role === "admin") redirect("/admin");
   if (current.role !== "client") redirect("/connexion?reason=role");
+  return current;
+}
+
+export async function requireClientSpace() {
+  const current = await getAuthenticatedProfile();
+  if (!current.configured) redirect("/connexion?reason=configuration");
+  if (!current.user) redirect("/connexion");
+  if (current.role === "admin") redirect("/admin");
+  if (current.role !== "client" && current.role !== "prospect") redirect("/connexion?reason=role");
   return current;
 }
 

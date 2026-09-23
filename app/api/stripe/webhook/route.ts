@@ -3,7 +3,7 @@ import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe/server";
 import { stripeWebhookSecret } from "@/lib/stripe/config";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { resolveClientId, syncPaymentFromInvoice, syncSubscriptionFromStripe } from "@/lib/stripe/sync";
+import { ensureClientForProject, resolveClientId, syncPaymentFromInvoice, syncSubscriptionFromStripe } from "@/lib/stripe/sync";
 
 const HANDLED_EVENTS = new Set([
   "checkout.session.completed",
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        const clientId = session.metadata?.feaseweb_client_id;
+        const clientId = session.metadata?.feaseweb_client_id ?? (session.metadata?.feaseweb_project_intake_id ? await ensureClientForProject(session.metadata.feaseweb_project_intake_id) : null);
         const subscriptionId = typeof session.subscription === "string" ? session.subscription : session.subscription?.id;
         if (clientId && subscriptionId) {
           const subscription = await stripe.subscriptions.retrieve(subscriptionId);

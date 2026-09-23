@@ -29,9 +29,15 @@ export async function POST() {
     .select("id, email, company")
     .eq("user_id", user.id)
     .maybeSingle();
-  if (!client) return NextResponse.json({ error: "Aucun client FeaseWeb associé à ce compte." }, { status: 404 });
+  let project: { id: string; email: string; company: string; current_step: number; project_status: string } | null = null;
+  if (!client) {
+    try { const result = await supabase.from("project_intakes").select("id, email, company, current_step, project_status").eq("user_id", user.id).maybeSingle(); project = result.data; } catch { project = null; }
+  }
+  if (!client && !project) return NextResponse.json({ error: "Aucun projet FeaseWeb associé à ce compte." }, { status: 404 });
 
-  const blocking = await getActiveOrPendingSubscription(client.id);
+  if (project && (project.current_step < 8 || project.project_status === "subscription_active")) return NextResponse.json({ error: "Terminez la configuration de votre projet avant de démarrer." }, { status: 409 });
+
+  const blocking = client ? await getActiveOrPendingSubscription(client.id) : null;
   if (blocking) {
     return NextResponse.json(
       { error: "Un abonnement existe déjà pour ce client.", status: blocking.status },
@@ -39,16 +45,14 @@ export async function POST() {
     );
   }
 
-  const customerId = await ensureStripeCustomer(client);
-
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
-    customer: customerId,
+    ...(client ? { customer: await ensureStripeCustomer(client) } : { customer_email: project!.email }),
     line_items: [{ price: stripePriceId, quantity: 1 }],
     success_url: `${safeAppUrl}/espace-client?checkout=success`,
     cancel_url: `${safeAppUrl}/espace-client?checkout=cancelled`,
-    metadata: { feaseweb_client_id: client.id },
-    subscription_data: { metadata: { feaseweb_client_id: client.id } },
+    metadata: client ? { feaseweb_client_id: client.id } : { feaseweb_project_intake_id: project!.id, feaseweb_user_id: user.id },
+    subscription_data: { metadata: client ? { feaseweb_client_id: client.id } : { feaseweb_project_intake_id: project!.id, feaseweb_user_id: user.id } },
   });
 
   if (!session.url) {
