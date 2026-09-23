@@ -1,21 +1,8 @@
 import type { Metadata } from "next";
-import { Fraunces, Public_Sans } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { siteUrl } from "@/lib/site-config";
 import "./globals.css";
-
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-fraunces",
-  weight: ["300", "500", "600"],
-});
-
-const publicSans = Public_Sans({
-  subsets: ["latin"],
-  variable: "--font-public-sans",
-  weight: ["400", "500", "600"],
-});
 
 const SITE_URL = siteUrl;
 
@@ -50,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className={`${fraunces.variable} ${publicSans.variable}`}>
+    <html lang="fr">
       <body className="min-h-screen font-sans antialiased">
         <script
           type="application/ld+json"

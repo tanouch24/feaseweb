@@ -80,4 +80,14 @@ describe("server auth boundaries", () => {
     expect(netlifyConfig).not.toContain("STRIPE_WEBHOOK_SECRET");
     expect(netlifyConfig).not.toContain("SECRETS_SCAN_ENABLED");
   });
+
+  it("keeps production builds independent from Google Font downloads", () => {
+    const layout = readFileSync(resolve(process.cwd(), "app/layout.tsx"), "utf8");
+    const styles = readFileSync(resolve(process.cwd(), "app/globals.css"), "utf8");
+    expect(layout).not.toContain("next/font/google");
+    expect(layout).not.toContain("Public_Sans");
+    expect(layout).not.toContain("Fraunces");
+    expect(styles).toContain("Georgia");
+    expect(styles).toContain("Avenir Next");
+  });
 });

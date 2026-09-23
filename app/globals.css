@@ -10,8 +10,9 @@
   --color-accent: #c98a3e;
   --color-line: #e4e1d8;
 
-  --font-serif: var(--font-fraunces), Georgia, serif;
-  --font-sans: var(--font-public-sans), system-ui, sans-serif;
+  /* System fallbacks keep production builds independent from remote font downloads. */
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-sans: "Avenir Next", Avenir, "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   --radius-sm: 8px;
   --radius-md: 14px;
