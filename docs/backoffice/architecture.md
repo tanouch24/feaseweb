@@ -4,6 +4,8 @@
 
 Le dépôt V4 remplace le store `localStorage` par des Route Handlers protégés et Supabase/PostgreSQL. Le schéma exécutable est la migration `supabase/migrations/20260922140000_backoffice_v4.sql`; `docs/backoffice/schema.sql` est un point d'entrée documentaire vers cette migration. Tant que les variables Supabase ne sont pas fournies, aucune donnée métier n'est lue ou écrite.
 
+La V6 ajoute la migration `supabase/migrations/20260923180000_client_service_activity.sql`. La table `client_updates` porte le journal opérationnel FeaseWeb saisi manuellement par un administrateur : catégorie, titre, description, statut, date et visibilité client. Elle est volontairement distincte de `activity_log`, qui reste un audit interne. Les futures tâches automatisées devront appeler la même couche métier/API que l'admin et ne devront créer une mise à jour qu'après une intervention réellement effectuée.
+
 Les données de démonstration sont explicitement marquées et chargées uniquement par action utilisateur. Elles ne sont pas rendues sur le site public.
 
 ## Séparation des espaces
@@ -27,6 +29,8 @@ Abonnement : le modèle porte 4900 EUR/mois, le provider et les identifiants ext
 ## Authentification et sécurité
 
 Supabase Auth gère les mots de passe et les cookies SSR via `@supabase/ssr`. `proxy.ts` rafraîchit la session, mais chaque layout et Route Handler revalide l'utilisateur et son rôle. La secret key est uniquement serveur. Les secrets doivent rester dans l'environnement, jamais dans Git. Les numéros de carte ne seront jamais stockés.
+
+L'espace client interroge uniquement les lignes qui lui appartiennent via RLS. `client_updates` est lisible par un client seulement lorsque `visible_to_client = true`; les écritures, modifications et suppressions sont réservées à l'admin. Les notes internes et `activity_log` ne sont jamais exposés dans l'espace client. Les demandes client utilisent la même table `modification_requests`, avec un titre persistant ajouté en V6.
 
 ## Points avant production
 

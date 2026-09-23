@@ -20,4 +20,20 @@ describe("server auth boundaries", () => {
     expect(source).toContain("SUPABASE_SECRET_KEY");
     expect(source).not.toContain("NEXT_PUBLIC_SUPABASE_SECRET_KEY");
   });
+
+  it("protects activity writes and client requests on the server", () => {
+    const adminRoute = readFileSync(resolve(process.cwd(), "app/api/admin/client-updates/route.ts"), "utf8");
+    const clientRoute = readFileSync(resolve(process.cwd(), "app/api/client/requests/route.ts"), "utf8");
+    expect(adminRoute).toContain("requireApiAdmin");
+    expect(clientRoute).toContain("requireClient");
+    expect(clientRoute).not.toContain("internal_notes");
+  });
+
+  it("keeps internal activity and notes out of the client RLS path", () => {
+    const migration = readFileSync(resolve(process.cwd(), "supabase/migrations/20260923180000_client_service_activity.sql"), "utf8");
+    expect(migration).toContain("visible_to_client = true");
+    expect(migration).toContain("client_updates_self_select");
+    expect(migration).not.toContain("client_updates_self_insert");
+    expect(migration).not.toContain("internal_notes");
+  });
 });

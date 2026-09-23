@@ -1,142 +1,43 @@
+/* eslint-disable react/no-unescaped-entities */
 import type { Metadata } from "next";
 import { requireClient } from "@/lib/authz";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/layout/LogoutButton";
 import { StartSubscriptionButton, ManageSubscriptionButton } from "@/components/billing/BillingActions";
+import { ClientRequestForm } from "@/components/client/ClientRequestForm";
 
-export const metadata: Metadata = {
-  title: "Espace client — FeaseWeb",
-  description:
-    "Suivez l'état de votre site, votre référencement et vos demandes de modification depuis votre espace client FeaseWeb.",
-  alternates: { canonical: "/espace-client" },
-  robots: { index: false, follow: false },
-};
+export const metadata: Metadata = { title: "Espace client — FeaseWeb", description: "Suivez le travail réalisé par FeaseWeb sur votre site.", alternates: { canonical: "/espace-client" }, robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
-const STATUS_LABELS: Record<string, string> = {
-  incomplet: "En attente de paiement",
-  essai: "Période d'essai",
-  actif: "Actif",
-  retard: "Paiement en retard",
-  impaye: "Impayé",
-  incomplet_expire: "Expiré",
-  annule: "Annulé",
-  en_pause: "En pause",
-};
+const statusLabels: Record<string, string> = { a_preparer: "À préparer", en_creation: "En création", preview: "En attente de validation", corrections: "Corrections en cours", valide: "Validé", mise_en_ligne: "Mise en ligne", actif: "En ligne", suspendu: "Maintenance", archive: "Archivé", incomplet: "En attente de paiement", retard: "Paiement en retard", impaye: "Impayé", annule: "Annulé" };
+const updateLabels: Record<string, string> = { seo: "SEO", contenu: "Contenu", maintenance: "Maintenance", site: "Site", securite: "Sécurité", autre: "Autre" };
+const formatDate = (value: string | null | undefined) => value ? new Date(value).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "—";
+const formatMonthDay = (value: string) => new Date(value).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
 
-const NEEDS_ATTENTION = new Set(["retard", "impaye"]);
-
-function formatDate(value: string | null | undefined) {
-  if (!value) return null;
-  return new Date(value).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
-}
-
-export default async function EspaceClientPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ checkout?: string }>;
-}) {
+export default async function EspaceClientPage({ searchParams }: { searchParams: Promise<{ checkout?: string }> }) {
   const { checkout } = await searchParams;
   const current = await requireClient();
   const supabase = await createClient();
-  const { data: client } = supabase
-    ? await supabase.from("clients").select("id, company, status").eq("user_id", current.user.id).maybeSingle()
-    : { data: null };
-
-  const { data: subscription } = client && supabase
-    ? await supabase
-        .from("subscriptions")
-        .select("status, next_billing_at, cancel_at_period_end")
-        .eq("client_id", client.id)
-        .maybeSingle()
-    : { data: null };
-
-  const { data: payments } = client && supabase
-    ? await supabase
-        .from("payments")
-        .select("id, amount_cents, status, created_at, invoice_reference")
-        .eq("client_id", client.id)
-        .order("created_at", { ascending: false })
-        .limit(5)
-    : { data: null };
-
-  return (
-    <main className="mx-auto max-w-5xl px-6 py-20">
-      <p className="text-xs font-medium uppercase tracking-widest text-brand-dark">Espace client</p>
-      <h1 className="mt-3 font-serif text-3xl text-ink md:text-4xl">Votre site, toujours sous contrôle.</h1>
-
-      {checkout === "success" && (
-        <div className="mt-8 rounded-lg border border-brand/30 bg-brand/5 p-5 text-brand-dark">
-          Paiement reçu, activation en cours. Le statut ci-dessous se met à jour dès la confirmation de Stripe.
-        </div>
-      )}
-      {checkout === "cancelled" && (
-        <div className="mt-8 rounded-lg border border-line bg-white p-5 text-ink-soft">
-          Le paiement a été annulé. Vous pouvez recommencer à tout moment.
-        </div>
-      )}
-
-      {client ? (
-        <div className="mt-10 rounded-lg border border-line bg-white p-8">
-          <p className="font-serif text-2xl text-ink">{client.company}</p>
-          <p className="mt-2 text-ink-soft">Statut du dossier : {client.status}</p>
-
-          <div className="mt-8 border-t border-line pt-6">
-            <p className="text-xs font-medium uppercase tracking-widest text-brand-dark">Abonnement</p>
-            <div className="mt-3 flex flex-wrap items-baseline gap-x-6 gap-y-2">
-              <p className="font-serif text-xl text-ink">FeaseWeb — 49 €/mois</p>
-              <p className="text-ink-soft">
-                Statut : {subscription ? STATUS_LABELS[subscription.status] ?? subscription.status : "Aucun abonnement"}
-              </p>
-            </div>
-
-            {subscription?.next_billing_at && (
-              <p className="mt-2 text-sm text-ink-soft">
-                {subscription.cancel_at_period_end
-                  ? `Se termine le ${formatDate(subscription.next_billing_at)} (annulation programmée).`
-                  : `Prochaine échéance : ${formatDate(subscription.next_billing_at)}.`}
-              </p>
-            )}
-
-            {subscription && NEEDS_ATTENTION.has(subscription.status) && (
-              <p className="mt-3 rounded-sm border border-accent/40 bg-accent/10 px-3 py-2 text-sm text-ink">
-                Paiement à régulariser — gérez votre moyen de paiement depuis le bouton ci-dessous.
-              </p>
-            )}
-
-            <div className="mt-5">
-              {subscription ? <ManageSubscriptionButton /> : <StartSubscriptionButton />}
-            </div>
-          </div>
-
-          {payments && payments.length > 0 && (
-            <div className="mt-8 border-t border-line pt-6">
-              <p className="text-xs font-medium uppercase tracking-widest text-brand-dark">
-                Historique des paiements
-              </p>
-              <ul className="mt-3 divide-y divide-line">
-                {payments.map((payment) => (
-                  <li key={payment.id} className="flex items-center justify-between py-2 text-sm">
-                    <span className="text-ink-soft">{formatDate(payment.created_at)}</span>
-                    <span className="text-ink">{(payment.amount_cents / 100).toFixed(2)} €</span>
-                    <span className="text-ink-soft">{payment.status}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <p className="mt-6 text-sm text-ink-soft">
-            Les demandes et le suivi du site seront disponibles ici au fur et à mesure de leur branchement.
-          </p>
-        </div>
-      ) : (
-        <div className="mt-10 rounded-lg border border-line bg-white p-8">
-          <p className="font-serif text-xl text-ink">Votre espace est prêt.</p>
-          <p className="mt-2 text-ink-soft">Aucun site n&apos;est encore associé à ce compte.</p>
-        </div>
-      )}
-      <LogoutButton />
-    </main>
-  );
+  const { data: client } = supabase ? await supabase.from("clients").select("id, company, first_name, status").eq("user_id", current.user.id).maybeSingle() : { data: null };
+  const { data: site } = client && supabase ? await supabase.from("sites").select("id, name, domain, production_url, status").eq("client_id", client.id).order("created_at").limit(1).maybeSingle() : { data: null };
+  const { data: subscription } = client && supabase ? await supabase.from("subscriptions").select("status, next_billing_at, cancel_at_period_end").eq("client_id", client.id).maybeSingle() : { data: null };
+  const { data: payments } = client && supabase ? await supabase.from("payments").select("id, amount_cents, status, created_at, invoice_reference").eq("client_id", client.id).order("created_at", { ascending: false }).limit(10) : { data: [] };
+  const { data: updates } = client && supabase ? await supabase.from("client_updates").select("id, category, title, description, status, activity_date, created_at").eq("client_id", client.id).eq("visible_to_client", true).order("activity_date", { ascending: false }).order("created_at", { ascending: false }) : { data: [] };
+  const { data: requests } = client && supabase ? await supabase.from("modification_requests").select("id, title, category, message, status, created_at, resolved_at").eq("client_id", client.id).order("created_at", { ascending: false }) : { data: [] };
+  const firstName = client?.first_name || current.profile?.first_name || "";
+  return <main className="client-space"><header className="client-header"><div><p className="client-eyebrow">ESPACE CLIENT FEASEWEB</p><h1>Bonjour{firstName ? ` ${firstName}` : ""}.</h1><p>FeaseWeb travaille régulièrement sur votre site et vous permet de suivre ce qui est fait.</p></div><LogoutButton /></header>
+    {checkout === "success" && <div className="client-alert">Votre demande d'abonnement a bien été reçue. Le statut se met à jour après confirmation de Stripe.</div>}
+    {checkout === "cancelled" && <div className="client-alert muted">Le paiement a été annulé. Vous pouvez reprendre lorsque vous serez prêt.</div>}
+    {client ? <>
+      <section className="client-hero-card"><div><p className="client-eyebrow">VOTRE SITE</p><h2>{client.company}</h2><p>{site?.domain || site?.production_url || "Domaine non renseigné"}</p></div><div className="client-status-block"><span>État du site</span><strong>{site ? statusLabels[site.status] ?? site.status : "Non renseigné"}</strong></div>{site?.production_url && <a className="client-button secondary" href={site.production_url} target="_blank" rel="noreferrer">Voir mon site ↗</a>}</section>
+      <div className="client-dashboard-grid"><section className="client-card client-activity-card"><div className="client-card-heading"><div><p className="client-eyebrow">SUIVI DU SERVICE</p><h2>Activité FeaseWeb</h2></div></div>{updates?.length ? <div className="client-update-list">{updates.map((update) => <article className="client-update" key={update.id}><div className="client-update-date">{formatMonthDay(update.activity_date)}</div><div className="client-update-mark" /><div><p className="client-update-category">{updateLabels[update.category] ?? update.category}</p><h3>{update.title}</h3><p>{update.description}</p><span className={`client-chip ${update.status}`}>{update.status === "termine" ? "Terminé" : update.status === "en_cours" ? "En cours" : "Prévu"}</span></div></article>)}</div> : <div className="client-empty"><h3>Le suivi de votre site apparaîtra ici</h3><p>FeaseWeb ajoutera les interventions au fur et à mesure du travail réalisé.</p></div>}</section>
+        <section className="client-card"><div className="client-card-heading"><div><p className="client-eyebrow">PROCHAINES ÉTAPES</p><h2>À venir</h2></div></div>{updates?.filter((update) => update.status !== "termine").length ? updates.filter((update) => update.status !== "termine").map((update) => <div className="client-next-item" key={update.id}><span>{updateLabels[update.category] ?? update.category}</span><strong>{update.title}</strong><small>{update.status === "en_cours" ? "En cours" : "Prévu"}</small></div>) : <div className="client-empty compact"><p>Aucune action à venir affichée pour le moment.</p></div>}</section>
+        <section className="client-card"><div className="client-card-heading"><div><p className="client-eyebrow">SERVICES</p><h2>État du service</h2></div></div><div className="client-service-list"><div><span>Site internet</span><strong>{site ? statusLabels[site.status] ?? site.status : "Non renseigné"}</strong></div><div><span>Abonnement</span><strong>{subscription ? statusLabels[subscription.status] ?? subscription.status : "Non renseigné"}</strong></div><div><span>Hébergement, maintenance et SEO</span><strong>Non renseigné</strong></div></div></section>
+      </div>
+      <section className="client-card client-requests"><div className="client-card-heading"><div><p className="client-eyebrow">BESOIN D'UNE MODIFICATION ?</p><h2>Vos demandes</h2></div></div><div className="client-request-layout"><div>{requests?.length ? requests.map((request) => <article className="client-request-row" key={request.id}><div><strong>{request.title || request.category}</strong><p>{request.message}</p></div><span className={`client-chip ${request.status}`}>{request.status === "recue" ? "Reçue" : request.status === "en_cours" ? "En cours" : request.status === "terminee" ? "Terminée" : "À préciser"}</span></article>) : <div className="client-empty compact"><p>Aucune demande pour le moment. Vous pouvez nous écrire ci-contre.</p></div>}</div><ClientRequestForm /></div></section>
+      <section className="client-card client-subscription"><div><p className="client-eyebrow">ABONNEMENT</p><h2>Mon abonnement</h2><p className="client-price">49 €<span>/mois</span></p><p>{subscription ? statusLabels[subscription.status] ?? subscription.status : "Aucun abonnement actif"}{subscription?.next_billing_at ? ` · prochaine échéance ${formatDate(subscription.next_billing_at)}` : ""}</p></div><div>{subscription ? <ManageSubscriptionButton /> : <StartSubscriptionButton />}<p className="client-footnote">Les paiements et factures sont gérés de manière sécurisée par Stripe.</p></div></section>
+      {payments && payments.length > 0 && <section className="client-card"><div className="client-card-heading"><div><p className="client-eyebrow">FACTURES</p><h2>Historique des paiements</h2></div></div><div className="client-payments">{payments.map((payment) => <div key={payment.id}><span>{formatDate(payment.created_at)}</span><strong>{(payment.amount_cents / 100).toFixed(2)} €</strong><small>{payment.status} {payment.invoice_reference ? `· ${payment.invoice_reference}` : ""}</small></div>)}</div></section>}
+    </> : <section className="client-card client-empty"><h2>Votre espace est prêt.</h2><p>Aucun site n'est encore associé à ce compte.</p></section>}
+    <footer className="client-support"><div><p className="client-eyebrow">BESOIN DE NOUS ?</p><h2>Une question ou une modification à prévoir ?</h2><p>Utilisez vos demandes ci-dessus : l'équipe FeaseWeb suivra votre message depuis le même dossier.</p></div></footer>
+  </main>;
 }

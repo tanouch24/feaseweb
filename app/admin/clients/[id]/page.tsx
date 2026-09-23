@@ -1,2 +1,2 @@
-import { ClientDetail } from "@/components/admin/AdminApp";
-export default async function AdminClientDetailPage({ params }: { params: Promise<{ id: string }> }) { return <ClientDetail clientId={(await params).id} />; }
+import { ClientDetailV6 } from "@/components/admin/ClientDetailV6";
+export default async function AdminClientDetailPage({ params }: { params: Promise<{ id: string }> }) { return <ClientDetailV6 clientId={(await params).id} />; }

@@ -34,6 +34,8 @@ export type SubscriptionStatus =
   | "incomplet_expire"
   | "en_pause";
 export type PaymentStatus = "paye" | "en_attente" | "echoue" | "rembourse";
+export type ClientUpdateCategory = "seo" | "contenu" | "maintenance" | "site" | "securite" | "autre";
+export type ClientUpdateStatus = "prevu" | "en_cours" | "termine";
 
 export type Prospect = {
   id: string; createdAt: string; firstName: string; lastName: string; company: string;
@@ -63,21 +65,22 @@ export type Payment = {
 };
 export type ModificationRequest = {
   id: string; clientId: string; siteId: string; createdAt: string; category: string;
-  message: string; attachments: string[]; priority: "basse" | "normale" | "haute";
+  title: string; message: string; attachments: string[]; priority: "basse" | "normale" | "haute";
   status: RequestStatus; internalReply: string; resolvedAt?: string;
 };
 export type SeoAction = { id: string; siteId: string; date: string; action: string; description: string; status: "a_faire" | "en_cours" | "terminee" };
 export type SeoMetric = { id: string; siteId: string; clicks: number; impressions: number; ctr: number; averagePosition: number; syncedAt?: string };
 export type Domain = { id: string; clientId: string; name: string; registrar: string; owner: string; expiresAt?: string; renewal: "manuel" | "automatique"; dnsStatus: "a_configurer" | "configure" | "probleme"; ssl: "actif" | "a_verifier" | "inactif"; notes: string };
 export type ActivityLog = { id: string; occurredAt: string; actor: "admin" | "system"; entityType: string; entityId: string; message: string };
+export type ClientUpdate = { id: string; clientId: string; siteId?: string; category: ClientUpdateCategory; title: string; description: string; status: ClientUpdateStatus; visibleToClient: boolean; activityDate: string; createdAt: string; updatedAt: string };
 
 export type BackofficeData = {
   prospects: Prospect[]; clients: Client[]; sites: Site[]; subscriptions: Subscription[];
-  payments: Payment[]; requests: ModificationRequest[]; seoActions: SeoAction[];
+  payments: Payment[]; requests: ModificationRequest[]; clientUpdates: ClientUpdate[]; seoActions: SeoAction[];
   seoMetrics: SeoMetric[]; domains: Domain[]; activity: ActivityLog[];
 };
 
-export const emptyData: BackofficeData = { prospects: [], clients: [], sites: [], subscriptions: [], payments: [], requests: [], seoActions: [], seoMetrics: [], domains: [], activity: [] };
+export const emptyData: BackofficeData = { prospects: [], clients: [], sites: [], subscriptions: [], payments: [], requests: [], clientUpdates: [], seoActions: [], seoMetrics: [], domains: [], activity: [] };
 
 export const labelMap: Record<string, string> = {
   nouveau: "Nouveau", a_contacter: "À contacter", contacte: "Contacté", qualifie: "Qualifié",
@@ -89,6 +92,7 @@ export const labelMap: Record<string, string> = {
   incomplet: "Incomplet", retard: "En retard", impaye: "Impayé", annule: "Annulé", paye: "Payé",
   echoue: "Échoué", rembourse: "Remboursé", a_faire: "À faire",
   essai: "Période d'essai", incomplet_expire: "Expiré", en_pause: "En pause", aucun: "Aucun paiement",
+  prevu: "Prévu", termine: "Terminé", seo: "SEO", contenu: "Contenu", maintenance: "Maintenance", site: "Site", securite: "Sécurité", autre: "Autre",
 };
 
 export function formatDate(value?: string) { return value ? new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(new Date(value)) : "—"; }
@@ -107,7 +111,7 @@ export function demoData(): BackofficeData {
     sites: [{ id: "site-demo-1", clientId: "client-demo-1", name: "Dupont Plomberie", slug: "dupont-plomberie", previewUrl: "https://preview.example.test/dupont-plomberie", finalDomain: "dupont-plomberie.example.test", repository: "", host: "À définir", createdAt: now, status: "actif", technicalNotes: "Site de démonstration." }],
     subscriptions: [{ id: "subscription-demo-1", clientId: "client-demo-1", status: "actif", amountCents: 4900, startedAt: now, nextDueAt: now, provider: "none", lastPaymentStatus: "paye" }],
     payments: [{ id: "payment-demo-1", clientId: "client-demo-1", amountCents: 4900, paidAt: now, status: "paye", invoice: "DÉMO-0001", period: "Mois de démonstration", provider: "none" }],
-    requests: [{ id: "request-demo-1", clientId: "client-demo-1", siteId: "site-demo-1", createdAt: now, category: "Contenu", message: "Ajouter les horaires du samedi.", attachments: [], priority: "normale", status: "en_cours", internalReply: "À traiter dans la prochaine passe." }],
+    requests: [{ id: "request-demo-1", clientId: "client-demo-1", siteId: "site-demo-1", createdAt: now, title: "Mettre à jour les horaires", category: "Contenu", message: "Ajouter les horaires du samedi.", attachments: [], priority: "normale", status: "en_cours", internalReply: "À traiter dans la prochaine passe." }], clientUpdates: [],
     seoActions: [{ id: "seo-demo-1", siteId: "site-demo-1", date: now, action: "Title modifié", description: "Donnée de démonstration.", status: "terminee" }], seoMetrics: [], domains: [{ id: "domain-demo-1", clientId: "client-demo-1", name: "dupont-plomberie.example.test", registrar: "À définir", owner: "Léa Dupont", renewal: "manuel", dnsStatus: "a_configurer", ssl: "a_verifier", notes: "Donnée de démonstration." }], activity: [{ id: "activity-demo-1", occurredAt: now, actor: "admin", entityType: "client", entityId: "client-demo-1", message: "Client de démonstration créé." }],
   };
 }

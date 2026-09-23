@@ -33,7 +33,7 @@ export function Footer() {
               Votre site internet, sans avoir à vous en occuper.
             </p>
           </div>
-          <nav className="flex flex-wrap gap-x-8 gap-y-3">
+          <nav className="flex min-w-0 max-w-full flex-wrap gap-x-8 gap-y-3">
             {navLinks.map((link) => (
               <Link
                 key={link.href}

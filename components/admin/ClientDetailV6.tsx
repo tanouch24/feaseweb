@@ -1,0 +1,42 @@
+"use client";
+/* eslint-disable react/no-unescaped-entities */
+
+import Link from "next/link";
+import { FormEvent, useState } from "react";
+import { ClientUpdatesPanel } from "@/components/admin/ClientUpdatesPanel";
+import { formatDate, formatMoney, getClientName, labelMap } from "@/lib/backoffice";
+import { useBackoffice } from "@/lib/backoffice-store";
+
+function PanelTitle({ title }: { title: string }) { return <div className="admin-panel-title"><h2>{title}</h2></div>; }
+function EmptyState({ title, detail }: { title: string; detail: string }) { return <div className="admin-empty"><div className="admin-empty-mark">—</div><h3>{title}</h3><p>{detail}</p></div>; }
+function DetailRows({ rows }: { rows: string[][] }) { return <dl className="admin-detail-rows">{rows.map(([term, value]) => <div key={term}><dt>{term}</dt><dd>{value}</dd></div>)}</dl>; }
+function StatusBadge({ value }: { value: string }) { return <span className="admin-badge neutral"><span />{labelMap[value] ?? value}</span>; }
+
+export function ClientDetailV6({ clientId }: { clientId: string }) {
+  const { data, setClientStatus, setSiteStatus, setSitePreview, addClientNote } = useBackoffice();
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [note, setNote] = useState("");
+  const client = data.clients.find((item) => item.id === clientId);
+  if (!client) return <><div className="admin-page-heading"><div><p className="admin-kicker">Portefeuille</p><h1>Client introuvable</h1><p>Ce dossier n'existe pas dans la base Supabase actuelle.</p></div></div><Link href="/admin/clients" className="admin-button secondary">Retour aux clients</Link></>;
+  const site = data.sites.find((item) => item.id === client.siteId);
+  const subscription = data.subscriptions.find((item) => item.id === client.subscriptionId);
+  const domain = data.domains.find((item) => item.id === client.domainId);
+  const requests = data.requests.filter((item) => item.clientId === client.id);
+  const activity = data.activity.filter((item) => item.entityId === client.id || item.entityId === site?.id);
+  const savePreview = (event: FormEvent) => { event.preventDefault(); if (site && previewUrl) { void setSitePreview(site.id, previewUrl); setPreviewUrl(""); } };
+  const saveNote = (event: FormEvent) => { event.preventDefault(); if (note.trim()) { void addClientNote(client.id, note.trim()); setNote(""); } };
+  return <>
+    <div className="admin-page-heading"><div><p className="admin-kicker">Fiche client</p><h1>{client.company}</h1><p>{getClientName(client)} · {client.email} · {client.phone}</p></div><Link href="/admin/clients" className="admin-button secondary">← Clients</Link></div>
+    <div className="admin-detail-grid">
+      <section className="admin-panel"><PanelTitle title="Identité" /><DetailRows rows={[["Nom", getClientName(client)], ["Entreprise", client.company], ["Email", client.email], ["Téléphone", client.phone], ["Début", formatDate(client.startedAt)], ["Statut", labelMap[client.status]]]} /><select className="admin-detail-select" value={client.status} onChange={(event) => void setClientStatus(client.id, event.target.value as never)} aria-label="Statut du client">{["actif", "en_attente", "suspendu", "resilie"].map((status) => <option key={status} value={status}>{labelMap[status]}</option>)}</select></section>
+      <section className="admin-panel"><PanelTitle title="Site & production" />{site ? <><DetailRows rows={[["Nom", site.name], ["Slug interne", site.slug], ["Preview", site.previewUrl || "Non renseignée"], ["Domaine final", site.finalDomain || "Non renseigné"], ["Hébergeur", site.host || "Non renseigné"], ["Statut", labelMap[site.status]]]} /><form className="admin-preview-form" onSubmit={savePreview}><input aria-label="URL de preview" type="url" placeholder="https://preview…" value={previewUrl} onChange={(event) => setPreviewUrl(event.target.value)} /><button className="admin-button" type="submit">Enregistrer la preview</button></form><div className="admin-detail-action"><StatusBadge value={site.status} /><select className="admin-detail-select" value={site.status} onChange={(event) => void setSiteStatus(site.id, event.target.value as never)} aria-label="Étape du site">{["a_preparer", "en_creation", "preview", "corrections", "valide", "mise_en_ligne", "actif", "suspendu", "archive"].map((status) => <option key={status} value={status}>{labelMap[status]}</option>)}</select></div>{site.previewUrl && <a className="admin-button" href={site.previewUrl} target="_blank" rel="noreferrer">Ouvrir la preview ↗</a>}</> : <EmptyState title="Aucun site associé" detail="Le site apparaîtra ici après création du dossier." />}</section>
+      <ClientUpdatesPanel clientId={client.id} siteId={site?.id} />
+      <section className="admin-panel"><PanelTitle title="État du service" /><DetailRows rows={[["Site internet", site ? labelMap[site.status] : "Non renseigné"], ["Abonnement", subscription ? labelMap[subscription.status] : "Non renseigné"], ["Hébergement", site?.host || "Non renseigné"], ["SSL", domain ? labelMap[domain.ssl] : "Non renseigné"], ["Référencement", "Suivi manuel"]]} /><p className="admin-panel-intro">Les services sont affichés à partir des données effectivement renseignées. Rien n'est activé automatiquement.</p></section>
+      <section className="admin-panel"><PanelTitle title="Abonnement" /><DetailRows rows={[["Offre", client.offer], ["Statut", subscription ? labelMap[subscription.status] : "Non configuré"], ["Montant", subscription ? `${formatMoney(subscription.amountCents)} / mois` : "—"], ["Provider", subscription?.provider ?? "none"], ["Prochaine échéance", formatDate(subscription?.nextDueAt)], ["Dernier paiement", subscription ? labelMap[subscription.lastPaymentStatus] : "—"]]} /></section>
+      <section className="admin-panel"><PanelTitle title="Domaine" />{domain ? <DetailRows rows={[["Domaine", domain.name], ["Registrar", domain.registrar], ["Propriétaire", domain.owner], ["DNS", labelMap[domain.dnsStatus]], ["SSL", labelMap[domain.ssl]], ["Renouvellement", domain.renewal]]} /> : <EmptyState title="Domaine non renseigné" detail="Aucune action DNS automatique n'est disponible." />}</section>
+      <section className="admin-panel"><PanelTitle title="Demandes de modification" />{requests.length ? requests.map((request) => <div className="admin-activity" key={request.id}><span className="status-dot" /><div><strong>{request.title}</strong><small>{formatDate(request.createdAt)} · {labelMap[request.status]}</small><p>{request.message}</p></div></div>) : <EmptyState title="Aucune demande" detail="Les demandes de ce client seront visibles ici." />}</section>
+      <section className="admin-panel"><PanelTitle title="Notes internes" /><div className="admin-note-list">{client.notes.length ? client.notes.map((item, index) => <p key={`${item}-${index}`}>{item}</p>) : <EmptyState title="Aucune note" detail="Les notes internes restent invisibles à l'espace client." />}<form className="admin-note-form" onSubmit={saveNote}><textarea aria-label="Nouvelle note interne" placeholder="Ajouter une note visible par FeaseWeb uniquement…" value={note} onChange={(event) => setNote(event.target.value)} /><button className="admin-button" type="submit">Ajouter la note</button></form></div></section>
+      <section className="admin-panel admin-panel-wide"><PanelTitle title="Historique interne" />{activity.length ? activity.map((event) => <div className="admin-activity" key={event.id}><span className="status-dot" /><div><strong>{event.message}</strong><small>{formatDate(event.occurredAt)} · {event.actor}</small></div></div>) : <EmptyState title="Historique vide" detail="Les événements futurs apparaîtront ici." />}</section>
+    </div>
+  </>;
+}

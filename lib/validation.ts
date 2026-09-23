@@ -27,3 +27,25 @@ export const sitePatchSchema = z.object({ previewUrl: z.string().trim().url().op
 export const statusSchema = z.object({ status: z.string().min(1).max(40) });
 export const prospectStatusSchema = z.object({ status: z.enum(["nouveau", "a_contacter", "contacte", "qualifie", "preview_en_cours", "preview_envoyee", "gagne", "perdu"]) });
 export const requestStatusSchema = z.object({ status: z.enum(["recue", "en_cours", "besoin_information", "terminee", "hors_perimetre"]) });
+const clientUpdateFields = {
+  clientId: z.string().uuid(),
+  siteId: z.string().uuid().nullable().optional(),
+  category: z.enum(["seo", "contenu", "maintenance", "site", "securite", "autre"]),
+  title: z.string().trim().min(1).max(180),
+  description: z.string().trim().min(1).max(5000),
+  status: z.enum(["prevu", "en_cours", "termine"]),
+  visibleToClient: z.boolean(),
+  activityDate: z.string().date(),
+};
+export const clientUpdateSchema = z.object(clientUpdateFields).transform((value) => ({
+  client_id: value.clientId, site_id: value.siteId ?? null, category: value.category, title: value.title,
+  description: value.description, status: value.status, visible_to_client: value.visibleToClient, activity_date: value.activityDate,
+}));
+export const clientUpdatePatchSchema = z.object({
+  siteId: z.string().uuid().nullable().optional(), category: clientUpdateFields.category.optional(), title: clientUpdateFields.title.optional(),
+  description: clientUpdateFields.description.optional(), status: clientUpdateFields.status.optional(), visibleToClient: clientUpdateFields.visibleToClient.optional(),
+  activityDate: clientUpdateFields.activityDate.optional(),
+}).transform((value) => Object.fromEntries(Object.entries(value).map(([key, entry]) => [
+  ({ siteId: "site_id", visibleToClient: "visible_to_client", activityDate: "activity_date" } as Record<string, string>)[key] ?? key, entry,
+])));
+export const clientRequestSchema = z.object({ title: z.string().trim().min(1).max(180), category: z.string().trim().min(1).max(120), message: z.string().trim().min(1).max(5000) });
