@@ -24,7 +24,15 @@ export type RequestStatus =
   | "besoin_information"
   | "terminee"
   | "hors_perimetre";
-export type SubscriptionStatus = "incomplet" | "actif" | "retard" | "impaye" | "annule";
+export type SubscriptionStatus =
+  | "incomplet"
+  | "actif"
+  | "retard"
+  | "impaye"
+  | "annule"
+  | "essai"
+  | "incomplet_expire"
+  | "en_pause";
 export type PaymentStatus = "paye" | "en_attente" | "echoue" | "rembourse";
 
 export type Prospect = {
@@ -46,11 +54,12 @@ export type Site = {
 export type Subscription = {
   id: string; clientId: string; status: SubscriptionStatus; amountCents: number;
   startedAt?: string; nextDueAt?: string; provider: "stripe" | "none";
-  externalCustomerId?: string; externalSubscriptionId?: string; lastPaymentStatus: PaymentStatus;
+  externalCustomerId?: string; externalSubscriptionId?: string; externalPriceId?: string;
+  cancelAtPeriodEnd?: boolean; canceledAt?: string; lastPaymentStatus: PaymentStatus | "aucun";
 };
 export type Payment = {
-  id: string; clientId: string; amountCents: number; paidAt?: string; status: PaymentStatus;
-  invoice: string; period: string; provider: "stripe" | "none"; externalReference?: string;
+  id: string; clientId: string; subscriptionId?: string; amountCents: number; paidAt?: string;
+  status: PaymentStatus; invoice: string; period: string; provider: "stripe" | "none"; externalReference?: string;
 };
 export type ModificationRequest = {
   id: string; clientId: string; siteId: string; createdAt: string; category: string;
@@ -79,6 +88,7 @@ export const labelMap: Record<string, string> = {
   besoin_information: "Besoin d'information", terminee: "Terminée", hors_perimetre: "Hors périmètre",
   incomplet: "Incomplet", retard: "En retard", impaye: "Impayé", annule: "Annulé", paye: "Payé",
   echoue: "Échoué", rembourse: "Remboursé", a_faire: "À faire",
+  essai: "Période d'essai", incomplet_expire: "Expiré", en_pause: "En pause", aucun: "Aucun paiement",
 };
 
 export function formatDate(value?: string) { return value ? new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(new Date(value)) : "—"; }
