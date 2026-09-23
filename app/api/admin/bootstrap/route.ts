@@ -14,6 +14,6 @@ export async function GET() {
   const results = await Promise.all(tables.map(async (table) => { const result = await supabase.from(table).select("*").order(orderColumns[table] ?? "created_at", { ascending: false }).limit(500); return [table, result] as const; }));
   const failure = results.find(([, result]) => result.error);
   if (failure) { console.error("admin_bootstrap_failed", failure[0]); return NextResponse.json({ error: "Impossible de charger les données du back-office." }, { status: 500 }); }
-  const rows = Object.fromEntries(results.map(([table, result]) => [table === "modification_requests" ? "requests" : table === "client_updates" ? "clientUpdates" : table === "seo_actions" ? "seoActions" : table === "seo_metrics" ? "seoMetrics" : table === "activity_log" ? "activity" : table, result.data ?? []]));
+  const rows = Object.fromEntries(results.map(([table, result]) => [table === "modification_requests" ? "requests" : table === "client_updates" ? "clientUpdates" : table === "seo_actions" ? "seoActions" : table === "seo_metrics" ? "seoMetrics" : table === "internal_notes" ? "internalNotes" : table === "activity_log" ? "activity" : table, result.data ?? []]));
   return NextResponse.json({ data: mapBackofficeRows(rows) });
 }

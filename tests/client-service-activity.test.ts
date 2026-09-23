@@ -21,6 +21,11 @@ describe("client service activity", () => {
     expect(data.requests[0].title).toBe("Horaires");
   });
 
+  it("maps admin internal notes from the bootstrap alias", () => {
+    const data = mapBackofficeRows({ clients: [{ id: "c1", first_name: "QA", last_name: "Client", company: "QA", email: "qa@example.test", phone: "", status: "actif", started_at: "2026-09-23T00:00:00Z" }], internalNotes: [{ id: "n1", client_id: "c1", body: "SECRET QA INTERNE" }] });
+    expect(data.clients[0].notes).toEqual(["SECRET QA INTERNE"]);
+  });
+
   it("allows partial admin changes without making clientId mutable", () => {
     const result = clientUpdatePatchSchema.safeParse({ visibleToClient: false, status: "en_cours" });
     expect(result.success).toBe(true);
