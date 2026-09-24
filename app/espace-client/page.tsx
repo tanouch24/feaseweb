@@ -4,8 +4,9 @@ import { requireClientSpace } from "@/lib/authz";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/layout/LogoutButton";
 import { ProspectProjectDashboard } from "@/components/client/ProspectProjectDashboard";
-import { ClientSpaceNavigation, ClientSpaceSections } from "@/components/client/ClientSpaceSections";
+import { ClientSpaceNavigation, ClientSpaceSections, ProductionDossierCard } from "@/components/client/ClientSpaceSections";
 import { mapProjectIntake, onboardingProjectSelect } from "@/lib/onboarding";
+import { calculateProductionCompleteness, mapProductionDossier, productionDossierSelect, type ProductionAccess, type ProductionMedia } from "@/lib/production";
 
 export const metadata: Metadata = { title: "Espace client — FeaseWeb", description: "Suivez le travail réalisé par FeaseWeb sur votre site.", alternates: { canonical: "/espace-client" }, robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -32,5 +33,12 @@ export default async function EspaceClientPage({ searchParams }: { searchParams:
     site ? supabase.from("seo_metrics").select("id, clicks, impressions, ctr, average_position, synced_at").eq("site_id", site.id).order("synced_at", { ascending: false }).limit(12) : Promise.resolve({ data: [] }),
   ]);
 
-  return <main className="client-space client-space-v2"><header className="client-header"><div><p className="client-eyebrow">ESPACE CLIENT FEASEWEB</p><h1>Votre espace de suivi</h1><p>Suivez la production, les interventions et votre abonnement depuis un même endroit.</p></div><LogoutButton /></header>{checkout === "success" && <div className="client-alert" role="status">Votre demande d'abonnement a bien été reçue. Le statut se met à jour après confirmation de Stripe.</div>}{checkout === "cancelled" && <div className="client-alert muted" role="status">Le paiement a été annulé. Votre dossier est conservé.</div>}<ClientSpaceSections client={client} profile={current.profile} project={intake ? mapProjectIntake(intake) : null} site={site} subscription={subscription} payments={payments ?? []} updates={updates ?? []} requests={requests ?? []} seoActions={seoActions ?? []} seoMetrics={seoMetrics ?? []} /></main>;
+  const project = intake ? mapProjectIntake(intake) : null;
+  const [{ data: production }, { data: access }, { data: media }] = await Promise.all([
+    supabase.from("production_dossiers").select(productionDossierSelect).eq("client_id", client.id).maybeSingle(),
+    intake ? supabase.from("project_access_requirements").select("category, status, client_choice, client_note").eq("project_intake_id", (intake as unknown as { id: string }).id) : Promise.resolve({ data: [] }),
+    supabase.from("project_media").select("id, original_name, media_type, mime_type, size_bytes, status, created_at").eq("client_id", client.id),
+  ]);
+  const completeness = project ? calculateProductionCompleteness(production ? mapProductionDossier(production) : null, project, (access ?? []) as ProductionAccess[], (media ?? []) as ProductionMedia[]) : null;
+  return <main className="client-space client-space-v2"><header className="client-header"><div><p className="client-eyebrow">ESPACE CLIENT FEASEWEB</p><h1>Votre espace de suivi</h1><p>Suivez la production, les interventions et votre abonnement depuis un même endroit.</p></div><LogoutButton /></header>{checkout === "success" && <div className="client-alert" role="status">Votre demande d'abonnement a bien été reçue. Le statut se met à jour après confirmation de Stripe.</div>}{checkout === "cancelled" && <div className="client-alert muted" role="status">Le paiement a été annulé. Votre dossier est conservé.</div>}{project && <ProductionDossierCard completeness={completeness} />}<ClientSpaceSections client={client} profile={current.profile} project={project} site={site} subscription={subscription} payments={payments ?? []} updates={updates ?? []} requests={requests ?? []} seoActions={seoActions ?? []} seoMetrics={seoMetrics ?? []} /></main>;
 }

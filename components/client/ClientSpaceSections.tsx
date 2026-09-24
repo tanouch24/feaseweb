@@ -2,6 +2,7 @@
 import { ClientRequestForm } from "@/components/client/ClientRequestForm";
 import { ManageSubscriptionButton, StartSubscriptionButton } from "@/components/billing/BillingActions";
 import { isOnboardingComplete, onboardingLabels, projectTimeline, type OnboardingProject, type ProjectTimelineStage } from "@/lib/onboarding";
+import type { ProductionCompleteness } from "@/lib/production";
 
 type ClientRecord = { first_name: string | null; last_name: string | null; company: string; email: string; phone: string | null; status: string; started_at: string | null };
 type ProfileRecord = { first_name?: string | null; last_name?: string | null; email?: string | null } | null;
@@ -67,6 +68,11 @@ function RequestItem({ request }: { request: RequestRecord }) {
 
 export function ClientSpaceNavigation() {
   return <nav className="client-space-nav" aria-label="Navigation de l'espace client"><a href="#tableau-de-bord" className="active">Tableau de bord</a><a href="#mon-entreprise">Mon entreprise</a><a href="#mon-site">Mon site</a><a href="#seo-visibilite">SEO &amp; visibilité</a><a href="#abonnement-factures">Abonnement &amp; factures</a><a href="#support-demandes">Support / demandes</a></nav>;
+}
+
+export function ProductionDossierCard({ completeness }: { completeness: ProductionCompleteness | null }) {
+  const score = completeness?.score ?? 0;
+  return <section className="client-card production-dashboard-card"><div><p className="client-eyebrow">PRÉPARATION DU PROJET</p><h2>Préparons votre site</h2><p>{completeness?.readyForBuild ? "Votre dossier contient les informations nécessaires pour démarrer la création." : "Complétez les informations utiles à la création de votre site."}</p>{completeness && completeness.blockersForBuild.length > 0 && <p className="production-blocker-note">{completeness.blockersForBuild.length} information{completeness.blockersForBuild.length > 1 ? "s" : ""} nécessaire{completeness.blockersForBuild.length > 1 ? "s" : ""} reste{completeness.blockersForBuild.length > 1 ? "nt" : ""} à préciser.</p>}</div><div className="production-dashboard-progress"><strong>{score} %</strong><span>Dossier de production</span><div><i style={{ width: `${score}%` }} /></div><a className="client-button" href="/espace-client/production">{completeness?.readyForBuild ? "Consulter mon dossier" : "Continuer mon dossier"}</a></div></section>;
 }
 
 export function ClientSpaceSections({ client, profile, project, site, subscription, payments, updates, requests, seoActions, seoMetrics }: ClientSpaceSectionsProps) {
