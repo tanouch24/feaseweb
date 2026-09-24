@@ -9,18 +9,20 @@ async function goTo(endpoint: string, setError: (message: string) => void, setLo
     const response = await fetch(endpoint, { method: "POST" });
     const body = await response.json().catch(() => null);
     if (!response.ok || !body?.url) {
-      setError(body?.error ?? "Action impossible pour le moment.");
+      setError(response.status === 409 && body?.code === "incomplete"
+        ? "Terminez votre configuration avant d'activer l'abonnement."
+        : "Nous n'avons pas pu ouvrir le paiement. Réessayez dans quelques instants.");
       setLoading(false);
       return;
     }
     window.location.assign(body.url);
   } catch {
-    setError("Action impossible pour le moment.");
+    setError("Nous n'avons pas pu ouvrir le paiement. Réessayez dans quelques instants.");
     setLoading(false);
   }
 }
 
-export function StartSubscriptionButton() {
+export function StartSubscriptionButton({ label = "Activer mon abonnement — 49 €/mois" }: { label?: string }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   return (
@@ -31,7 +33,7 @@ export function StartSubscriptionButton() {
         onClick={() => goTo("/api/billing/checkout", setError, setLoading)}
         className="inline-flex items-center justify-center rounded-sm bg-brand px-6 py-3 text-[15px] font-medium text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
       >
-        {loading ? "Redirection…" : "Démarrer mon projet — 49 €/mois"}
+        {loading ? "Redirection…" : label}
       </button>
       {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
     </div>

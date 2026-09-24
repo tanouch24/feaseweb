@@ -98,4 +98,16 @@ describe("POST /api/billing/checkout", () => {
       })
     );
   });
+
+  it("returns a clean error after a real Checkout creation failure", async () => {
+    getUserMock.mockResolvedValue({ data: { user: { id: "user-1" } } });
+    clientRowMock.mockResolvedValue({ data: { id: "client-1", email: "a@example.com", company: "ACME" } });
+    getActiveOrPendingSubscriptionMock.mockResolvedValue(null);
+    ensureStripeCustomerMock.mockResolvedValue("cus_test_1");
+    checkoutSessionsCreate.mockRejectedValue(new Error("Stripe API unavailable"));
+
+    const response = await POST();
+    expect(response.status).toBe(502);
+    expect(await response.json()).toEqual({ error: "Nous n'avons pas pu ouvrir le paiement. Réessayez dans quelques instants." });
+  });
 });

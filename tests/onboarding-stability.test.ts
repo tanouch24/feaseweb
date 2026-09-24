@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mapProjectIntake, completedOnboardingSteps, isOnboardingComplete, toOnboardingPatch } from "@/lib/onboarding";
+import { mapProjectIntake, completedOnboardingSteps, isOnboardingComplete, projectTimeline, toOnboardingPatch } from "@/lib/onboarding";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -35,8 +35,19 @@ describe("onboarding DB/DTO boundary", () => {
     const dashboard = readFileSync(resolve(process.cwd(), "components/client/ProspectProjectDashboard.tsx"), "utf8");
     expect(dashboard).toContain("Commencer la configuration");
     expect(dashboard).toContain("Continuer la configuration");
-    expect(dashboard).toContain("{complete && <section className=\"client-card client-offer-card\">");
+    expect(dashboard).toContain("{complete && <>");
+    expect(dashboard).toContain("Activez votre abonnement pour lancer la création");
     expect(dashboard).toContain("completedOnboardingSteps(project)");
+  });
+
+  it("maps every persisted production status to a real timeline state", () => {
+    expect(projectTimeline("project_configured", true).map((stage) => stage.state)).toEqual(["complete", "current", "upcoming", "upcoming", "upcoming"]);
+    expect(projectTimeline("subscription_active", true)[2].state).toBe("current");
+    expect(projectTimeline("building", true)[2].state).toBe("current");
+    expect(projectTimeline("preview_ready", true)[3].state).toBe("current");
+    expect(projectTimeline("client_feedback", true)[3].state).toBe("current");
+    expect(projectTimeline("finalizing", true)[4].state).toBe("current");
+    expect(projectTimeline("live", true).every((stage) => stage.state === "complete")).toBe(true);
   });
 
   it("keeps all six visual directions and the eight-step save flow", () => {

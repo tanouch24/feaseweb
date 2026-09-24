@@ -23,6 +23,6 @@ export default async function CreerMonSitePage({ searchParams }: { searchParams:
   const supabase = await createClient();
   const { data: project } = supabase ? await supabase.from("project_intakes").select(onboardingProjectSelect).eq("user_id", current.user.id).maybeSingle() : { data: null };
   if (!project) redirect("/espace-client");
-  if (project.completed_at) redirect("/espace-client");
+  if (project.completed_at && (current.role === "client" || project.project_status !== "project_configured")) redirect("/espace-client");
   return <main className="mx-auto max-w-6xl px-6 py-16 md:py-24"><div className="mx-auto max-w-3xl"><OnboardingConfigurator initial={mapProjectIntake(project)} /></div></main>;
 }

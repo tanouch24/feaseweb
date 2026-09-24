@@ -13,12 +13,11 @@ import { isOnboardingComplete, mapProjectIntake, onboardingProjectSelect } from 
 export async function POST() {
   const stripe = getStripe();
   const safeAppUrl = getSafeAppUrl();
-  if (!stripe || !stripePriceId || !safeAppUrl) {
-    return NextResponse.json({ error: "Stripe n'est pas configuré." }, { status: 503 });
-  }
+  const paymentUnavailable = "Nous n'avons pas pu ouvrir le paiement. Réessayez dans quelques instants.";
+  if (!stripe || !stripePriceId || !safeAppUrl) return NextResponse.json({ error: paymentUnavailable }, { status: 503 });
 
   const supabase = await createClient();
-  if (!supabase) return NextResponse.json({ error: "Supabase n'est pas configuré." }, { status: 503 });
+  if (!supabase) return NextResponse.json({ error: paymentUnavailable }, { status: 503 });
 
   const {
     data: { user },
@@ -36,7 +35,8 @@ export async function POST() {
   }
   if (!client && !project) return NextResponse.json({ error: "Aucun projet FeaseWeb associé à ce compte." }, { status: 404 });
 
-  if (project && (!isOnboardingComplete(project.intake) || !project.completed_at || project.project_status === "subscription_active")) return NextResponse.json({ error: "Terminez la configuration de votre projet avant de démarrer." }, { status: 409 });
+  if (project && (!isOnboardingComplete(project.intake) || !project.completed_at)) return NextResponse.json({ code: "incomplete", error: "Terminez la configuration de votre projet avant de démarrer." }, { status: 409 });
+  if (project?.project_status === "subscription_active") return NextResponse.json({ error: "Un abonnement existe déjà pour ce projet." }, { status: 409 });
 
   const blocking = client ? await getActiveOrPendingSubscription(client.id) : null;
   if (blocking) {
@@ -46,18 +46,26 @@ export async function POST() {
     );
   }
 
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    ...(client ? { customer: await ensureStripeCustomer(client) } : { customer_email: project!.email }),
-    line_items: [{ price: stripePriceId, quantity: 1 }],
-    success_url: `${safeAppUrl}/espace-client?checkout=success`,
-    cancel_url: `${safeAppUrl}/espace-client?checkout=cancelled`,
-    metadata: client ? { feaseweb_client_id: client.id } : { feaseweb_project_intake_id: project!.id, feaseweb_user_id: user.id },
-    subscription_data: { metadata: client ? { feaseweb_client_id: client.id } : { feaseweb_project_intake_id: project!.id, feaseweb_user_id: user.id } },
-  });
+  let session: { url?: string | null } | null = null;
+  try {
+    const metadata: Record<string, string> = client ? { feaseweb_client_id: client.id } : { feaseweb_project_intake_id: project!.id, feaseweb_user_id: user.id };
+    session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      ...(client ? { customer: await ensureStripeCustomer(client) } : { customer_email: project!.email }),
+      line_items: [{ price: stripePriceId, quantity: 1 }],
+      success_url: `${safeAppUrl}/espace-client?checkout=success`,
+      cancel_url: `${safeAppUrl}/espace-client?checkout=cancelled`,
+      metadata,
+      subscription_data: { metadata },
+    });
+  } catch (error) {
+    console.error("billing_checkout_session_failed", error instanceof Error ? { name: error.name, message: error.message } : { name: "unknown_error" });
+    return NextResponse.json({ error: paymentUnavailable }, { status: 502 });
+  }
 
-  if (!session.url) {
-    return NextResponse.json({ error: "Impossible de créer la session de paiement." }, { status: 500 });
+  if (!session?.url) {
+    console.error("billing_checkout_session_missing_url");
+    return NextResponse.json({ error: paymentUnavailable }, { status: 502 });
   }
   return NextResponse.json({ url: session.url });
 }
