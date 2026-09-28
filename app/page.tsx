@@ -12,6 +12,14 @@ import { SEOSection } from "@/components/home/SEOSection";
 import { ClientSpaceSection } from "@/components/home/ClientSpaceSection";
 import { ModificationFlow } from "@/components/home/ModificationFlow";
 import { FAQSection } from "@/components/home/FAQSection";
+import { pageMetadata } from "@/lib/seo-metadata";
+
+export const metadata = pageMetadata({
+  title: "Création de site internet pour TPE et artisans | FeaseWeb",
+  description:
+    "FeaseWeb crée, héberge et maintient votre site internet professionnel. Création ou refonte sans frais, puis 49 €/mois avec SEO inclus.",
+  path: "/",
+});
 
 export default function HomePage() {
   return (

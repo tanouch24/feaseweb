@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { PostCard } from "@/components/blog/PostCard";
 import { getAllPosts } from "@/lib/blog";
+import { pageMetadata } from "@/lib/seo-metadata";
 
-export const metadata: Metadata = {
-  title: "Blog — Conseils pour le site internet de votre entreprise | FeaseWeb",
+export const metadata: Metadata = pageMetadata({
+  title: "Conseils site internet, SEO et refonte pour TPE | FeaseWeb",
   description:
-    "Conseils pratiques sur le référencement, la refonte de site, le mobile et la maintenance, pour les artisans, commerçants et indépendants.",
-  alternates: { canonical: "/blog" },
-};
+    "Conseils pratiques pour le site internet des artisans, commerçants et petites entreprises : SEO local, refonte, mobile et maintenance.",
+  path: "/blog",
+});
 
 export default function BlogPage() {
   const posts = getAllPosts();

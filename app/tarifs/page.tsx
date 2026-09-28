@@ -4,13 +4,14 @@ import { OfferSection } from "@/components/home/OfferSection";
 import { ServiceEditorialGrid } from "@/components/home/ServiceEditorialGrid";
 import { FinalCTA } from "@/components/home/FinalCTA";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
+import { pageMetadata } from "@/lib/seo-metadata";
 
-export const metadata: Metadata = {
-  title: "Tarifs — 0 € de création, puis 49 €/mois tout compris | FeaseWeb",
+export const metadata: Metadata = pageMetadata({
+  title: "Tarif site internet : 0 € puis 49 €/mois | FeaseWeb",
   description:
-    "0 € de frais de création ou de refonte, puis 49 €/mois tout compris : site, hébergement, maintenance, sécurité, modifications et référencement SEO inclus.",
-  alternates: { canonical: "/tarifs" },
-};
+    "Le tarif FeaseWeb : 0 € de création ou de refonte, puis 49 €/mois pour un site, l’hébergement, la maintenance, la sécurité et le SEO.",
+  path: "/tarifs",
+});
 
 export default function TarifsPage() {
   return (
@@ -18,7 +19,7 @@ export default function TarifsPage() {
       <RevealOnScroll>
         <KineticWords />
       </RevealOnScroll>
-      <OfferSection headingLevel="h1" />
+      <OfferSection headingLevel="h1" heading="Un site internet professionnel à 49 €/mois, tout compris." />
       <RevealOnScroll>
         <ServiceEditorialGrid />
       </RevealOnScroll>

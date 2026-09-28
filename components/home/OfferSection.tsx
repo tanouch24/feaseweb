@@ -48,7 +48,7 @@ const nodes = [
   },
 ];
 
-export function OfferSection({ headingLevel = "h2" }: { headingLevel?: "h1" | "h2" }) {
+export function OfferSection({ headingLevel = "h2", heading = "Et on s'occupe du reste." }: { headingLevel?: "h1" | "h2"; heading?: string }) {
   const { ref, inView } = useInView({ threshold: 0.35 });
   const [active, setActive] = useState(0);
   const left = nodes.slice(0, 3);
@@ -61,7 +61,7 @@ export function OfferSection({ headingLevel = "h2" }: { headingLevel?: "h1" | "h
         ref={ref as (node: HTMLDivElement | null) => void}
         className="mx-auto max-w-4xl px-6 text-center"
       >
-        <SectionHeading title="Et on s'occupe du reste." level={headingLevel} />
+        <SectionHeading title={heading} level={headingLevel} />
 
         <div className="mt-10 flex flex-col items-center">
           <p className="text-xs uppercase tracking-widest text-ink-soft">

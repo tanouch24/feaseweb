@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import { FAQSection } from "@/components/home/FAQSection";
 import { FinalCTA } from "@/components/home/FinalCTA";
 import { faqItems } from "@/lib/faq.demo";
+import { pageMetadata } from "@/lib/seo-metadata";
 
-export const metadata: Metadata = {
-  title: "Questions fréquentes — FeaseWeb",
+export const metadata: Metadata = pageMetadata({
+  title: "FAQ site internet : création, prix et maintenance | FeaseWeb",
   description:
-    "Pourquoi la création est-elle à 0 € ? Que comprennent les 49 €/mois ? Le référencement est-il inclus ? Toutes les réponses sur le service FeaseWeb.",
-  alternates: { canonical: "/faq" },
-};
+    "Réponses aux questions sur la création de site internet, les 49 €/mois, l’hébergement, la maintenance, les modifications et le SEO inclus.",
+  path: "/faq",
+});
 
 export default function FAQPage() {
   const jsonLd = {

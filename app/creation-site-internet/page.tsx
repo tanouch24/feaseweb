@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { CommercialPage } from "@/components/home/CommercialPage";
 import { FinalCTA } from "@/components/home/FinalCTA";
+import { pageMetadata } from "@/lib/seo-metadata";
 
-export const metadata: Metadata = {
-  title: "Création de site internet professionnel | FeaseWeb",
+export const metadata: Metadata = pageMetadata({
+  title: "Création de site internet pour entreprise | FeaseWeb",
   description:
-    "FeaseWeb crée votre site internet professionnel pour votre entreprise, sans frais de création puis 49 €/mois avec hébergement, maintenance et SEO inclus.",
-  alternates: { canonical: "/creation-site-internet" },
-  openGraph: { title: "Création de site internet professionnel | FeaseWeb", description: "Un site professionnel géré pour votre entreprise, sans frais de création." },
-};
+    "FeaseWeb crée votre site internet professionnel pour artisan, commerçant ou TPE : 0 € de création, puis 49 €/mois avec hébergement, maintenance et SEO.",
+  path: "/creation-site-internet",
+});
 
 export default function CreationSiteInternetPage() {
   const jsonLd = { "@context": "https://schema.org", "@type": "Service", name: "Création de site internet FeaseWeb", provider: { "@type": "Organization", name: "FeaseWeb" }, description: "Création et gestion continue d'un site internet professionnel.", areaServed: "France" };

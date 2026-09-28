@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { mdxComponents } from "@/components/blog/mdx-components";
 import { getAllSlugs, getPostBySlug } from "@/lib/blog";
+import { pageMetadata } from "@/lib/seo-metadata";
 
 export function generateStaticParams() {
   return getAllSlugs().map((slug) => ({ slug }));
@@ -17,17 +18,13 @@ export async function generateMetadata({
   const post = getPostBySlug(slug);
   if (!post) return {};
 
-  return {
-    title: `${post.title} | Blog FeaseWeb`,
+  return pageMetadata({
+    title: `${post.title} | FeaseWeb`,
     description: post.description,
-    alternates: { canonical: `/blog/${slug}` },
-    openGraph: {
-      title: post.title,
-      description: post.description,
-      type: "article",
-      publishedTime: post.date,
-    },
-  };
+    path: `/blog/${slug}`,
+    type: "article",
+    publishedTime: post.date,
+  });
 }
 
 function formatDate(date: string) {

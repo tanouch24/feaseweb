@@ -34,7 +34,7 @@ function GoogleSnippetMockup() {
   );
 }
 
-export function SEOSection({ headingLevel = "h2" }: { headingLevel?: "h1" | "h2" }) {
+export function SEOSection({ headingLevel = "h2", heading = "Un beau site ne suffit pas. Il faut aussi qu'on puisse le trouver." }: { headingLevel?: "h1" | "h2"; heading?: string }) {
   const { ref, inView } = useInView({ threshold: 0.3 });
 
   return (
@@ -45,7 +45,7 @@ export function SEOSection({ headingLevel = "h2" }: { headingLevel?: "h1" | "h2"
       >
         <div className="grid gap-12 md:grid-cols-2 md:items-center">
           <div>
-            <SectionHeading title="Un beau site ne suffit pas. Il faut aussi qu'on puisse le trouver." level={headingLevel} />
+            <SectionHeading title={heading} level={headingLevel} />
             <p className="mt-4 max-w-xl text-ink-soft">
               Le référencement est inclus dans votre abonnement : FeaseWeb
               travaille les fondations techniques de votre site et suit son

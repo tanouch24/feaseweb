@@ -1,12 +1,14 @@
 /* eslint-disable react/no-unescaped-entities */
 import type { Metadata } from "next";
 import Link from "next/link";
+import { pageMetadata } from "@/lib/seo-metadata";
 
-export const metadata: Metadata = {
-  title: "À propos de FeaseWeb",
-  description: "FeaseWeb, un service français de sites internet gérés pour les petites entreprises.",
-  alternates: { canonical: "/a-propos" },
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Site internet géré pour TPE et artisans | FeaseWeb",
+  description:
+    "FeaseWeb est un service français qui crée, héberge et maintient les sites internet des artisans, commerçants et petites entreprises.",
+  path: "/a-propos",
+});
 
 export default function AProposPage() {
   return (

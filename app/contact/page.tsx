@@ -2,12 +2,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DemoLeadForm } from "@/components/home/DemoLeadForm";
+import { pageMetadata } from "@/lib/seo-metadata";
 
-export const metadata: Metadata = {
-  title: "Contact — FeaseWeb",
-  description: "Parlez de votre projet de site internet à FeaseWeb.",
-  alternates: { canonical: "/contact" },
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Contact création de site internet | FeaseWeb",
+  description:
+    "Décrivez votre projet de création ou de refonte de site internet. FeaseWeb vous répond et vous explique la suite du parcours.",
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return (

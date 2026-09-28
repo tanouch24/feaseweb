@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DemoSitePreview, type DemoSiteSlug } from "@/components/demo-sites/DemoSitePreview";
 import { demoSites } from "@/lib/demo-sites.demo";
+import { pageMetadata } from "@/lib/seo-metadata";
 
 export function generateStaticParams() {
   return demoSites.map((site) => ({ slug: site.slug }));
@@ -17,11 +18,11 @@ export async function generateMetadata({
   const site = demoSites.find((candidate) => candidate.slug === slug);
   if (!site) return {};
 
-  return {
-    title: `${site.name} — Exemple de site FeaseWeb`,
-    description: site.description,
-    alternates: { canonical: `/exemples/${slug}` },
-  };
+  return pageMetadata({
+    title: `${site.name} — Démonstration de site | FeaseWeb`,
+    description: `Démonstration fictive d’un site pour ${site.category.toLowerCase()} : ${site.description.toLowerCase()}`,
+    path: `/exemples/${slug}`,
+  });
 }
 
 export default async function ExempleDetailPage({

@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { CommercialPage } from "@/components/home/CommercialPage";
 import { FinalCTA } from "@/components/home/FinalCTA";
+import { pageMetadata } from "@/lib/seo-metadata";
 
-export const metadata: Metadata = {
-  title: "Refonte de site internet | FeaseWeb",
+export const metadata: Metadata = pageMetadata({
+  title: "Refonte de site internet sans frais | FeaseWeb",
   description:
-    "Votre site est ancien, lent ou peu clair ? FeaseWeb prépare sa refonte sans frais de création, puis assure sa maintenance et son référencement.",
-  alternates: { canonical: "/refonte-site-internet" },
-  openGraph: { title: "Refonte de site internet | FeaseWeb", description: "Un site plus clair, plus actuel et géré dans la durée." },
-};
+    "Votre site est ancien, lent ou peu clair ? FeaseWeb prépare sa refonte sans frais, puis assure la maintenance et le référencement dans la durée.",
+  path: "/refonte-site-internet",
+});
 
 export default function RefonteSiteInternetPage() {
   const jsonLd = { "@context": "https://schema.org", "@type": "Service", name: "Refonte de site internet FeaseWeb", provider: { "@type": "Organization", name: "FeaseWeb" }, description: "Refonte et gestion continue d'un site internet professionnel.", areaServed: "France" };

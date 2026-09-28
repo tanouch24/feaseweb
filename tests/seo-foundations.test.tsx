@@ -6,6 +6,17 @@ import ExemplesPage from "@/app/exemples/page";
 import SEOPage from "@/app/seo/page";
 import FAQPage from "@/app/faq/page";
 import BlogPage from "@/app/blog/page";
+import { metadata as homeMetadata } from "@/app/page";
+import { metadata as commentMetadata } from "@/app/comment-ca-marche/page";
+import { metadata as tarifsMetadata } from "@/app/tarifs/page";
+import { metadata as exemplesMetadata } from "@/app/exemples/page";
+import { metadata as seoMetadata } from "@/app/seo/page";
+import { metadata as faqMetadata } from "@/app/faq/page";
+import { metadata as blogMetadata } from "@/app/blog/page";
+import { metadata as creationMetadata } from "@/app/creation-site-internet/page";
+import { metadata as refonteMetadata } from "@/app/refonte-site-internet/page";
+import { metadata as aboutMetadata } from "@/app/a-propos/page";
+import { metadata as contactMetadata } from "@/app/contact/page";
 import { metadata as creerMetadata } from "@/app/creer-mon-site/page";
 import { metadata as refaireMetadata } from "@/app/refaire-mon-site/page";
 import { metadata as legalMetadata } from "@/app/mentions-legales/page";
@@ -61,5 +72,37 @@ describe("SEO foundations", () => {
     for (const metadata of [creerMetadata, refaireMetadata, legalMetadata, privacyMetadata, cgvMetadata, cookiesMetadata]) {
       expect(metadata.robots).toMatchObject({ index: false });
     }
+  });
+
+  it("keeps the principal indexable pages distinct and fully described", () => {
+    const metadata = [
+      homeMetadata,
+      commentMetadata,
+      tarifsMetadata,
+      exemplesMetadata,
+      seoMetadata,
+      faqMetadata,
+      blogMetadata,
+      creationMetadata,
+      refonteMetadata,
+      aboutMetadata,
+      contactMetadata,
+    ];
+    const titles = metadata.map((entry) => entry.title);
+    const descriptions = metadata.map((entry) => entry.description);
+
+    expect(titles.every((title) => typeof title === "string" && title.length > 0)).toBe(true);
+    expect(descriptions.every((description) => typeof description === "string" && description.length > 0)).toBe(true);
+    expect(new Set(titles).size).toBe(titles.length);
+    expect(new Set(descriptions).size).toBe(descriptions.length);
+    expect(JSON.stringify(metadata)).not.toContain("fease.fr");
+    expect(JSON.stringify(metadata)).not.toContain("netlify.app");
+  });
+
+  it("keeps the examples page explicit about demonstrations", () => {
+    const { container } = render(<ExemplesPage />);
+
+    expect(container.textContent).toContain("Démonstrations");
+    expect(container.textContent).toContain("Démonstration fictive");
   });
 });
