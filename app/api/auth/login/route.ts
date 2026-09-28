@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { loginSchema } from "@/lib/validation";
+import { setAdminSessionCookie } from "@/lib/admin-session";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -16,5 +17,6 @@ export async function POST(request: Request) {
     await supabase.auth.signOut();
     return NextResponse.json({ error: "Ce compte n'a pas de rôle FeaseWeb valide." }, { status: 403 });
   }
-  return NextResponse.json({ redirect: profile?.role === "admin" ? "/admin" : "/espace-client" });
+  const response = NextResponse.json({ redirect: profile?.role === "admin" ? "/admin" : "/espace-client" });
+  return profile?.role === "admin" ? setAdminSessionCookie(response) : response;
 }

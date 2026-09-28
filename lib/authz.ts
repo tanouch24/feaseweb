@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
+import { ADMIN_SESSION_COOKIE } from "@/lib/admin-session";
 
 export type Role = "admin" | "client" | "prospect";
 
@@ -10,7 +12,10 @@ export async function getAuthenticatedProfile() {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) return { configured: true as const, user: null, role: null };
   const { data: profile } = await supabase.from("profiles").select("id, role, first_name, last_name, email").eq("id", user.id).maybeSingle();
-  return { configured: true as const, user, role: (profile?.role as Role | null) ?? null, profile };
+  const role = (profile?.role as Role | null) ?? null;
+  const cookieStore = await cookies();
+  if (role === "admin" && !cookieStore.get(ADMIN_SESSION_COOKIE)) return { configured: true as const, user: null, role: null, profile: null };
+  return { configured: true as const, user, role, profile };
 }
 
 export async function requireAdmin() {

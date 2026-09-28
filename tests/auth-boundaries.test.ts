@@ -24,6 +24,20 @@ describe("server auth boundaries", () => {
     expect(source).not.toContain("NEXT_PUBLIC_SUPABASE_SECRET_KEY");
   });
 
+  it("requires a browser-session admin marker while leaving client sessions unchanged", () => {
+    const authz = readFileSync(resolve(process.cwd(), "lib/authz.ts"), "utf8");
+    const login = readFileSync(resolve(process.cwd(), "app/api/auth/login/route.ts"), "utf8");
+    const logout = readFileSync(resolve(process.cwd(), "app/api/auth/logout/route.ts"), "utf8");
+    const session = readFileSync(resolve(process.cwd(), "lib/admin-session.ts"), "utf8");
+    expect(authz).toContain("ADMIN_SESSION_COOKIE");
+    expect(login).toContain("setAdminSessionCookie");
+    expect(logout).toContain("setAdminSessionCookie");
+    expect(session).toContain("httpOnly: true");
+    expect(session).toContain('sameSite: "lax"');
+    expect(session).toContain("...(clear ? { maxAge: 0 } : {})");
+    expect(readFileSync(resolve(process.cwd(), "lib/supabase/client.ts"), "utf8")).not.toContain("persistSession: false");
+  });
+
   it("keeps onboarding closed and role-driven", () => {
     const loginPage = readFileSync(resolve(process.cwd(), "app/connexion/page.tsx"), "utf8");
     const inviteRoute = readFileSync(resolve(process.cwd(), "app/api/admin/clients/[id]/invite/route.ts"), "utf8");
