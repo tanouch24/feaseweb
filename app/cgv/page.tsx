@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Conditions générales de vente — FeaseWeb",
   description: "Conditions générales de vente du service FeaseWeb.",
   alternates: { canonical: "/cgv" },
+  robots: { index: false, follow: true },
 };
 
 export default function CGVPage() {

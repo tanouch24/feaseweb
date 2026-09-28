@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "Politique de cookies — FeaseWeb",
   description: "Politique de cookies du site FeaseWeb.",
   alternates: { canonical: "/cookies" },
+  robots: { index: false, follow: true },
 };
 
 export default function CookiesPage() {

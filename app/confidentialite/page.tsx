@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Politique de confidentialité — FeaseWeb",
   description: "Politique de confidentialité du site FeaseWeb.",
   alternates: { canonical: "/confidentialite" },
+  robots: { index: false, follow: true },
 };
 
 export default function ConfidentialitePage() {

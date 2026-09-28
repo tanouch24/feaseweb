@@ -4,13 +4,13 @@ import { useState } from "react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { faqItems } from "@/lib/faq.demo";
 
-export function FAQSection() {
+export function FAQSection({ headingLevel = "h2" }: { headingLevel?: "h1" | "h2" }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
     <section id="faq" className="bg-bg-alt py-20 md:py-28">
       <div className="mx-auto max-w-3xl px-6">
-        <SectionHeading title="Questions fréquentes" />
+        <SectionHeading title="Questions fréquentes" level={headingLevel} />
         <div className="mt-8 divide-y divide-line border-y border-line">
           {faqItems.map((item, index) => {
             const isOpen = openIndex === index;

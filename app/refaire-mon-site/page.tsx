@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description:
     "Donnez-nous l'adresse de votre site actuel : FeaseWeb prépare sa refonte, sans frais, avec la même formule à 49 €/mois.",
   alternates: { canonical: "/refaire-mon-site" },
+  robots: { index: false, follow: false },
 };
 
 export default function RefaireMonSitePage() {

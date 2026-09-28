@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   description:
     "Parlez-nous de votre entreprise : FeaseWeb prépare votre site, sans frais de création. Vous validez avant toute mise en ligne.",
   alternates: { canonical: "/creer-mon-site" },
+  robots: { index: false, follow: false },
 };
 
 export const dynamic = "force-dynamic";

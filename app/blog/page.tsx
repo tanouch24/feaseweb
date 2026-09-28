@@ -18,6 +18,7 @@ export default function BlogPage() {
       <SectionHeading
         eyebrow="Blog FeaseWeb"
         title="Des conseils simples pour le site de votre entreprise."
+        level="h1"
       />
       <div className="mt-10 grid gap-6 sm:grid-cols-2">
         {posts.map((post) => (

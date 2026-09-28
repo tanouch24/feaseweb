@@ -45,4 +45,4 @@ Lancer `npm run dev`, ouvrir `/connexion`, se connecter avec un utilisateur Supa
 
 ## Avant production
 
-Ajouter dans Supabase Authentication les URLs `https://fease.fr` et `https://fease.fr/**`, en conservant `http://localhost:3000/**` pour le développement. Le parcours reset password n'est pas encore implémenté ; une procédure d'invitation ou de création de compte doit être décidée avant l'onboarding de clients réels.
+Ajouter dans Supabase Authentication les URLs `https://feaseweb.fr` et `https://feaseweb.fr/**`, en conservant `http://localhost:3000/**` pour le développement. Le parcours reset password n'est pas encore implémenté ; une procédure d'invitation ou de création de compte doit être décidée avant l'onboarding de clients réels.

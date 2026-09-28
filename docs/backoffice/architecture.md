@@ -34,4 +34,4 @@ L'espace client interroge uniquement les lignes qui lui appartiennent via RLS. `
 
 ## Points avant production
 
-Le projet Supabase FeaseWeb est désormais configuré localement et les migrations V4/V5/V6 sont versionnées dans `supabase/migrations/`. Les tests RLS et l'intégration réelle ont été validés lors de la QA V6.1. Restent avant la production : configuration Supabase Auth pour `fease.fr`, SMTP/reset password, rate limiting distribué, upload sécurisé, monitoring, revue RGPD, configuration du webhook Stripe public et connexion GSC. Aucun DNS ni déploiement n'est réalisé par le dépôt.
+Le projet Supabase FeaseWeb est désormais configuré localement et les migrations V4/V5/V6 sont versionnées dans `supabase/migrations/`. Les tests RLS et l'intégration réelle ont été validés lors de la QA V6.1. Restent avant la production : configuration Supabase Auth pour `feaseweb.fr`, SMTP/reset password, rate limiting distribué, upload sécurisé, monitoring, revue RGPD, configuration du webhook Stripe public et connexion GSC. Aucun DNS ni déploiement n'est réalisé par le dépôt.

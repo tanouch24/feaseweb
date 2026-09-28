@@ -2,11 +2,15 @@ export function SectionHeading({
   eyebrow,
   title,
   id,
+  level = "h2",
 }: {
   eyebrow?: string;
   title: string;
   id?: string;
+  level?: "h1" | "h2";
 }) {
+  const Heading = level;
+
   return (
     <div id={id} className="max-w-2xl">
       {eyebrow && (
@@ -14,9 +18,9 @@ export function SectionHeading({
           {eyebrow}
         </p>
       )}
-      <h2 className="mt-3 font-serif text-3xl leading-tight text-ink md:text-[2.5rem]">
+      <Heading className="mt-3 font-serif text-3xl leading-tight text-ink md:text-[2.5rem]">
         {title}
-      </h2>
+      </Heading>
     </div>
   );
 }

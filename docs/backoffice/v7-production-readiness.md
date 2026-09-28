@@ -12,7 +12,7 @@ Le code utilise les variables suivantes :
 - `STRIPE_WEBHOOK_SECRET` (serveur uniquement)
 - `NEXT_PUBLIC_APP_URL`
 
-Localement, `NEXT_PUBLIC_APP_URL` vaut `http://localhost:3000`. En production, il devra valoir `https://fease.fr`. `.env.local` n'est pas suivi par Git.
+Localement, `NEXT_PUBLIC_APP_URL` vaut `http://localhost:3000`. En production, il devra valoir `https://feaseweb.fr`. `.env.local` n'est pas suivi par Git.
 
 ## Authentification unique
 
@@ -22,8 +22,8 @@ Localement, `NEXT_PUBLIC_APP_URL` vaut `http://localhost:3000`. En production, i
 
 Dans Supabase Authentication, ajouter les URLs du site :
 
-- Site URL : `https://fease.fr`
-- Redirect URL : `https://fease.fr/**`
+- Site URL : `https://feaseweb.fr`
+- Redirect URL : `https://feaseweb.fr/**`
 - conserver `http://localhost:3000/**` pour le développement local
 
 Le parcours V8 prévoit l'invitation administrateur, l'activation du compte et la récupération du mot de passe. Le SMTP et les templates Supabase restent à configurer et tester dans le projet distant avant l'onboarding réel.
@@ -32,7 +32,7 @@ Le parcours V8 prévoit l'invitation administrateur, l'activation du compte et l
 
 Ne pas réutiliser le secret `whsec_` du Stripe CLI local. Après mise en ligne :
 
-1. créer dans Stripe Dashboard LIVE un endpoint `https://fease.fr/api/stripe/webhook` ;
+1. créer dans Stripe Dashboard LIVE un endpoint `https://feaseweb.fr/api/stripe/webhook` ;
 2. sélectionner `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid` et `invoice.payment_failed` ;
 3. récupérer le signing secret propre à cet endpoint Dashboard ;
 4. renseigner ce secret dans Netlify comme `STRIPE_WEBHOOK_SECRET` ;
@@ -47,11 +47,11 @@ Le Checkout et le Customer Portal utilisent `NEXT_PUBLIC_APP_URL` pour leurs URL
 3. configurer les variables d'environnement de production ;
 4. lancer le premier build ;
 5. vérifier l'URL Netlify temporaire ;
-6. ajouter `fease.fr` comme domaine principal ;
+6. ajouter `feaseweb.fr` comme domaine principal ;
 7. récupérer les DNS demandés par Netlify ;
 8. modifier les DNS chez IONOS ;
 9. attendre la validation et le SSL ;
-10. configurer `fease.com` en redirection vers `fease.fr` ;
+10. configurer `fease.com` en redirection vers `feaseweb.fr` ;
 11. ajouter les URLs Supabase Auth de production ;
 12. créer le webhook Stripe Dashboard LIVE ;
 13. effectuer les smoke tests non financiers ;

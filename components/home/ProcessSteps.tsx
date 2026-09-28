@@ -127,14 +127,14 @@ function LiveVisual() {
 
 const visuals = [QuestionnaireVisual, WireframeVisual, ValidationVisual, LiveVisual];
 
-export function ProcessSteps() {
+export function ProcessSteps({ headingLevel = "h2" }: { headingLevel?: "h1" | "h2" }) {
   const { active, setStepRef } = useActiveStep(steps.length);
   const ActiveVisual = visuals[active];
 
   return (
     <section id="comment-ca-marche" className="bg-bg-alt py-20 md:py-28">
       <div className="mx-auto max-w-6xl px-6">
-        <SectionHeading title="Comment ça marche" />
+        <SectionHeading title="Comment ça marche" level={headingLevel} />
         <div className="mt-12 grid gap-10 md:grid-cols-2 md:gap-16">
           <div>
             {steps.map((step, index) => (

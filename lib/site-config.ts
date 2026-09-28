@@ -1,1 +1,1 @@
-export const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://fease.fr";
+export const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://feaseweb.fr";

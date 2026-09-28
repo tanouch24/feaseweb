@@ -18,7 +18,7 @@ export default function TarifsPage() {
       <RevealOnScroll>
         <KineticWords />
       </RevealOnScroll>
-      <OfferSection />
+      <OfferSection headingLevel="h1" />
       <RevealOnScroll>
         <ServiceEditorialGrid />
       </RevealOnScroll>

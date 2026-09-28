@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function SEOPage() {
   return (
     <main>
-      <SEOSection />
+      <SEOSection headingLevel="h1" />
       <FinalCTA />
     </main>
   );

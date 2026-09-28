@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function CommentCaMarchePage() {
   return (
     <main>
-      <ProcessSteps />
+      <ProcessSteps headingLevel="h1" />
       <RevealOnScroll>
         <ComparisonBlock />
       </RevealOnScroll>

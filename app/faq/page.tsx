@@ -30,7 +30,7 @@ export default function FAQPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <FAQSection />
+      <FAQSection headingLevel="h1" />
       <FinalCTA />
     </main>
   );

@@ -28,8 +28,8 @@ La migration doit être appliquée au projet Supabase réel avant d'utiliser le 
 
 ## Configuration Supabase à vérifier
 
-- Site URL : `https://fease.fr` ;
-- Redirect URL : `https://fease.fr/**` ;
+- Site URL : `https://feaseweb.fr` ;
+- Redirect URL : `https://feaseweb.fr/**` ;
 - Redirect URL locale : `http://localhost:3000/**` ;
 - Email/password activé ;
 - SMTP de production configuré ;

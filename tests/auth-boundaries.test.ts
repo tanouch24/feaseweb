@@ -88,7 +88,7 @@ describe("server auth boundaries", () => {
     const nextConfig = readFileSync(resolve(process.cwd(), "next.config.ts"), "utf8");
 
     expect(siteConfig).toContain("NEXT_PUBLIC_APP_URL");
-    expect(siteConfig).toContain("https://fease.fr");
+    expect(siteConfig).toContain("https://feaseweb.fr");
     expect(layout).toContain('import { siteUrl } from "@/lib/site-config"');
     expect(robots).toContain("siteUrl");
     expect(sitemap).toContain("siteUrl");

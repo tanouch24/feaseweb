@@ -20,6 +20,7 @@ export default function ExemplesPage() {
         <SectionHeading
           eyebrow="Exemples de sites FeaseWeb"
           title="Quatre métiers, quatre sites."
+          level="h1"
         />
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {demoSites.map((site) => (
