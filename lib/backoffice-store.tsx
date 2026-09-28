@@ -16,7 +16,7 @@ type Store = {
   updateProspectReview: (id: string, action: "complete_appointment" | "cancel_appointment" | "approve" | "needs_information" | "decline", note?: string) => Promise<void>;
   setRequestStatus: (id: string, status: ModificationRequest["status"]) => Promise<void>;
   addSeoAction: (siteId: string, action: string, description: string) => Promise<void>;
-  createClientUpdate: (input: { clientId: string; siteId?: string; updateType: ClientUpdate["updateType"]; actionType?: ClientUpdate["actionType"]; title: string; message: string }) => Promise<void>;
+  createClientUpdate: (input: { clientId: string; siteId?: string; updateType: ClientUpdate["updateType"]; actionType?: ClientUpdate["actionType"]; title: string; message: string }) => Promise<{ emailSent: boolean; warning?: string }>;
   updateClientUpdate: (id: string, input: { siteId?: string | null; updateType?: ClientUpdate["updateType"]; actionType?: ClientUpdate["actionType"] | null; title?: string; message?: string }) => Promise<void>;
   deleteClientUpdate: (id: string) => Promise<void>;
   setProjectStatus: (id: string, status: string) => Promise<void>;
@@ -50,7 +50,7 @@ export function BackofficeProvider({ children }: { children: React.ReactNode }) 
     updateProspectReview: async (id, action, note) => { await api(`/api/admin/prospects/${id}/review`, { method: "PATCH", body: JSON.stringify({ action, note: note ?? null }) }); await refresh(); },
     setRequestStatus: (id, status) => mutate(`/api/admin/requests/${id}`, { status }),
     addSeoAction: async (siteId, action, description) => { await api("/api/admin/seo/actions", { method: "POST", body: JSON.stringify({ siteId, action, description }) }); await refresh(); },
-    createClientUpdate: async (input) => { await api("/api/admin/client-updates", { method: "POST", body: JSON.stringify(input) }); await refresh(); },
+    createClientUpdate: async (input) => { const idempotencyKey = crypto.randomUUID(); const result = await api("/api/admin/client-updates", { method: "POST", headers: { "Idempotency-Key": idempotencyKey }, body: JSON.stringify(input) }); await refresh(); return { emailSent: Boolean(result?.emailSent), warning: typeof result?.warning === "string" ? result.warning : undefined }; },
     updateClientUpdate: async (id, input) => { await api(`/api/admin/client-updates/${id}`, { method: "PATCH", body: JSON.stringify(input) }); await refresh(); },
     deleteClientUpdate: async (id) => { await api(`/api/admin/client-updates/${id}`, { method: "DELETE" }); await refresh(); },
     setProjectStatus: (id, status) => mutate(`/api/admin/project-intakes/${id}`, { status }),

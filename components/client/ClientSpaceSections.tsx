@@ -4,6 +4,7 @@ import { ClientUpdatesSection } from "@/components/client/ClientUpdatesSection";
 import { ManageSubscriptionButton, StartSubscriptionButton } from "@/components/billing/BillingActions";
 import { isOnboardingComplete, onboardingLabels, projectTimeline, type OnboardingProject, type ProjectTimelineStage } from "@/lib/onboarding";
 import type { ProductionCompleteness } from "@/lib/production";
+import { whatsappContactUrl } from "@/lib/whatsapp";
 
 type ClientRecord = { first_name: string | null; last_name: string | null; company: string; email: string; phone: string | null; status: string; started_at: string | null };
 type ProfileRecord = { first_name?: string | null; last_name?: string | null; email?: string | null } | null;
@@ -93,6 +94,7 @@ export function ClientSpaceSections({ client, profile, project, site, subscripti
         <section className="client-card"><SectionHeading eyebrow="ABONNEMENT" title="Votre formule" />{subscription ? <><p className="client-price">{money(subscription.amount_cents)}<span>/mois</span></p><p className="client-muted-note">{label(subscription.status)}</p></> : <p className="client-muted-note">Aucun abonnement enregistré.</p>}</section>
       </div>
       <ClientUpdatesSection updates={updates.map((update) => ({ id: update.id, updateType: update.update_type as never, actionType: update.action_type as never, title: update.title, description: update.description, status: update.status, activityDate: update.activity_date, createdAt: update.created_at, readAt: update.read_at }))} />
+      <section className="client-card client-whatsapp-card" aria-labelledby="client-whatsapp-title"><p className="client-eyebrow">BESOIN D'AIDE ?</p><h2 id="client-whatsapp-title">Une question concernant votre site ?</h2><p>Contactez FeaseWeb directement sur WhatsApp.</p><a className="client-button" href={whatsappContactUrl} target="_blank" rel="noopener noreferrer">Nous contacter sur WhatsApp ↗</a></section>
       <section className="client-card client-dashboard-requests"><SectionHeading eyebrow="DEMANDES OUVERTES" title={`${openRequests.length} demande${openRequests.length > 1 ? "s" : ""} en cours`} />{openRequests.length ? <div className="client-request-list">{openRequests.slice(0, 3).map((request) => <RequestItem key={request.id} request={request} />)}</div> : <p className="client-muted-note">Aucune demande ouverte.</p>}<a className="client-text-link" href="#support-demandes">Voir le support et l'historique →</a></section>
     </section>
 

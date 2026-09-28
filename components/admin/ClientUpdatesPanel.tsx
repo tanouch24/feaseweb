@@ -18,15 +18,24 @@ export function ClientUpdatesPanel({ clientId, siteId }: { clientId: string; sit
   const updates = data.clientUpdates.filter((update) => update.clientId === clientId);
   const [editing, setEditing] = useState<ClientUpdate | null>(null);
   const [form, setForm] = useState<UpdateForm>(emptyForm());
+  const [notice, setNotice] = useState("");
   const reset = () => { setEditing(null); setForm(emptyForm()); };
   const edit = (update: ClientUpdate) => { setEditing(update); setForm({ updateType: update.updateType, actionType: update.actionType ?? "", title: update.title, message: update.description }); };
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!form.title.trim() || !form.message.trim()) return;
+    setNotice("");
     const payload = { updateType: form.updateType, actionType: form.actionType || null, title: form.title, message: form.message };
-    if (editing) await updateClientUpdate(editing.id, payload);
-    else await createClientUpdate({ ...payload, actionType: form.actionType || undefined, clientId, siteId });
-    reset();
+    try {
+      if (editing) await updateClientUpdate(editing.id, payload);
+      else {
+        const result = await createClientUpdate({ ...payload, actionType: form.actionType || undefined, clientId, siteId });
+        setNotice(result.warning ?? "Mise à jour publiée et email envoyé.");
+      }
+      reset();
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Impossible de publier la mise à jour.");
+    }
   };
   return <section className="admin-panel admin-panel-wide">
     <PanelTitle title="Activité FeaseWeb" />
@@ -36,6 +45,7 @@ export function ClientUpdatesPanel({ clientId, siteId }: { clientId: string; sit
       <label>Titre<input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} maxLength={180} required placeholder="Votre première version est prête" /></label>
       <label>Message<textarea value={form.message} onChange={(event) => setForm({ ...form, message: event.target.value })} maxLength={5000} required placeholder="Expliquez clairement l'avancement du projet…" /></label>
       <div className="admin-update-actions"><button className="admin-button" type="submit">{editing ? "Enregistrer la modification" : "Publier la mise à jour"}</button>{editing && <button className="admin-button secondary" type="button" onClick={reset}>Annuler</button>}</div>
+      {notice && <p className="admin-panel-intro" role="status">{notice}</p>}
     </form>
     <div className="admin-update-list">{updates.length ? updates.map((update) => <article className="admin-update-row" key={update.id}><div className="admin-update-copy"><div className="admin-update-meta"><StatusBadge value={update.updateType} /><StatusBadge value={update.readAt ? "Lu" : "Non lu"} /><span>{update.visibleToClient ? "Publié" : "Interne"} · {formatDate(update.activityDate)}</span></div><strong>{update.title}</strong><p>{update.description}</p>{update.actionType && <small>{labelMap[update.actionType]}</small>}</div><div className="admin-update-row-actions"><button className="admin-text-button" type="button" onClick={() => edit(update)}>Modifier</button><button className="admin-text-button admin-danger-button" type="button" onClick={() => { if (window.confirm("Supprimer cette mise à jour ?")) void deleteClientUpdate(update.id); }}>Supprimer</button></div></article>) : <EmptyState title="Aucune mise à jour" detail="Le suivi publié par FeaseWeb apparaîtra ici après la première publication." />}</div>
   </section>;
