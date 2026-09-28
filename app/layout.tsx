@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { TrackingConsent } from "@/components/analytics/TrackingConsent";
 import { siteUrl } from "@/lib/site-config";
 import "./globals.css";
 
@@ -46,6 +47,7 @@ export default function RootLayout({
         <Header />
         {children}
         <Footer />
+        <TrackingConsent />
       </body>
     </html>
   );

@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { appointmentInputSchema, mapProjectAppointment, mapProjectValidation } from "@/lib/project-review";
 import { isOnboardingComplete, mapProjectIntake, onboardingProjectSelect } from "@/lib/onboarding";
+import { sendMetaConversionEvent } from "@/lib/meta-conversions";
 
 async function getProspectContext() {
   const current = await getAuthenticatedProfile();
@@ -17,7 +18,7 @@ async function getProspectContext() {
   return { current, intake, supabase };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const context = await getProspectContext();
   if ("response" in context) return context.response;
   const admin = createAdminClient();
@@ -27,7 +28,10 @@ export async function GET() {
     admin.from("project_validations").select("id, project_intake_id, validation_status").eq("project_intake_id", context.intake.id).maybeSingle(),
   ]);
   if (appointmentError || validationError) return NextResponse.json({ error: "Rendez-vous indisponible." }, { status: 500 });
-  return NextResponse.json({ appointment: appointment ? mapProjectAppointment(appointment) : null, validation: { status: mapProjectValidation(validation).status } });
+  const validationStatus = mapProjectValidation(validation).status;
+  const approvalEventId = validationStatus === "approved" ? `prospect_approved:${context.intake.id}` : undefined;
+  if (approvalEventId) void sendMetaConversionEvent({ eventName: "prospect_approved", eventId: approvalEventId, eventSourceUrl: request.url, userData: { email: context.current.user.email } });
+  return NextResponse.json({ appointment: appointment ? mapProjectAppointment(appointment) : null, validation: { status: validationStatus }, ...(approvalEventId ? { approvalEventId } : {}) });
 }
 
 export async function POST(request: Request) {
@@ -41,7 +45,9 @@ export async function POST(request: Request) {
   if (!admin) return NextResponse.json({ error: "Service indisponible." }, { status: 503 });
   const { data, error } = await admin.from("project_appointments").upsert({ project_intake_id: context.intake.id, appointment_status: "scheduled", appointment_date: parsed.data.date, appointment_time: parsed.data.time, phone: parsed.data.phone, note: parsed.data.note || null }, { onConflict: "project_intake_id" }).select("id, project_intake_id, appointment_status, appointment_date, appointment_time, phone, note").single();
   if (error) { console.error("prospect_appointment_save_failed", error.code); return NextResponse.json({ error: "Impossible d'enregistrer votre rendez-vous." }, { status: 500 }); }
-  return NextResponse.json({ appointment: mapProjectAppointment(data) }, { status: 201 });
+  const trackingEventId = `appointment_scheduled:${data.id}:${data.appointment_date}:${data.appointment_time}`;
+  void sendMetaConversionEvent({ eventName: "appointment_scheduled", eventId: trackingEventId, eventSourceUrl: request.url, userData: { email: context.current.user.email, phone: data.phone } });
+  return NextResponse.json({ appointment: mapProjectAppointment(data), trackingEventId }, { status: 201 });
 }
 
 export async function DELETE() {

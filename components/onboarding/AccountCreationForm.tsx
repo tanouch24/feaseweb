@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
+import { trackEvent } from "@/lib/analytics";
 
 function maskEmail(email: string) { const [local, domain] = email.split("@"); if (!local || !domain) return email; return `${local.slice(0, 1)}***@${domain}`; }
 
@@ -18,6 +19,7 @@ export function AccountCreationForm({ initialError = "" }: { initialError?: stri
     const response = await fetch("/api/onboarding/account", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.fromEntries(form)) });
     const body = await response.json().catch(() => null); setLoading(false);
     if (!response.ok) { setError(body?.error ?? "Impossible de créer votre espace."); return; }
+    if (body?.trackingEventId) trackEvent("account_created", body.trackingEventId);
     if (body?.needsConfirmation) { setConfirmationEmail(String(form.get("email") ?? "")); setConfirmation(true); return; }
     window.location.assign(body?.redirect ?? "/creer-mon-site");
   }

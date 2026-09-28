@@ -29,6 +29,7 @@ export type ProjectValidation = {
 export type ProjectReview = {
   appointment: ProjectAppointment | null;
   validation: Pick<ProjectValidation, "status">;
+  approvalEventId?: string;
 };
 
 export const appointmentInputSchema = z.object({

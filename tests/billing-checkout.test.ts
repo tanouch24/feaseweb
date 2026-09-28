@@ -33,6 +33,10 @@ vi.mock("@/lib/supabase/admin", () => ({
   createAdminClient: () => ({ from: (table: string) => { if (table !== "project_validations") throw new Error(`unexpected admin table ${table}`); return { select: () => ({ eq: () => ({ maybeSingle: validationRowMock }) }) }; } }),
 }));
 
+vi.mock("@/lib/meta-conversions", () => ({
+  sendMetaConversionEvent: vi.fn(),
+}));
+
 vi.mock("@/lib/stripe/server", () => ({
   getStripe: () => ({ checkout: { sessions: { create: checkoutSessionsCreate } } }),
 }));

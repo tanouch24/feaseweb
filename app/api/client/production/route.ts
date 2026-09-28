@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { calculateProductionCompleteness, mapProductionDossier, productionDossierSchema, productionDossierSelect, type ProductionAccess, type ProductionMedia } from "@/lib/production";
 import { mapProjectIntake, onboardingProjectSelect } from "@/lib/onboarding";
+import { sendMetaConversionEvent } from "@/lib/meta-conversions";
 
 export const dynamic = "force-dynamic";
 
@@ -62,11 +63,19 @@ export async function PATCH(request: Request) {
   const mapped = saved ? mapProductionDossier(saved) : null;
   const completeness = calculateProductionCompleteness(mapped, mapProjectIntake(intake), (access ?? []) as ProductionAccess[], (media ?? []) as ProductionMedia[]);
   if (input.completed && !completeness.readyForBuild) return NextResponse.json({ error: "Le dossier comporte encore des informations nécessaires.", completeness }, { status: 422 });
+  let trackingEventId: string | undefined;
   if (input.completed || input.clientConfirmation) {
     const completionUpdate: Record<string, string> = {};
     if (input.completed && completeness.readyForBuild) completionUpdate.completed_at = new Date().toISOString();
     if (input.clientConfirmation) completionUpdate.confirmed_at = new Date().toISOString();
-    if (Object.keys(completionUpdate).length) await admin.from("production_dossiers").update(completionUpdate).eq("client_id", client.id);
+    if (Object.keys(completionUpdate).length) {
+      const { error: completionError } = await admin.from("production_dossiers").update(completionUpdate).eq("client_id", client.id);
+      if (completionError) return NextResponse.json({ error: "Impossible de finaliser le dossier." }, { status: 500 });
+      if (input.completed && completeness.readyForBuild) {
+        trackingEventId = `production_info_completed:${client.id}:${completionUpdate.completed_at}`;
+        void sendMetaConversionEvent({ eventName: "production_info_completed", eventId: trackingEventId, eventSourceUrl: request.url, userData: { email: client.email } });
+      }
+    }
   }
-  return NextResponse.json({ dossier: mapped, completeness });
+  return NextResponse.json({ dossier: mapped, completeness, ...(trackingEventId ? { trackingEventId } : {}) });
 }

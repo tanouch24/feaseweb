@@ -5,6 +5,7 @@ import { getStripe } from "@/lib/stripe/server";
 import { getSafeAppUrl, stripePriceId } from "@/lib/stripe/config";
 import { ensureStripeCustomer, getActiveOrPendingSubscription } from "@/lib/stripe/customer";
 import { isOnboardingComplete, mapProjectIntake, onboardingProjectSelect } from "@/lib/onboarding";
+import { sendMetaConversionEvent } from "@/lib/meta-conversions";
 
 /**
  * Creates a Stripe Checkout Session for the single FeaseWeb subscription
@@ -60,7 +61,7 @@ export async function POST() {
   const safeAppUrl = getSafeAppUrl();
   if (!stripe || !stripePriceId || !safeAppUrl) return NextResponse.json({ error: paymentUnavailable }, { status: 503 });
 
-  let session: { url?: string | null } | null = null;
+  let session: { id?: string; url?: string | null } | null = null;
   try {
     const metadata: Record<string, string> = client ? { feaseweb_client_id: client.id } : { feaseweb_project_intake_id: project!.id, feaseweb_user_id: user.id };
     session = await stripe.checkout.sessions.create({
@@ -81,5 +82,7 @@ export async function POST() {
     console.error("billing_checkout_session_missing_url");
     return NextResponse.json({ error: paymentUnavailable }, { status: 502 });
   }
-  return NextResponse.json({ url: session.url });
+  const trackingEventId = `checkout_started:${session.id ?? (client?.id ?? project?.id ?? user.id)}`;
+  void sendMetaConversionEvent({ eventName: "checkout_started", eventId: trackingEventId, eventSourceUrl: `${safeAppUrl}/espace-client`, userData: { email: client?.email ?? project?.email }, customData: { currency: "EUR", value: 49 } });
+  return NextResponse.json({ url: session.url, trackingEventId });
 }

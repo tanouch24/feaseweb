@@ -3,6 +3,7 @@ import { accountCreationSchema } from "@/lib/validation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSafeAppUrl } from "@/lib/stripe/config";
+import { sendMetaConversionEvent } from "@/lib/meta-conversions";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -31,6 +32,8 @@ export async function POST(request: Request) {
   if (prospect.error) return NextResponse.json({ error: "Impossible de préparer le dossier." }, { status: 500 });
   const intake = await admin.from("project_intakes").upsert({ user_id: data.user.id, prospect_id: prospect.data.id, first_name: parsed.data.firstName, last_name: parsed.data.lastName, company: parsed.data.company, email: parsed.data.email, phone: parsed.data.phone ?? null }, { onConflict: "user_id" });
   if (intake.error) return NextResponse.json({ error: "Impossible de préparer le projet." }, { status: 500 });
-  if (!data.session) return NextResponse.json({ needsConfirmation: true });
-  return NextResponse.json({ redirect: "/creer-mon-site" });
+  const trackingEventId = `account_created:${data.user.id}`;
+  void sendMetaConversionEvent({ eventName: "account_created", eventId: trackingEventId, eventSourceUrl: request.url, userData: { email: parsed.data.email, phone: parsed.data.phone } });
+  if (!data.session) return NextResponse.json({ needsConfirmation: true, trackingEventId });
+  return NextResponse.json({ redirect: "/creer-mon-site", trackingEventId });
 }

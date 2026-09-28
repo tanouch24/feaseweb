@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
 import type { Metadata } from "next";
 import { LegalPageLayout } from "@/components/layout/LegalPageLayout";
 
@@ -12,13 +11,15 @@ export default function CookiesPage() {
   return (
     <LegalPageLayout title="Politique de cookies">
       <p>
-        Le site FeaseWeb n'active pas volontairement de cookie publicitaire ou
-        analytique dans cette version.
+        FeaseWeb propose des outils de mesure d’audience et de marketing
+        uniquement après votre accord. Vous pouvez refuser, choisir séparément
+        les catégories ou modifier votre choix à tout moment avec le bouton
+        « Gérer mes cookies ».
       </p>
       <p>
-        Si des outils de mesure ou de personnalisation sont ajoutés plus tard,
-        leurs finalités, durées et modalités de consentement seront documentées
-        avant activation.
+        Les préférences sont conservées dans votre navigateur. Le refus ou
+        l’absence de choix empêche le chargement de Google Analytics et du
+        Pixel Meta.
       </p>
     </LegalPageLayout>
   );

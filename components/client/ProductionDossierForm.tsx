@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { onboardingLabels, type OnboardingProject } from "@/lib/onboarding";
 import type { ProductionCompleteness, ProductionDossier, ProductionMedia } from "@/lib/production";
+import { trackEvent } from "@/lib/analytics";
 
 type AccessRow = { category: string; status: string; client_choice: string | null; client_note: string | null };
 type Service = { title: string; description: string };
@@ -63,10 +64,10 @@ export function ProductionDossierForm({ project }: { project: OnboardingProject 
   const save = async (nextStep: number, completed = false) => {
     setSaving(true); setError(""); setMessage("");
     const response = await fetch("/api/client/production", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...state, currentStep: nextStep, completed, clientConfirmation: completed ? true : state.clientConfirmation }) });
-    const data = await response.json().catch(() => ({})) as { error?: string; completeness?: ProductionCompleteness; dossier?: ProductionDossier };
+    const data = await response.json().catch(() => ({})) as { error?: string; completeness?: ProductionCompleteness; dossier?: ProductionDossier; trackingEventId?: string };
     setSaving(false);
     if (!response.ok) { setError(data.error ?? "Impossible d'enregistrer le dossier."); if (data.completeness) setCompleteness(data.completeness); return false; }
-    if (data.dossier) setDossier(data.dossier); if (data.completeness) setCompleteness(data.completeness); setState((current) => ({ ...current, currentStep: nextStep, clientConfirmation: completed ? true : current.clientConfirmation })); setMessage("Enregistré"); return true;
+    if (data.dossier) setDossier(data.dossier); if (data.completeness) setCompleteness(data.completeness); if (data.trackingEventId) trackEvent("production_info_completed", data.trackingEventId); setState((current) => ({ ...current, currentStep: nextStep, clientConfirmation: completed ? true : current.clientConfirmation })); setMessage("Enregistré"); return true;
   };
   const setAccessChoice = async (category: string, choice: string) => {
     setError(""); const response = await fetch("/api/client/production/access", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ category, clientChoice: choice }) });

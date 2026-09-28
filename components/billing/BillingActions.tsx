@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { trackEvent } from "@/lib/analytics";
 
 async function goTo(endpoint: string, setError: (message: string) => void, setLoading: (value: boolean) => void) {
   setLoading(true);
@@ -17,6 +18,7 @@ async function goTo(endpoint: string, setError: (message: string) => void, setLo
       setLoading(false);
       return;
     }
+    if (body.trackingEventId) trackEvent("checkout_started", body.trackingEventId, { currency: "EUR", value: 49 });
     window.location.assign(body.url);
   } catch {
     setError("Nous n'avons pas pu ouvrir le paiement. Réessayez dans quelques instants.");

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { OnboardingProject } from "@/lib/onboarding";
 import { toOnboardingPatch } from "@/lib/onboarding";
+import { trackEvent } from "@/lib/analytics";
 
 type Project = OnboardingProject;
 const activities = [["artisan_btp","Artisan / BTP"],["commerce","Commerce"],["restaurant","Restaurant / Alimentation"],["beaute","Beauté / Bien-être"],["sante","Santé"],["immobilier","Immobilier"],["automobile","Automobile"],["services_entreprises","Services aux entreprises"],["profession_liberale","Profession libérale"],["autre","Autre"]] as const;
@@ -18,7 +19,9 @@ function MiniPreview({ item, selected, onClick }: { item: typeof styles[number];
 export function OnboardingConfigurator({ initial }: { initial: Project }) {
   const [project,setProject] = useState<Project>({...initial, requestedPages: initial.requestedPages.length ? initial.requestedPages : ["accueil","contact"], availableAssets: initial.availableAssets});
   const [step,setStep] = useState(Math.min(Math.max(Number(initial.currentStep ?? 1),1),8)); const [error,setError] = useState(""); const [saving,setSaving] = useState(false); const [done,setDone] = useState(false);
-  async function save(changes: Project,nextStep=step) { setSaving(true); setError(""); const response=await fetch("/api/onboarding/project",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(toOnboardingPatch(changes,nextStep))}); const body=await response.json().catch(()=>null); setSaving(false); if(!response.ok){setError(body?.error??"Impossible d'enregistrer votre projet.");return false;} setProject(body.project); return true; }
+  const startedEventId = useRef<string | null>(null);
+  useEffect(() => { const id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "session"; startedEventId.current = `configurator_started:${id}`; trackEvent("configurator_started", startedEventId.current); }, []);
+  async function save(changes: Project,nextStep=step) { setSaving(true); setError(""); const response=await fetch("/api/onboarding/project",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(toOnboardingPatch(changes,nextStep))}); const body=await response.json().catch(()=>null); setSaving(false); if(!response.ok){setError(body?.error??"Impossible d'enregistrer votre projet.");return false;} if(body?.trackingEventId) trackEvent("configurator_completed", body.trackingEventId); setProject(body.project); return true; }
   async function advance() { const next=Math.min(step+1,8); if(await save(project,next)) setStep(next); }
   const choose=<K extends keyof Project>(key:K,value:Project[K])=>setProject(old=>({...old,[key]:value}));
   const multi=(key:"requestedPages"|"availableAssets",value:string,exclusive=false)=>setProject(old=>{const current=old[key];if(exclusive)return {...old,[key]:[value]};const next=current.includes(value)?current.filter(item=>item!==value):[...current.filter(item=>item!=="aucun"),value];return {...old,[key]:next};});

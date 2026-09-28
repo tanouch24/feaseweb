@@ -4,6 +4,7 @@ import { getAuthenticatedProfile } from "@/lib/authz";
 import { onboardingPatchSchema } from "@/lib/validation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isOnboardingComplete, mapProjectIntake, onboardingProjectSelect } from "@/lib/onboarding";
+import { sendMetaConversionEvent } from "@/lib/meta-conversions";
 
 export async function GET() {
   const current = await getAuthenticatedProfile();
@@ -34,6 +35,11 @@ export async function PATCH(request: Request) {
     if (admin) {
       const completed = await admin.from("project_intakes").update({ completed_at: new Date().toISOString(), project_status: "project_configured" }).eq("user_id", current.user.id).select(onboardingProjectSelect).single();
       if (!completed.error && completed.data) result = completed.data;
+      if (!completed.error) {
+        const trackingEventId = `configurator_completed:${current.user.id}`;
+        void sendMetaConversionEvent({ eventName: "configurator_completed", eventId: trackingEventId, eventSourceUrl: request.url, userData: { email: current.user.email } });
+        return NextResponse.json({ project: mapProjectIntake(result), trackingEventId });
+      }
     }
   }
   return NextResponse.json({ project: mapProjectIntake(result) });
