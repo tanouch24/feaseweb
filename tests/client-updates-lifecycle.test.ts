@@ -11,6 +11,7 @@ describe("client updates lifecycle safeguards", () => {
     expect(migration).toContain("update_type");
     expect(migration).toContain("action_type");
     expect(migration).toContain("read_at");
+    expect(migration).toContain("revoke all on public.client_updates from anon");
     expect(migration).not.toContain("create table");
   });
 
