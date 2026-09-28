@@ -5,6 +5,7 @@ import { mdxComponents } from "@/components/blog/mdx-components";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { getAllSlugs, getPostBySlug } from "@/lib/blog";
 import { pageMetadata } from "@/lib/seo-metadata";
+import { siteUrl } from "@/lib/site-config";
 
 export function generateStaticParams() {
   return getAllSlugs().map((slug) => ({ slug }));
@@ -50,8 +51,14 @@ export default async function BlogPostPage({
     "@type": "BlogPosting",
     headline: post.title,
     description: post.description,
+    url: new URL(`/blog/${slug}`, siteUrl).toString(),
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": new URL(`/blog/${slug}`, siteUrl).toString(),
+    },
     datePublished: post.date,
     author: { "@type": "Organization", name: "FeaseWeb" },
+    publisher: { "@type": "Organization", name: "FeaseWeb", url: siteUrl },
   };
 
   return (

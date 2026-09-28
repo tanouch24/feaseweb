@@ -32,10 +32,32 @@ import { metadata as cookiesMetadata } from "@/app/cookies/page";
 import robots from "@/app/robots";
 import sitemap from "@/app/sitemap";
 import { siteUrl } from "@/lib/site-config";
+import { organizationJsonLd, websiteJsonLd } from "@/lib/structured-data";
 
 describe("SEO foundations", () => {
   it("uses the production canonical domain", () => {
     expect(siteUrl).toBe("https://feaseweb.fr");
+  });
+
+  it("publishes only verified organization and website structured data", () => {
+    expect(organizationJsonLd).toMatchObject({
+      "@type": "Organization",
+      name: "FeaseWeb",
+      alternateName: "NB CONSULTING",
+      url: "https://feaseweb.fr",
+    });
+    expect(organizationJsonLd.identifier).toEqual([
+      { "@type": "PropertyValue", propertyID: "SIREN", value: "509817649" },
+      { "@type": "PropertyValue", propertyID: "SIRET", value: "50981764900080" },
+    ]);
+    expect(websiteJsonLd).toEqual({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "FeaseWeb",
+      url: "https://feaseweb.fr",
+      inLanguage: "fr-FR",
+    });
+    expect(JSON.stringify({ organizationJsonLd, websiteJsonLd })).not.toMatch(/Review|AggregateRating|ratingValue/);
   });
 
   it("publishes only useful public URLs in the sitemap", () => {
