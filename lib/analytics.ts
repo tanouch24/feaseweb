@@ -74,7 +74,11 @@ function appendScript(id: string, src: string, onLoad: () => void) {
 function initializeGa() {
   if ((gaReady && document.getElementById("feaseweb-ga4")) || typeof window === "undefined") return;
   window.dataLayer = window.dataLayer ?? [];
-  window.gtag = window.gtag ?? function gtag(...args: unknown[]) { window.dataLayer?.push(args); };
+  // The Google tag runtime expects the native Arguments object from the official snippet.
+  window.gtag = window.gtag ?? function gtag() {
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer?.push(arguments);
+  };
   appendScript("feaseweb-ga4", `https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}`, () => undefined);
   window.gtag("js", new Date());
   window.gtag("config", GA4_MEASUREMENT_ID, { send_page_view: false });

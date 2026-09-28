@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, vi } from "vitest";
-import { getConsent, initializeTracking, normalizeConsent, trackEvent, trackPageView } from "@/lib/analytics";
+import { getConsent, initializeTracking, normalizeConsent, setConsent, trackEvent, trackPageView } from "@/lib/analytics";
 
 describe("centralized tracking", () => {
   beforeEach(() => {
@@ -46,6 +46,18 @@ describe("centralized tracking", () => {
     expect(ga.mock.calls.filter(([kind, name]) => kind === "event" && name === "page_view")).toHaveLength(1);
   });
 
+  it.each([
+    ["refuse", { analytics: false, marketing: false }],
+    ["analytics only", { analytics: true, marketing: false }],
+    ["marketing only", { analytics: false, marketing: true }],
+    ["accept all", { analytics: true, marketing: true }],
+  ])("persists the %s consent state", (_label, state) => {
+    setConsent(state);
+
+    expect(getConsent()).toEqual(state);
+    expect(JSON.parse(window.localStorage.getItem("feaseweb-consent") ?? "null")).toEqual(state);
+  });
+
   it("starts GA4 after analytics consent", () => {
     window.localStorage.setItem("feaseweb-consent", JSON.stringify({ analytics: true, marketing: false }));
 
@@ -55,8 +67,8 @@ describe("centralized tracking", () => {
       "src",
       "https://www.googletagmanager.com/gtag/js?id=G-ZE1MDKS9WV",
     );
-    expect(window.dataLayer?.[0]).toEqual(expect.arrayContaining(["js"]));
-    expect(window.dataLayer?.[1]).toEqual(["config", "G-ZE1MDKS9WV", { send_page_view: false }]);
+    expect(Array.from(window.dataLayer?.[0] as ArrayLike<unknown>)).toEqual(["js", expect.any(Date)]);
+    expect(Array.from(window.dataLayer?.[1] as ArrayLike<unknown>)).toEqual(["config", "G-ZE1MDKS9WV", { send_page_view: false }]);
   });
 });
 
