@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 import { getSafeAppUrl, stripePriceId } from "@/lib/stripe/config";
 import { ensureStripeCustomer, getActiveOrPendingSubscription } from "@/lib/stripe/customer";
@@ -11,11 +12,7 @@ import { isOnboardingComplete, mapProjectIntake, onboardingProjectSelect } from 
  * customer. Nothing accepted from the request body — there isn't one.
  */
 export async function POST() {
-  const stripe = getStripe();
-  const safeAppUrl = getSafeAppUrl();
   const paymentUnavailable = "Nous n'avons pas pu ouvrir le paiement. Réessayez dans quelques instants.";
-  if (!stripe || !stripePriceId || !safeAppUrl) return NextResponse.json({ error: paymentUnavailable }, { status: 503 });
-
   const supabase = await createClient();
   if (!supabase) return NextResponse.json({ error: paymentUnavailable }, { status: 503 });
 
@@ -36,6 +33,19 @@ export async function POST() {
   if (!client && !project) return NextResponse.json({ error: "Aucun projet FeaseWeb associé à ce compte." }, { status: 404 });
 
   if (project && (!isOnboardingComplete(project.intake) || !project.completed_at)) return NextResponse.json({ code: "incomplete", error: "Terminez la configuration de votre projet avant de démarrer." }, { status: 409 });
+  if (project) {
+    const admin = createAdminClient();
+    if (!admin) return NextResponse.json({ error: paymentUnavailable }, { status: 503 });
+    const { data: validation, error: validationError } = await admin
+      .from("project_validations")
+      .select("validation_status")
+      .eq("project_intake_id", project.id)
+      .maybeSingle();
+    if (validationError) return NextResponse.json({ error: paymentUnavailable }, { status: 503 });
+    if (validation?.validation_status !== "approved") {
+      return NextResponse.json({ code: "project_not_approved", error: "Votre projet doit être validé par FeaseWeb avant de pouvoir activer l'abonnement." }, { status: 403 });
+    }
+  }
   if (project?.project_status === "subscription_active") return NextResponse.json({ error: "Un abonnement existe déjà pour ce projet." }, { status: 409 });
 
   const blocking = client ? await getActiveOrPendingSubscription(client.id) : null;
@@ -45,6 +55,10 @@ export async function POST() {
       { status: 409 }
     );
   }
+
+  const stripe = getStripe();
+  const safeAppUrl = getSafeAppUrl();
+  if (!stripe || !stripePriceId || !safeAppUrl) return NextResponse.json({ error: paymentUnavailable }, { status: 503 });
 
   let session: { url?: string | null } | null = null;
   try {

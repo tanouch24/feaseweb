@@ -7,6 +7,9 @@ export type ProspectStatus =
   | "preview_envoyee"
   | "gagne"
   | "perdu";
+export type AppointmentStatus = "not_scheduled" | "scheduled" | "completed" | "cancelled";
+export type ValidationStatus = "pending" | "approved" | "needs_information" | "declined";
+export type ProspectReview = { appointmentStatus: AppointmentStatus; appointmentDate?: string; appointmentTime?: string; phone?: string; validationStatus: ValidationStatus };
 export type ClientStatus = "actif" | "en_attente" | "suspendu" | "resilie";
 export type ClientAccessStatus = "non_invite" | "invitation_envoyee" | "actif";
 export type SiteStatus =
@@ -42,7 +45,7 @@ export type Prospect = {
   id: string; createdAt: string; firstName: string; lastName: string; company: string;
   email: string; phone: string; activity: string; city: string; currentSite: string;
   hasSite: boolean; objective: string; message: string; source: string;
-  status: ProspectStatus; notes: string[];
+  status: ProspectStatus; notes: string[]; review?: ProspectReview;
 };
 export type Client = {
   id: string; prospectId?: string; firstName: string; lastName: string; company: string;
@@ -75,7 +78,7 @@ export type SeoMetric = { id: string; siteId: string; clicks: number; impression
 export type Domain = { id: string; clientId: string; name: string; registrar: string; owner: string; expiresAt?: string; renewal: "manuel" | "automatique"; dnsStatus: "a_configurer" | "configure" | "probleme"; ssl: "actif" | "a_verifier" | "inactif"; notes: string };
 export type ActivityLog = { id: string; occurredAt: string; actor: "admin" | "system"; entityType: string; entityId: string; message: string };
 export type ClientUpdate = { id: string; clientId: string; siteId?: string; category: ClientUpdateCategory; title: string; description: string; status: ClientUpdateStatus; visibleToClient: boolean; activityDate: string; createdAt: string; updatedAt: string };
-export type ProjectIntake = { id: string; userId: string; prospectId?: string; clientId?: string; firstName: string; lastName: string; company: string; email: string; phone: string; activity: string; hasExistingSite: boolean; existingSiteUrl: string; existingSiteProject: string; objective: string; pages: string[]; style: string; palette: string; assets: string[]; contactChannel: string; contactSlot: string; status: string; currentStep: number };
+export type ProjectIntake = { id: string; userId: string; prospectId?: string; clientId?: string; firstName: string; lastName: string; company: string; email: string; phone: string; activity: string; hasExistingSite: boolean; existingSiteUrl: string; existingSiteProject: string; objective: string; pages: string[]; style: string; palette: string; assets: string[]; contactChannel: string; contactSlot: string; status: string; currentStep: number; completedAt?: string };
 
 export type BackofficeData = {
   prospects: Prospect[]; clients: Client[]; sites: Site[]; subscriptions: Subscription[];
@@ -96,6 +99,7 @@ export const labelMap: Record<string, string> = {
   echoue: "Échoué", rembourse: "Remboursé", a_faire: "À faire",
   essai: "Période d'essai", incomplet_expire: "Expiré", en_pause: "En pause", aucun: "Aucun paiement",
   prevu: "Prévu", termine: "Terminé", seo: "SEO", contenu: "Contenu", maintenance: "Maintenance", site: "Site", securite: "Sécurité", autre: "Autre",
+  not_scheduled: "Non planifié", scheduled: "Planifié", completed: "Réalisé", cancelled: "Annulé", pending: "Validation en attente", approved: "Projet validé", needs_information: "Informations nécessaires", declined: "Projet refusé", configure: "Terminée",
 };
 
 export function formatDate(value?: string) { return value ? new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(new Date(value)) : "—"; }

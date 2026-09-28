@@ -3,12 +3,16 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const {
   getUserMock,
   clientRowMock,
+  projectRowMock,
+  validationRowMock,
   checkoutSessionsCreate,
   ensureStripeCustomerMock,
   getActiveOrPendingSubscriptionMock,
 } = vi.hoisted(() => ({
   getUserMock: vi.fn(),
   clientRowMock: vi.fn(),
+  projectRowMock: vi.fn(),
+  validationRowMock: vi.fn(),
   checkoutSessionsCreate: vi.fn(),
   ensureStripeCustomerMock: vi.fn(),
   getActiveOrPendingSubscriptionMock: vi.fn(),
@@ -18,10 +22,15 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({
     auth: { getUser: getUserMock },
     from: (table: string) => {
+      if (table === "project_intakes") return { select: () => ({ eq: () => ({ maybeSingle: projectRowMock }) }) };
       if (table !== "clients") throw new Error(`unexpected table ${table}`);
       return { select: () => ({ eq: () => ({ maybeSingle: clientRowMock }) }) };
     },
   }),
+}));
+
+vi.mock("@/lib/supabase/admin", () => ({
+  createAdminClient: () => ({ from: (table: string) => { if (table !== "project_validations") throw new Error(`unexpected admin table ${table}`); return { select: () => ({ eq: () => ({ maybeSingle: validationRowMock }) }) }; } }),
 }));
 
 vi.mock("@/lib/stripe/server", () => ({
@@ -45,6 +54,8 @@ describe("POST /api/billing/checkout", () => {
   beforeEach(() => {
     getUserMock.mockReset();
     clientRowMock.mockReset();
+    projectRowMock.mockReset();
+    validationRowMock.mockReset();
     checkoutSessionsCreate.mockReset();
     ensureStripeCustomerMock.mockReset();
     getActiveOrPendingSubscriptionMock.mockReset();
@@ -109,5 +120,32 @@ describe("POST /api/billing/checkout", () => {
     const response = await POST();
     expect(response.status).toBe(502);
     expect(await response.json()).toEqual({ error: "Nous n'avons pas pu ouvrir le paiement. Réessayez dans quelques instants." });
+  });
+
+  it.each([
+    ["without validation", null],
+    ["with pending validation", { validation_status: "pending" }],
+    ["with requested information", { validation_status: "needs_information" }],
+    ["with declined validation", { validation_status: "declined" }],
+  ])("refuses a complete prospect checkout %s", async (_label, validation) => {
+    getUserMock.mockResolvedValue({ data: { user: { id: "user-1" } } });
+    clientRowMock.mockResolvedValue({ data: null });
+    projectRowMock.mockResolvedValue({ data: { id: "intake-1", email: "a@example.com", company: "ACME", current_step: 8, project_status: "project_configured", completed_at: "2026-09-25T10:00:00.000Z", activity: "artisan_btp", has_existing_site: false, existing_site_url: null, existing_site_project: null, primary_objective: "devis", requested_pages: ["accueil"], style_direction: "sobre_professionnel", color_mood: "clair_minimal", available_assets: ["logo"], contact_channel: "email", contact_slot: "matin" } });
+    validationRowMock.mockResolvedValue({ data: validation });
+    const response = await POST();
+    expect(response.status).toBe(403);
+    expect(checkoutSessionsCreate).not.toHaveBeenCalled();
+  });
+
+  it("allows a complete prospect checkout only after FeaseWeb approval", async () => {
+    getUserMock.mockResolvedValue({ data: { user: { id: "user-1" } } });
+    clientRowMock.mockResolvedValue({ data: null });
+    projectRowMock.mockResolvedValue({ data: { id: "intake-1", email: "a@example.com", company: "ACME", current_step: 8, project_status: "project_configured", completed_at: "2026-09-25T10:00:00.000Z", activity: "artisan_btp", has_existing_site: false, existing_site_url: null, existing_site_project: null, primary_objective: "devis", requested_pages: ["accueil"], style_direction: "sobre_professionnel", color_mood: "clair_minimal", available_assets: ["logo"], contact_channel: "email", contact_slot: "matin" } });
+    validationRowMock.mockResolvedValue({ data: { validation_status: "approved" } });
+    getActiveOrPendingSubscriptionMock.mockResolvedValue(null);
+    checkoutSessionsCreate.mockResolvedValue({ url: "https://checkout.stripe.com/test-session" });
+    const response = await POST();
+    expect(response.status).toBe(200);
+    expect(checkoutSessionsCreate).toHaveBeenCalledWith(expect.objectContaining({ line_items: [{ price: "price_test_123", quantity: 1 }], metadata: { feaseweb_project_intake_id: "intake-1", feaseweb_user_id: "user-1" } }));
   });
 });

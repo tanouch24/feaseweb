@@ -13,6 +13,7 @@ type Store = {
   addClientNote: (id: string, note: string) => Promise<void>;
   inviteClient: (id: string) => Promise<void>;
   addProspectNote: (id: string, note: string) => Promise<void>;
+  updateProspectReview: (id: string, action: "complete_appointment" | "cancel_appointment" | "approve" | "needs_information" | "decline", note?: string) => Promise<void>;
   setRequestStatus: (id: string, status: ModificationRequest["status"]) => Promise<void>;
   addSeoAction: (siteId: string, action: string, description: string) => Promise<void>;
   createClientUpdate: (input: Omit<ClientUpdate, "id" | "createdAt" | "updatedAt">) => Promise<void>;
@@ -46,6 +47,7 @@ export function BackofficeProvider({ children }: { children: React.ReactNode }) 
     addClientNote: async (id, body) => { await api("/api/admin/notes", { method: "POST", body: JSON.stringify({ clientId: id, body }) }); await refresh(); },
     inviteClient: async (id) => { await api(`/api/admin/clients/${id}/invite`, { method: "POST", body: JSON.stringify({}) }); await refresh(); },
     addProspectNote: async (id, body) => { await api("/api/admin/notes", { method: "POST", body: JSON.stringify({ prospectId: id, body }) }); await refresh(); },
+    updateProspectReview: async (id, action, note) => { await api(`/api/admin/prospects/${id}/review`, { method: "PATCH", body: JSON.stringify({ action, note: note ?? null }) }); await refresh(); },
     setRequestStatus: (id, status) => mutate(`/api/admin/requests/${id}`, { status }),
     addSeoAction: async (siteId, action, description) => { await api("/api/admin/seo/actions", { method: "POST", body: JSON.stringify({ siteId, action, description }) }); await refresh(); },
     createClientUpdate: async (input) => { await api("/api/admin/client-updates", { method: "POST", body: JSON.stringify({ clientId: input.clientId, siteId: input.siteId ?? null, category: input.category, title: input.title, description: input.description, status: input.status, visibleToClient: input.visibleToClient, activityDate: input.activityDate }) }); await refresh(); },

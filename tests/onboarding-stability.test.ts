@@ -41,12 +41,12 @@ describe("onboarding DB/DTO boundary", () => {
   });
 
   it("maps every persisted production status to a real timeline state", () => {
-    expect(projectTimeline("project_configured", true).map((stage) => stage.state)).toEqual(["complete", "current", "upcoming", "upcoming", "upcoming"]);
-    expect(projectTimeline("subscription_active", true)[2].state).toBe("current");
-    expect(projectTimeline("building", true)[2].state).toBe("current");
-    expect(projectTimeline("preview_ready", true)[3].state).toBe("current");
-    expect(projectTimeline("client_feedback", true)[3].state).toBe("current");
-    expect(projectTimeline("finalizing", true)[4].state).toBe("current");
+    expect(projectTimeline("project_configured", true).map((stage) => stage.state)).toEqual(["complete", "current", "upcoming", "upcoming", "upcoming", "upcoming", "upcoming"]);
+    expect(projectTimeline("subscription_active", true)[4].state).toBe("current");
+    expect(projectTimeline("building", true)[4].state).toBe("current");
+    expect(projectTimeline("preview_ready", true)[5].state).toBe("current");
+    expect(projectTimeline("client_feedback", true)[5].state).toBe("current");
+    expect(projectTimeline("finalizing", true)[6].state).toBe("current");
     expect(projectTimeline("live", true).every((stage) => stage.state === "complete")).toBe(true);
   });
 

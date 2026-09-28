@@ -86,21 +86,29 @@ export type ProjectTimelineState = "complete" | "current" | "upcoming";
 export type ProjectTimelineStage = { key: string; label: string; state: ProjectTimelineState };
 
 /** Maps persisted production statuses to the five client-facing milestones. */
-export function projectTimeline(status: string, complete: boolean): ProjectTimelineStage[] {
+export function projectTimeline(status: string, complete: boolean, appointmentStatus = "not_scheduled", validationStatus = "pending"): ProjectTimelineStage[] {
   if (!complete) return [
     { key: "configuration", label: "Configuration", state: "current" },
+    { key: "appointment", label: "Rendez-vous", state: "upcoming" },
+    { key: "validation", label: "Validation FeaseWeb", state: "upcoming" },
     { key: "subscription", label: "Abonnement", state: "upcoming" },
     { key: "creation", label: "Création du site", state: "upcoming" },
     { key: "preview", label: "Votre aperçu", state: "upcoming" },
     { key: "live", label: "Mise en ligne", state: "upcoming" },
   ];
+  const workflowStarted = status !== "project_configured";
+  const appointmentDone = workflowStarted || appointmentStatus === "scheduled" || appointmentStatus === "completed";
+  const validationDone = workflowStarted || validationStatus === "approved";
+  const validationCurrent = appointmentStatus === "completed" && !validationDone;
   const creationCurrent = status === "subscription_active" || status === "preparation" || status === "building";
   const previewCurrent = status === "preview_ready" || status === "client_feedback";
   const liveCurrent = status === "finalizing";
   const live = status === "live";
   return [
     { key: "configuration", label: "Configuration", state: "complete" },
-    { key: "subscription", label: "Abonnement", state: status === "project_configured" ? "current" : "complete" },
+    { key: "appointment", label: "Rendez-vous", state: appointmentDone ? "complete" : "current" },
+    { key: "validation", label: "Validation FeaseWeb", state: validationDone ? "complete" : (validationCurrent ? "current" : "upcoming") },
+    { key: "subscription", label: "Abonnement", state: status === "project_configured" ? (validationDone ? "current" : "upcoming") : "complete" },
     { key: "creation", label: "Création du site", state: creationCurrent ? "current" : (previewCurrent || liveCurrent || live ? "complete" : "upcoming") },
     { key: "preview", label: "Votre aperçu", state: previewCurrent ? "current" : (liveCurrent || live ? "complete" : "upcoming") },
     { key: "live", label: "Mise en ligne", state: liveCurrent ? "current" : (live ? "complete" : "upcoming") },

@@ -11,6 +11,8 @@ async function goTo(endpoint: string, setError: (message: string) => void, setLo
     if (!response.ok || !body?.url) {
       setError(response.status === 409 && body?.code === "incomplete"
         ? "Terminez votre configuration avant d'activer l'abonnement."
+        : response.status === 403 && body?.code === "project_not_approved"
+          ? "Votre projet doit être validé par FeaseWeb avant d'activer l'abonnement."
         : "Nous n'avons pas pu ouvrir le paiement. Réessayez dans quelques instants.");
       setLoading(false);
       return;

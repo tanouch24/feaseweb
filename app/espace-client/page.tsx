@@ -15,7 +15,7 @@ export default async function EspaceClientPage({ searchParams }: { searchParams:
   const { checkout } = await searchParams;
   const current = await requireClientSpace();
   const supabase = await createClient();
-  const { data: intake } = supabase ? await supabase.from("project_intakes").select(onboardingProjectSelect).eq("user_id", current.user.id).maybeSingle() : { data: null };
+  const { data: intake } = supabase ? await supabase.from("project_intakes").select(`id, ${onboardingProjectSelect}`).eq("user_id", current.user.id).maybeSingle() : { data: null };
   if (current.role === "prospect" && intake) return <ProspectProjectDashboard project={mapProjectIntake(intake)} checkout={checkout} />;
 
   if (!supabase) return <main className="client-space"><header className="client-header"><div><p className="client-eyebrow">ESPACE CLIENT FEASEWEB</p><h1>Votre espace est indisponible.</h1><p>Réessayez dans quelques instants.</p></div><LogoutButton /></header></main>;
