@@ -1,5 +1,11 @@
 [build]
   command = "npm run build"
 
+[[redirects]]
+  from = "https://feaseweb.netlify.app/*"
+  to = "https://feaseweb.fr/:splat"
+  status = 301
+  force = true
+
 [build.environment]
   SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_APP_URL,NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,NEXT_PUBLIC_SUPABASE_URL"
