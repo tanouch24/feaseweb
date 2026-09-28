@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TrackingConsent } from "@/components/analytics/TrackingConsent";
@@ -34,5 +34,16 @@ describe("tracking consent UI", () => {
 
     expect(screen.getByRole("checkbox", { name: /Mesure d’audience/ })).toBeChecked();
     expect(screen.getByRole("checkbox", { name: /Marketing/ })).not.toBeChecked();
+  });
+
+  it("dismisses the save confirmation automatically", () => {
+    vi.useFakeTimers();
+    render(<TrackingConsent />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Tout accepter" }));
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(4000));
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    vi.useRealTimers();
   });
 });

@@ -14,15 +14,15 @@ beforeEach(() => {
 describe("back-office local console", () => {
   it("does not present fictional metrics when the dataset is empty", async () => {
     renderAdmin(<AdminOverview />);
-    await waitFor(() => expect(screen.getByText("Abonnements actifs").parentElement).toHaveTextContent("0 €"));
-    expect(screen.getByText("Aucune activité")).toBeInTheDocument();
-    expect(screen.getByText("Rien d'urgent")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("Le suivi, simplement.")).toBeInTheDocument());
+    expect(screen.getAllByText("Aucun dossier")).toHaveLength(7);
   });
 
   it("does not read localStorage for business data", async () => {
     window.localStorage.setItem("feaseweb-backoffice-v1", JSON.stringify(demoData()));
     renderAdmin(<AdminOverview />);
-    await waitFor(() => expect(screen.getByText("Abonnements actifs").parentElement).toHaveTextContent("0 €"));
+    await waitFor(() => expect(screen.getByText("Le suivi, simplement.")).toBeInTheDocument());
+    expect(screen.getAllByText("Aucun dossier")).toHaveLength(7);
   });
 
   it("filters prospects by company or email", async () => {

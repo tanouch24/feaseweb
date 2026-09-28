@@ -36,6 +36,12 @@ export function TrackingConsent() {
     trackPageView(`${pathname}${window.location.search}`);
   }, [pathname, consent]);
 
+  useEffect(() => {
+    if (!saved) return;
+    const timeout = window.setTimeout(() => setSaved(false), 4000);
+    return () => window.clearTimeout(timeout);
+  }, [saved]);
+
   function save(next: ConsentState) {
     setConsent(next);
     setLocalConsent(next);
