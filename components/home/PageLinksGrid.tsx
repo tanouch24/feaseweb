@@ -25,13 +25,25 @@ const links = [
     href: "/exemples",
     Icon: GlobeIcon,
     title: "Exemples de sites",
-    body: "Quatre métiers, quatre sites créés par FeaseWeb — et une démonstration avant/après.",
+    body: "Quatre démonstrations de métiers différents pour voir l'approche FeaseWeb avant de parler de votre projet.",
   },
   {
     href: "/seo",
     Icon: ChartIcon,
     title: "Référencement",
     body: "Le SEO est inclus dans l'abonnement, jamais ajouté en option.",
+  },
+  {
+    href: "/site-internet-artisan",
+    Icon: GlobeIcon,
+    title: "Site pour artisan",
+    body: "Une présentation claire de votre activité, de vos prestations et de votre zone d'intervention.",
+  },
+  {
+    href: "/maintenance-site-internet",
+    Icon: SupportIcon,
+    title: "Maintenance",
+    body: "Hébergement, sécurité, sauvegardes et petites évolutions dans la durée.",
   },
   {
     href: "/blog",

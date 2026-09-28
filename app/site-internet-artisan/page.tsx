@@ -1,0 +1,64 @@
+import type { Metadata } from "next";
+import { FinalCTA } from "@/components/home/FinalCTA";
+import { ManagedServiceLanding } from "@/components/home/ManagedServiceLanding";
+import { pageMetadata } from "@/lib/seo-metadata";
+
+export const metadata: Metadata = pageMetadata({
+  title: "Site internet pour artisan : création gérée | FeaseWeb",
+  description:
+    "FeaseWeb crée et gère le site internet de votre activité artisanale : prestations, zone d’intervention, contact, mobile, maintenance et SEO inclus.",
+  path: "/site-internet-artisan",
+});
+
+export default function SiteInternetArtisanPage() {
+  return (
+    <>
+      <ManagedServiceLanding
+        eyebrow="Site internet pour artisan"
+        title="Un site professionnel pour votre activité artisanale, sans avoir à vous en occuper."
+        intro="Plombier, électricien, couvreur, chauffagiste ou artisan du bâtiment : FeaseWeb présente votre savoir-faire avec un site clair, adapté au mobile et géré dans la durée."
+        highlights={[
+          "Vos prestations visibles en quelques secondes",
+          "Votre zone d’intervention clairement présentée",
+          "Un appel ou une demande de devis facile",
+          "Un site lisible sur téléphone",
+        ]}
+        sections={[
+          {
+            title: "Un site qui commence par les besoins de vos clients",
+            body: "Un visiteur veut rapidement comprendre ce que vous faites, où vous intervenez et comment vous joindre. La page d’accueil et les rubriques du site donnent la priorité à ces informations, sans demander au client de chercher.",
+            points: [
+              "Prestations et spécialités expliquées simplement",
+              "Zone d’intervention et coordonnées faciles à trouver",
+              "Boutons d’appel, de contact ou de demande de devis",
+            ],
+          },
+          {
+            title: "Des bases solides pour votre visibilité locale",
+            body: "Le site présente clairement votre métier et votre secteur d’intervention afin d’aider les visiteurs et les moteurs de recherche à comprendre votre activité. FeaseWeb travaille ces fondations sans promettre une position précise sur Google.",
+            points: [
+              "Structure adaptée à une petite entreprise locale",
+              "Contenu organisé autour de vos services réels",
+              "Référencement naturel inclus dans l’abonnement",
+            ],
+          },
+          {
+            title: "Un service géré, pas un outil à administrer",
+            body: "Vous fournissez les informations sur votre activité et vos priorités. FeaseWeb prépare le site, le met en ligne et continue de s’en occuper : hébergement, sécurité, maintenance et petites modifications raisonnables sont compris dans la formule.",
+            points: [
+              "0 € de frais de création selon l’offre actuelle",
+              "49 €/mois avec hébergement, SSL et maintenance inclus",
+              "Accompagnement après la mise en ligne",
+            ],
+          },
+        ]}
+        relatedLinks={[
+          { label: "Voir l’offre et le tarif", href: "/tarifs" },
+          { label: "Découvrir la création de site", href: "/creation-site-internet" },
+          { label: "Comprendre le référencement inclus", href: "/seo" },
+        ]}
+      />
+      <FinalCTA />
+    </>
+  );
+}

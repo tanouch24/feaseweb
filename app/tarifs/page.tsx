@@ -3,6 +3,7 @@ import { KineticWords } from "@/components/home/KineticWords";
 import { OfferSection } from "@/components/home/OfferSection";
 import { ServiceEditorialGrid } from "@/components/home/ServiceEditorialGrid";
 import { FinalCTA } from "@/components/home/FinalCTA";
+import { RelatedLinks } from "@/components/home/RelatedLinks";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { pageMetadata } from "@/lib/seo-metadata";
 
@@ -23,6 +24,7 @@ export default function TarifsPage() {
       <RevealOnScroll>
         <ServiceEditorialGrid />
       </RevealOnScroll>
+      <RelatedLinks links={[{ label: "Site internet pour artisan", href: "/site-internet-artisan" }, { label: "Maintenance du site internet", href: "/maintenance-site-internet" }]} />
       <FinalCTA />
     </main>
   );

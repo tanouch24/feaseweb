@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SEOSection } from "@/components/home/SEOSection";
 import { FinalCTA } from "@/components/home/FinalCTA";
+import { RelatedLinks } from "@/components/home/RelatedLinks";
 import { pageMetadata } from "@/lib/seo-metadata";
 
 export const metadata: Metadata = pageMetadata({
@@ -14,6 +15,7 @@ export default function SEOPage() {
   return (
     <main>
       <SEOSection headingLevel="h1" heading="Le référencement naturel de votre site est inclus." />
+      <RelatedLinks links={[{ label: "Voir le site internet pour artisan", href: "/site-internet-artisan" }, { label: "Découvrir la maintenance incluse", href: "/maintenance-site-internet" }]} />
       <FinalCTA />
     </main>
   );

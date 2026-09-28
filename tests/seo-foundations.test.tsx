@@ -6,6 +6,9 @@ import ExemplesPage from "@/app/exemples/page";
 import SEOPage from "@/app/seo/page";
 import FAQPage from "@/app/faq/page";
 import BlogPage from "@/app/blog/page";
+import HomePage from "@/app/page";
+import SiteInternetArtisanPage from "@/app/site-internet-artisan/page";
+import MaintenanceSiteInternetPage from "@/app/maintenance-site-internet/page";
 import { metadata as homeMetadata } from "@/app/page";
 import { metadata as commentMetadata } from "@/app/comment-ca-marche/page";
 import { metadata as tarifsMetadata } from "@/app/tarifs/page";
@@ -17,6 +20,8 @@ import { metadata as creationMetadata } from "@/app/creation-site-internet/page"
 import { metadata as refonteMetadata } from "@/app/refonte-site-internet/page";
 import { metadata as aboutMetadata } from "@/app/a-propos/page";
 import { metadata as contactMetadata } from "@/app/contact/page";
+import { metadata as artisanMetadata } from "@/app/site-internet-artisan/page";
+import { metadata as maintenanceMetadata } from "@/app/maintenance-site-internet/page";
 import { metadata as creerMetadata } from "@/app/creer-mon-site/page";
 import { metadata as refaireMetadata } from "@/app/refaire-mon-site/page";
 import { metadata as legalMetadata } from "@/app/mentions-legales/page";
@@ -35,10 +40,12 @@ describe("SEO foundations", () => {
   it("publishes only useful public URLs in the sitemap", () => {
     const urls = sitemap().map((entry) => entry.url);
 
-    expect(urls).toHaveLength(20);
+    expect(urls).toHaveLength(22);
     expect(urls.every((url) => url.startsWith("https://feaseweb.fr/"))).toBe(true);
     expect(urls).not.toContain("https://feaseweb.fr/creer-mon-site");
     expect(urls).not.toContain("https://feaseweb.fr/refaire-mon-site");
+    expect(urls).toContain("https://feaseweb.fr/site-internet-artisan");
+    expect(urls).toContain("https://feaseweb.fr/maintenance-site-internet");
     expect(urls.some((url) => url.includes("/admin"))).toBe(false);
     expect(urls.some((url) => url.includes("/api"))).toBe(false);
     expect(urls.some((url) => url.includes("fease.fr"))).toBe(false);
@@ -63,6 +70,8 @@ describe("SEO foundations", () => {
     ["référencement", SEOPage],
     ["FAQ", FAQPage],
     ["blog", BlogPage],
+    ["site internet artisan", SiteInternetArtisanPage],
+    ["maintenance de site internet", MaintenanceSiteInternetPage],
   ])("renders exactly one H1 on %s", (_name, Page) => {
     const { container } = render(<Page />);
     expect(container.querySelectorAll("h1")).toHaveLength(1);
@@ -87,6 +96,8 @@ describe("SEO foundations", () => {
       refonteMetadata,
       aboutMetadata,
       contactMetadata,
+      artisanMetadata,
+      maintenanceMetadata,
     ];
     const titles = metadata.map((entry) => entry.title);
     const descriptions = metadata.map((entry) => entry.description);
@@ -99,10 +110,29 @@ describe("SEO foundations", () => {
     expect(JSON.stringify(metadata)).not.toContain("netlify.app");
   });
 
+  it("keeps the new landing pages indexable without review markup", () => {
+    for (const metadata of [artisanMetadata, maintenanceMetadata]) {
+      expect(metadata.robots).not.toMatchObject({ index: false });
+      expect(metadata.alternates?.canonical).toMatch(/^\//);
+    }
+
+    const { container: artisan } = render(<SiteInternetArtisanPage />);
+    const { container: maintenance } = render(<MaintenanceSiteInternetPage />);
+    const html = `${artisan.innerHTML}${maintenance.innerHTML}`;
+
+    expect(html).not.toContain("AggregateRating");
+    expect(html).not.toContain('"@type":"Review"');
+  });
+
   it("keeps the examples page explicit about demonstrations", () => {
     const { container } = render(<ExemplesPage />);
 
     expect(container.textContent).toContain("Démonstrations");
     expect(container.textContent).toContain("Démonstration fictive");
+  });
+
+  it("does not present demo sites as real client work on the home links", () => {
+    const { container } = render(<HomePage />);
+    expect(container.textContent).not.toContain("sites créés par FeaseWeb");
   });
 });

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ProcessSteps } from "@/components/home/ProcessSteps";
 import { ComparisonBlock } from "@/components/home/ComparisonBlock";
 import { FinalCTA } from "@/components/home/FinalCTA";
+import { RelatedLinks } from "@/components/home/RelatedLinks";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { pageMetadata } from "@/lib/seo-metadata";
 
@@ -19,6 +20,7 @@ export default function CommentCaMarchePage() {
       <RevealOnScroll>
         <ComparisonBlock />
       </RevealOnScroll>
+      <RelatedLinks links={[{ label: "Voir la maintenance après la mise en ligne", href: "/maintenance-site-internet" }, { label: "Découvrir la création de site", href: "/creation-site-internet" }]} />
       <FinalCTA />
     </main>
   );
