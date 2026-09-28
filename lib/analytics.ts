@@ -72,7 +72,7 @@ function appendScript(id: string, src: string, onLoad: () => void) {
 }
 
 function initializeGa() {
-  if (gaReady || typeof window === "undefined") return;
+  if ((gaReady && document.getElementById("feaseweb-ga4")) || typeof window === "undefined") return;
   window.dataLayer = window.dataLayer ?? [];
   window.gtag = window.gtag ?? function gtag(...args: unknown[]) { window.dataLayer?.push(args); };
   appendScript("feaseweb-ga4", `https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}`, () => undefined);
@@ -82,7 +82,7 @@ function initializeGa() {
 }
 
 function initializeMeta() {
-  if (metaReady || typeof window === "undefined") return;
+  if ((metaReady && document.getElementById("feaseweb-meta-pixel")) || typeof window === "undefined") return;
   type MetaQueue = ((...args: unknown[]) => void) & { callMethod?: (...args: unknown[]) => void; queue?: unknown[]; loaded?: boolean; version?: string; push?: (...args: unknown[]) => void };
   const fbq = ((...args: unknown[]) => {
     const queue = fbq as MetaQueue;

@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, vi } from "vitest";
-import { getConsent, normalizeConsent, trackEvent, trackPageView } from "@/lib/analytics";
+import { getConsent, initializeTracking, normalizeConsent, trackEvent, trackPageView } from "@/lib/analytics";
 
 describe("centralized tracking", () => {
   beforeEach(() => {
@@ -45,6 +45,19 @@ describe("centralized tracking", () => {
     trackPageView("/tarifs");
     expect(ga.mock.calls.filter(([kind, name]) => kind === "event" && name === "page_view")).toHaveLength(1);
   });
+
+  it("starts GA4 after analytics consent", () => {
+    window.localStorage.setItem("feaseweb-consent", JSON.stringify({ analytics: true, marketing: false }));
+
+    initializeTracking();
+
+    expect(document.querySelector("script#feaseweb-ga4")).toHaveAttribute(
+      "src",
+      "https://www.googletagmanager.com/gtag/js?id=G-ZE1MDKS9WV",
+    );
+    expect(window.dataLayer?.[0]).toEqual(expect.arrayContaining(["js"]));
+    expect(window.dataLayer?.[1]).toEqual(["config", "G-ZE1MDKS9WV", { send_page_view: false }]);
+  });
 });
 
 describe("server conversion boundary", () => {
@@ -62,6 +75,7 @@ describe("server conversion boundary", () => {
     const source = await fs.readFile("next.config.ts", "utf8");
     expect(source).toContain("isDevelopment ? \" 'unsafe-eval'\" : \"\"");
     expect(source).toContain("https://www.googletagmanager.com");
+    expect(source).toContain("https://analytics.google.com");
     expect(source).toContain("https://connect.facebook.net");
   });
 });
