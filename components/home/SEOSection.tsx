@@ -1,9 +1,6 @@
-"use client";
-
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { MockupFrame } from "@/components/ui/MockupFrame";
 import { CheckIcon } from "@/components/ui/icons";
-import { useInView } from "@/hooks/useInView";
 
 const foundations = [
   "Titre optimisé",
@@ -35,14 +32,9 @@ function GoogleSnippetMockup() {
 }
 
 export function SEOSection({ headingLevel = "h2", heading = "Un beau site ne suffit pas. Il faut aussi qu'on puisse le trouver." }: { headingLevel?: "h1" | "h2"; heading?: string }) {
-  const { ref, inView } = useInView({ threshold: 0.3 });
-
   return (
     <section id="seo" className="py-20 md:py-28">
-      <div
-        ref={ref as (node: HTMLDivElement | null) => void}
-        className="mx-auto max-w-5xl px-6"
-      >
+      <div className="mx-auto max-w-5xl px-6">
         <div className="grid gap-12 md:grid-cols-2 md:items-center">
           <div>
             <SectionHeading title={heading} level={headingLevel} />
@@ -52,13 +44,10 @@ export function SEOSection({ headingLevel = "h2", heading = "Un beau site ne suf
               évolution dans le temps.
             </p>
             <ul className="mt-8 grid gap-3">
-              {foundations.map((item, index) => (
+              {foundations.map((item) => (
                 <li
                   key={item}
-                  className={`flex items-start gap-2 text-ink-soft transition-all duration-500 ease-out ${
-                    inView ? "translate-x-0 opacity-100" : "-translate-x-3 opacity-0"
-                  }`}
-                  style={{ transitionDelay: `${index * 90}ms` }}
+                  className="flex items-start gap-2 text-ink-soft"
                 >
                   <CheckIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand" />
                   {item}
