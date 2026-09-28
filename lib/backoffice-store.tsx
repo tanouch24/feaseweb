@@ -16,8 +16,8 @@ type Store = {
   updateProspectReview: (id: string, action: "complete_appointment" | "cancel_appointment" | "approve" | "needs_information" | "decline", note?: string) => Promise<void>;
   setRequestStatus: (id: string, status: ModificationRequest["status"]) => Promise<void>;
   addSeoAction: (siteId: string, action: string, description: string) => Promise<void>;
-  createClientUpdate: (input: Omit<ClientUpdate, "id" | "createdAt" | "updatedAt">) => Promise<void>;
-  updateClientUpdate: (id: string, input: Partial<Omit<ClientUpdate, "id" | "clientId" | "createdAt" | "updatedAt">>) => Promise<void>;
+  createClientUpdate: (input: { clientId: string; siteId?: string; updateType: ClientUpdate["updateType"]; actionType?: ClientUpdate["actionType"]; title: string; message: string }) => Promise<void>;
+  updateClientUpdate: (id: string, input: { siteId?: string | null; updateType?: ClientUpdate["updateType"]; actionType?: ClientUpdate["actionType"] | null; title?: string; message?: string }) => Promise<void>;
   deleteClientUpdate: (id: string) => Promise<void>;
   setProjectStatus: (id: string, status: string) => Promise<void>;
 };
@@ -50,8 +50,8 @@ export function BackofficeProvider({ children }: { children: React.ReactNode }) 
     updateProspectReview: async (id, action, note) => { await api(`/api/admin/prospects/${id}/review`, { method: "PATCH", body: JSON.stringify({ action, note: note ?? null }) }); await refresh(); },
     setRequestStatus: (id, status) => mutate(`/api/admin/requests/${id}`, { status }),
     addSeoAction: async (siteId, action, description) => { await api("/api/admin/seo/actions", { method: "POST", body: JSON.stringify({ siteId, action, description }) }); await refresh(); },
-    createClientUpdate: async (input) => { await api("/api/admin/client-updates", { method: "POST", body: JSON.stringify({ clientId: input.clientId, siteId: input.siteId ?? null, category: input.category, title: input.title, description: input.description, status: input.status, visibleToClient: input.visibleToClient, activityDate: input.activityDate }) }); await refresh(); },
-    updateClientUpdate: async (id, input) => { await api(`/api/admin/client-updates/${id}`, { method: "PATCH", body: JSON.stringify({ ...(input.siteId !== undefined ? { siteId: input.siteId } : {}), ...(input.category ? { category: input.category } : {}), ...(input.title ? { title: input.title } : {}), ...(input.description ? { description: input.description } : {}), ...(input.status ? { status: input.status } : {}), ...(input.visibleToClient !== undefined ? { visibleToClient: input.visibleToClient } : {}), ...(input.activityDate ? { activityDate: input.activityDate } : {}) }) }); await refresh(); },
+    createClientUpdate: async (input) => { await api("/api/admin/client-updates", { method: "POST", body: JSON.stringify(input) }); await refresh(); },
+    updateClientUpdate: async (id, input) => { await api(`/api/admin/client-updates/${id}`, { method: "PATCH", body: JSON.stringify(input) }); await refresh(); },
     deleteClientUpdate: async (id) => { await api(`/api/admin/client-updates/${id}`, { method: "DELETE" }); await refresh(); },
     setProjectStatus: (id, status) => mutate(`/api/admin/project-intakes/${id}`, { status }),
   };

@@ -32,24 +32,25 @@ export const requestStatusSchema = z.object({ status: z.enum(["recue", "en_cours
 const clientUpdateFields = {
   clientId: z.string().uuid(),
   siteId: z.string().uuid().nullable().optional(),
-  category: z.enum(["seo", "contenu", "maintenance", "site", "securite", "autre"]),
+  updateType: z.enum(["information", "avancement", "action_requise", "apercu_disponible", "mise_en_ligne"]),
+  actionType: z.enum(["voir_apercu", "completer_informations", "voir_projet"]).nullable().optional(),
   title: z.string().trim().min(1).max(180),
-  description: z.string().trim().min(1).max(5000),
-  status: z.enum(["prevu", "en_cours", "termine"]),
-  visibleToClient: z.boolean(),
-  activityDate: z.string().date(),
+  message: z.string().trim().min(1).max(5000),
 };
-export const clientUpdateSchema = z.object(clientUpdateFields).transform((value) => ({
-  client_id: value.clientId, site_id: value.siteId ?? null, category: value.category, title: value.title,
-  description: value.description, status: value.status, visible_to_client: value.visibleToClient, activity_date: value.activityDate,
-}));
-export const clientUpdatePatchSchema = z.object({
-  siteId: z.string().uuid().nullable().optional(), category: clientUpdateFields.category.optional(), title: clientUpdateFields.title.optional(),
-  description: clientUpdateFields.description.optional(), status: clientUpdateFields.status.optional(), visibleToClient: clientUpdateFields.visibleToClient.optional(),
-  activityDate: clientUpdateFields.activityDate.optional(),
-}).transform((value) => Object.fromEntries(Object.entries(value).map(([key, entry]) => [
-  ({ siteId: "site_id", visibleToClient: "visible_to_client", activityDate: "activity_date" } as Record<string, string>)[key] ?? key, entry,
+const legacyClientUpdateSchema = z.object({
+  clientId: z.string().uuid(), siteId: z.string().uuid().nullable().optional(), category: z.enum(["seo", "contenu", "maintenance", "site", "securite", "autre"]), title: z.string().trim().min(1).max(180), description: z.string().trim().min(1).max(5000), status: z.enum(["prevu", "en_cours", "termine"]), visibleToClient: z.boolean(), activityDate: z.string().date(),
+}).transform((value) => ({ client_id: value.clientId, site_id: value.siteId ?? null, category: value.category, title: value.title, description: value.description, status: value.status, visible_to_client: value.visibleToClient, activity_date: value.activityDate }));
+export const clientUpdateSchema = z.union([z.object(clientUpdateFields).transform((value) => ({
+  client_id: value.clientId, site_id: value.siteId ?? null, update_type: value.updateType, action_type: value.actionType ?? null, title: value.title, description: value.message, category: "site" as const, status: "termine" as const, visible_to_client: true, activity_date: new Date().toISOString().slice(0, 10),
+})), legacyClientUpdateSchema]);
+const modernClientUpdatePatchSchema = z.object({
+  siteId: z.string().uuid().nullable().optional(), updateType: clientUpdateFields.updateType.optional(), actionType: clientUpdateFields.actionType.optional(), title: clientUpdateFields.title.optional(),
+  message: clientUpdateFields.message.optional(),
+}).strict().transform((value) => Object.fromEntries(Object.entries(value).map(([key, entry]) => [
+  ({ siteId: "site_id", updateType: "update_type", actionType: "action_type", message: "description" } as Record<string, string>)[key] ?? key, entry,
 ])));
+const legacyClientUpdatePatchSchema = z.object({ siteId: z.string().uuid().nullable().optional(), category: z.enum(["seo", "contenu", "maintenance", "site", "securite", "autre"]).optional(), title: z.string().trim().min(1).max(180).optional(), description: z.string().trim().min(1).max(5000).optional(), status: z.enum(["prevu", "en_cours", "termine"]).optional(), visibleToClient: z.boolean().optional(), activityDate: z.string().date().optional() }).transform((value) => Object.fromEntries(Object.entries(value).map(([key, entry]) => [({ siteId: "site_id", visibleToClient: "visible_to_client", activityDate: "activity_date" } as Record<string, string>)[key] ?? key, entry])));
+export const clientUpdatePatchSchema = z.union([modernClientUpdatePatchSchema, legacyClientUpdatePatchSchema]);
 export const clientRequestSchema = z.object({ title: z.string().trim().min(1).max(180), category: z.string().trim().min(1).max(120), message: z.string().trim().min(1).max(5000) });
 export const accountCreationSchema = z.object({
   firstName: z.string().trim().min(1).max(100), lastName: z.string().trim().min(1).max(100), company: z.string().trim().min(1).max(180),

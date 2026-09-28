@@ -186,6 +186,8 @@ body {
 .client-section-heading { margin-bottom: 18px; }
 .client-section-heading h2 { margin: 6px 0 0; font-family: var(--font-serif); font-size: 28px; font-weight: 500; letter-spacing: -.04em; }
 .client-section-heading p:last-child { max-width: 660px; margin: 7px 0 0; color: #60706a; font-size: 13px; line-height: 1.55; }
+.client-updates-heading { display: flex; align-items: center; gap: 10px; }
+.client-unread-badge { display: inline-flex; border-radius: 999px; padding: 5px 9px; background: #eaf3ee; color: #246348; font-size: 11px; font-weight: 700; }
 .client-dashboard-overview { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr); gap: 16px; }
 .client-project-status-card { grid-row: span 2; }
 .client-project-status-card h3 { margin: 6px 0 0; font-family: var(--font-serif); font-size: 26px; font-weight: 500; }

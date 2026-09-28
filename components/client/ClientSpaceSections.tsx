@@ -1,5 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 import { ClientRequestForm } from "@/components/client/ClientRequestForm";
+import { ClientUpdatesSection } from "@/components/client/ClientUpdatesSection";
 import { ManageSubscriptionButton, StartSubscriptionButton } from "@/components/billing/BillingActions";
 import { isOnboardingComplete, onboardingLabels, projectTimeline, type OnboardingProject, type ProjectTimelineStage } from "@/lib/onboarding";
 import type { ProductionCompleteness } from "@/lib/production";
@@ -9,7 +10,7 @@ type ProfileRecord = { first_name?: string | null; last_name?: string | null; em
 type SiteRecord = { id: string; name: string; domain: string | null; preview_url: string | null; production_url: string | null; status: string; created_at: string | null; launched_at: string | null } | null;
 type SubscriptionRecord = { status: string; amount_cents: number; currency: string; next_billing_at: string | null; cancel_at_period_end: boolean; canceled_at: string | null; provider: string } | null;
 type PaymentRecord = { id: string; amount_cents: number; status: string; created_at: string; invoice_reference: string | null; period_start: string | null; period_end: string | null };
-type UpdateRecord = { id: string; category: string; title: string; description: string; status: string; activity_date: string; created_at: string };
+type UpdateRecord = { id: string; category?: string; update_type?: string; action_type?: string | null; title: string; description: string; status: string; activity_date: string; created_at: string; read_at?: string | null };
 type RequestRecord = { id: string; title: string; category: string; message: string; status: string; created_at: string; resolved_at: string | null };
 type SeoActionRecord = { id: string; date: string; action: string; description: string | null; status: string };
 type SeoMetricRecord = { id: string; clicks: number | null; impressions: number | null; ctr: number | null; average_position: number | null; synced_at: string | null };
@@ -58,10 +59,6 @@ function ProjectTimeline({ project }: { project: OnboardingProject | null }) {
   return <ol className="client-project-timeline">{projectTimeline(project.projectStatus, isOnboardingComplete(project)).map((stage, index) => <TimelineItem key={stage.key} stage={stage} index={index} />)}</ol>;
 }
 
-function UpdateItem({ update }: { update: UpdateRecord }) {
-  return <article className="client-update"><div className="client-update-date">{date(update.activity_date)}</div><div className="client-update-mark" /><div><p className="client-update-category">{label(update.category)}</p><h3>{update.title}</h3><p>{update.description}</p><span className={`client-chip ${update.status}`}>{label(update.status)}</span></div></article>;
-}
-
 function RequestItem({ request }: { request: RequestRecord }) {
   return <article className="client-request-row"><div><strong>{request.title || label(request.category) || request.category}</strong><p>{request.message}</p><small>{date(request.created_at)}{request.resolved_at ? ` · Terminée le ${date(request.resolved_at)}` : ""}</small></div><span className={`client-chip ${request.status}`}>{label(request.status)}</span></article>;
 }
@@ -78,7 +75,6 @@ export function ProductionDossierCard({ completeness }: { completeness: Producti
 export function ClientSpaceSections({ client, profile, project, site, subscription, payments, updates, requests, seoActions, seoMetrics }: ClientSpaceSectionsProps) {
   const openRequests = requests.filter((request) => !["terminee", "hors_perimetre"].includes(request.status));
   const nextUpdate = updates.find((update) => update.status !== "termine");
-  const latestUpdates = updates.slice(0, 3);
   const metrics = seoMetrics[0];
   const hasMetric = metrics && [metrics.clicks, metrics.impressions, metrics.ctr, metrics.average_position].some((value) => value !== null && value !== undefined);
   const firstName = client.first_name || profile?.first_name || "";
@@ -96,7 +92,7 @@ export function ClientSpaceSections({ client, profile, project, site, subscripti
         <section className="client-card"><SectionHeading eyebrow="APERÇU" title="Votre site" />{site?.preview_url ? <><p className="client-card-lead">Une version de votre site est disponible pour consultation.</p><a className="client-button secondary" href={site.preview_url} target="_blank" rel="noreferrer">Ouvrir l'aperçu ↗</a></> : <p className="client-muted-note">Aucun aperçu n'est encore enregistré.</p>}</section>
         <section className="client-card"><SectionHeading eyebrow="ABONNEMENT" title="Votre formule" />{subscription ? <><p className="client-price">{money(subscription.amount_cents)}<span>/mois</span></p><p className="client-muted-note">{label(subscription.status)}</p></> : <p className="client-muted-note">Aucun abonnement enregistré.</p>}</section>
       </div>
-      <section className="client-card client-activity-card client-dashboard-activity"><SectionHeading eyebrow="DERNIÈRES ACTIONS FEASEWEB" title="Ce qui a été fait" />{latestUpdates.length ? <div className="client-update-list">{latestUpdates.map((update) => <UpdateItem key={update.id} update={update} />)}</div> : <div className="client-empty compact"><p>Aucune intervention visible n'est encore enregistrée.</p></div>}</section>
+      <ClientUpdatesSection updates={updates.map((update) => ({ id: update.id, updateType: update.update_type as never, actionType: update.action_type as never, title: update.title, description: update.description, status: update.status, activityDate: update.activity_date, createdAt: update.created_at, readAt: update.read_at }))} />
       <section className="client-card client-dashboard-requests"><SectionHeading eyebrow="DEMANDES OUVERTES" title={`${openRequests.length} demande${openRequests.length > 1 ? "s" : ""} en cours`} />{openRequests.length ? <div className="client-request-list">{openRequests.slice(0, 3).map((request) => <RequestItem key={request.id} request={request} />)}</div> : <p className="client-muted-note">Aucune demande ouverte.</p>}<a className="client-text-link" href="#support-demandes">Voir le support et l'historique →</a></section>
     </section>
 

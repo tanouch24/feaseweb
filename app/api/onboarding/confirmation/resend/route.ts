@@ -12,6 +12,9 @@ export async function POST(request: Request) {
   const appUrl = getSafeAppUrl();
   if (!supabase || !appUrl) return NextResponse.json({ error: "Le service est momentanément indisponible." }, { status: 503 });
   const { error } = await supabase.auth.resend({ type: "signup", email: parsed.data.email, options: { emailRedirectTo: `${appUrl}/auth/callback?next=/creer-mon-site` } });
-  if (error) console.error("onboarding_confirmation_resend_failed");
+  if (error) {
+    console.error("onboarding_confirmation_resend_failed");
+    return NextResponse.json({ error: "Impossible de renvoyer l'email pour le moment. Réessayez dans quelques instants." }, { status: 502 });
+  }
   return NextResponse.json({ message: genericMessage });
 }

@@ -40,6 +40,8 @@ export type SubscriptionStatus =
 export type PaymentStatus = "paye" | "en_attente" | "echoue" | "rembourse";
 export type ClientUpdateCategory = "seo" | "contenu" | "maintenance" | "site" | "securite" | "autre";
 export type ClientUpdateStatus = "prevu" | "en_cours" | "termine";
+export type ClientUpdateType = "information" | "avancement" | "action_requise" | "apercu_disponible" | "mise_en_ligne";
+export type ClientUpdateActionType = "voir_apercu" | "completer_informations" | "voir_projet";
 
 export type Prospect = {
   id: string; createdAt: string; firstName: string; lastName: string; company: string;
@@ -77,7 +79,7 @@ export type SeoAction = { id: string; siteId: string; date: string; action: stri
 export type SeoMetric = { id: string; siteId: string; clicks: number; impressions: number; ctr: number; averagePosition: number; syncedAt?: string };
 export type Domain = { id: string; clientId: string; name: string; registrar: string; owner: string; expiresAt?: string; renewal: "manuel" | "automatique"; dnsStatus: "a_configurer" | "configure" | "probleme"; ssl: "actif" | "a_verifier" | "inactif"; notes: string };
 export type ActivityLog = { id: string; occurredAt: string; actor: "admin" | "system"; entityType: string; entityId: string; message: string };
-export type ClientUpdate = { id: string; clientId: string; siteId?: string; category: ClientUpdateCategory; title: string; description: string; status: ClientUpdateStatus; visibleToClient: boolean; activityDate: string; createdAt: string; updatedAt: string };
+export type ClientUpdate = { id: string; clientId: string; siteId?: string; category: ClientUpdateCategory; updateType: ClientUpdateType; actionType?: ClientUpdateActionType; readAt?: string; title: string; description: string; status: ClientUpdateStatus; visibleToClient: boolean; activityDate: string; createdAt: string; updatedAt: string };
 export type ProjectIntake = { id: string; userId: string; prospectId?: string; clientId?: string; firstName: string; lastName: string; company: string; email: string; phone: string; activity: string; hasExistingSite: boolean; existingSiteUrl: string; existingSiteProject: string; objective: string; pages: string[]; style: string; palette: string; assets: string[]; contactChannel: string; contactSlot: string; status: string; currentStep: number; completedAt?: string };
 
 export type BackofficeData = {
@@ -98,7 +100,7 @@ export const labelMap: Record<string, string> = {
   incomplet: "Incomplet", retard: "En retard", impaye: "Impayé", annule: "Annulé", paye: "Payé",
   echoue: "Échoué", rembourse: "Remboursé", a_faire: "À faire",
   essai: "Période d'essai", incomplet_expire: "Expiré", en_pause: "En pause", aucun: "Aucun paiement",
-  prevu: "Prévu", termine: "Terminé", seo: "SEO", contenu: "Contenu", maintenance: "Maintenance", site: "Site", securite: "Sécurité", autre: "Autre",
+  prevu: "Prévu", termine: "Terminé", seo: "SEO", contenu: "Contenu", maintenance: "Maintenance", site: "Site", securite: "Sécurité", autre: "Autre", information: "Information", avancement: "Avancement", action_requise: "Action requise", apercu_disponible: "Aperçu disponible", voir_apercu: "Voir mon aperçu", completer_informations: "Compléter mes informations", voir_projet: "Voir mon projet",
   not_scheduled: "Non planifié", scheduled: "Planifié", completed: "Réalisé", cancelled: "Annulé", pending: "Validation en attente", approved: "Projet validé", needs_information: "Informations nécessaires", declined: "Projet refusé", configure: "Terminée",
 };
 
