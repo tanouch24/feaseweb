@@ -25,7 +25,7 @@ const baseProps = {
 
 describe("ClientSpaceSections", () => {
   it("renders the permanent navigation and real client sections", () => {
-    render(<ClientSpaceSections {...baseProps} seoActions={[{ id: "seo-1", date: "2026-09-24T10:00:00.000Z", action: "Title modifié", description: "Le title de la page d'accueil a été optimisé.", status: "terminee" }]} seoMetrics={[]} />);
+    render(<ClientSpaceSections {...baseProps} seoActions={[{ id: "seo-1", date: "2026-09-24T10:00:00.000Z", action: "Title modifié", description: "Le title de la page d'accueil a été optimisé.", status: "terminee" }]} />);
     expect(screen.getByRole("navigation", { name: "Navigation de l'espace client" })).toBeInTheDocument();
     for (const label of ["Tableau de bord", "Mon entreprise", "Mon site", "SEO & visibilité", "Abonnement & factures", "Support / demandes"]) expect(screen.getByRole("link", { name: label })).toBeInTheDocument();
     expect(screen.getAllByText("Structure en préparation").length).toBe(2);
@@ -35,7 +35,7 @@ describe("ClientSpaceSections", () => {
   });
 
   it("keeps the SEO empty state honest and does not invent metrics", () => {
-    render(<ClientSpaceSections {...baseProps} seoActions={[]} seoMetrics={[]} />);
+    render(<ClientSpaceSections {...baseProps} seoActions={[]} />);
     expect(screen.getByText("Aucune action SEO n'a encore été enregistrée. Les interventions réalisées par FeaseWeb apparaîtront ici.")).toBeInTheDocument();
     expect(screen.queryByText("Clics")).not.toBeInTheDocument();
     expect(screen.queryByText("Impressions")).not.toBeInTheDocument();
@@ -49,7 +49,6 @@ describe("client space architecture", () => {
     expect(page).toContain('current.role === "prospect"');
     expect(page).toContain("ProspectProjectDashboard");
     expect(page).toContain('from("seo_actions")');
-    expect(page).toContain('from("seo_metrics")');
     expect(page).toContain('from("modification_requests")');
     expect(page).toContain('from("client_updates")');
   });

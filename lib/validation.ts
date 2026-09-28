@@ -51,7 +51,7 @@ const modernClientUpdatePatchSchema = z.object({
 ])));
 const legacyClientUpdatePatchSchema = z.object({ siteId: z.string().uuid().nullable().optional(), category: z.enum(["seo", "contenu", "maintenance", "site", "securite", "autre"]).optional(), title: z.string().trim().min(1).max(180).optional(), description: z.string().trim().min(1).max(5000).optional(), status: z.enum(["prevu", "en_cours", "termine"]).optional(), visibleToClient: z.boolean().optional(), activityDate: z.string().date().optional() }).transform((value) => Object.fromEntries(Object.entries(value).map(([key, entry]) => [({ siteId: "site_id", visibleToClient: "visible_to_client", activityDate: "activity_date" } as Record<string, string>)[key] ?? key, entry])));
 export const clientUpdatePatchSchema = z.union([modernClientUpdatePatchSchema, legacyClientUpdatePatchSchema]);
-export const clientRequestSchema = z.object({ title: z.string().trim().min(1).max(180), category: z.string().trim().min(1).max(120), message: z.string().trim().min(1).max(5000) });
+export const clientRequestSchema = z.object({ title: z.string().trim().min(1).max(180), category: z.enum(["Modification", "Ajout", "Contenu", "Site", "Information", "Autre"]), message: z.string().trim().min(1).max(5000) });
 export const accountCreationSchema = z.object({
   firstName: z.string().trim().min(1).max(100), lastName: z.string().trim().min(1).max(100), company: z.string().trim().min(1).max(180),
   email: z.string().trim().toLowerCase().email().max(320), phone: optionalText(40).refine((value) => !value || /^[+()\d\s.-]{7,40}$/.test(value), "Le téléphone n'est pas valide."),

@@ -2,9 +2,10 @@
 import { ClientRequestForm } from "@/components/client/ClientRequestForm";
 import { ClientUpdatesSection } from "@/components/client/ClientUpdatesSection";
 import { ManageSubscriptionButton, StartSubscriptionButton } from "@/components/billing/BillingActions";
-import { isOnboardingComplete, onboardingLabels, projectTimeline, type OnboardingProject, type ProjectTimelineStage } from "@/lib/onboarding";
+import { isOnboardingComplete, onboardingLabels, type OnboardingProject } from "@/lib/onboarding";
 import type { ProductionCompleteness } from "@/lib/production";
 import { whatsappContactUrl } from "@/lib/whatsapp";
+import { clientOrderTimeline } from "@/lib/client-order-timeline";
 
 type ClientRecord = { first_name: string | null; last_name: string | null; company: string; email: string; phone: string | null; status: string; started_at: string | null };
 type ProfileRecord = { first_name?: string | null; last_name?: string | null; email?: string | null } | null;
@@ -14,7 +15,6 @@ type PaymentRecord = { id: string; amount_cents: number; status: string; created
 type UpdateRecord = { id: string; category?: string; update_type?: string; action_type?: string | null; title: string; description: string; status: string; activity_date: string; created_at: string; read_at?: string | null };
 type RequestRecord = { id: string; title: string; category: string; message: string; status: string; created_at: string; resolved_at: string | null };
 type SeoActionRecord = { id: string; date: string; action: string; description: string | null; status: string };
-type SeoMetricRecord = { id: string; clicks: number | null; impressions: number | null; ctr: number | null; average_position: number | null; synced_at: string | null };
 
 export type ClientSpaceSectionsProps = {
   client: ClientRecord;
@@ -26,7 +26,8 @@ export type ClientSpaceSectionsProps = {
   updates: UpdateRecord[];
   requests: RequestRecord[];
   seoActions: SeoActionRecord[];
-  seoMetrics: SeoMetricRecord[];
+  appointment?: { appointment_status?: string | null; appointment_date?: string | null; appointment_time?: string | null } | null;
+  validation?: { validation_status?: string | null } | null;
 };
 
 const labels: Record<string, string> = {
@@ -50,18 +51,15 @@ function DataRows({ rows }: { rows: Array<[string, string | null | undefined]> }
   return <dl className="client-data-rows">{visible.map(([term, value]) => <div key={term}><dt>{term}</dt><dd>{value}</dd></div>)}</dl>;
 }
 
-function TimelineItem({ stage, index }: { stage: ProjectTimelineStage; index: number }) {
-  const state = stage.state === "complete" ? "Terminée" : stage.state === "current" ? "Étape actuelle" : "À venir";
-  return <li className={`client-project-timeline-item ${stage.state}`}><span className="client-project-timeline-mark" aria-hidden="true">{stage.state === "complete" ? "✓" : index + 1}</span><span><strong>{stage.label}</strong><small>{state}</small></span></li>;
-}
-
-function ProjectTimeline({ project }: { project: OnboardingProject | null }) {
-  if (!project) return <div className="client-empty compact"><p>Le statut détaillé du projet apparaîtra ici dès que le dossier sera associé.</p></div>;
-  return <ol className="client-project-timeline">{projectTimeline(project.projectStatus, isOnboardingComplete(project)).map((stage, index) => <TimelineItem key={stage.key} stage={stage} index={index} />)}</ol>;
+function ProjectTimeline({ project, appointment, paymentConfirmed, paymentDate, live }: { project: OnboardingProject | null; appointment?: ClientSpaceSectionsProps["appointment"]; paymentConfirmed: boolean; paymentDate?: string | null; live: boolean }) {
+  if (!project) return <div className="client-empty compact"><p>Le suivi apparaîtra ici dès que le dossier sera associé.</p></div>;
+  const stages = clientOrderTimeline({ hasProject: isOnboardingComplete(project), appointmentStatus: appointment?.appointment_status, appointmentDate: appointment?.appointment_date, appointmentTime: appointment?.appointment_time, paymentConfirmed, paymentDate, live });
+  return <ol className="client-project-timeline">{stages.map((stage, index) => <li className={`client-project-timeline-item ${stage.state}`} key={stage.key}><span className="client-project-timeline-mark" aria-hidden="true">{stage.state === "complete" ? "✓" : index + 1}</span><span><strong>{stage.label}</strong><small>{stage.detail ?? (stage.state === "complete" ? "Terminé" : stage.state === "current" ? "En cours" : "À venir")}</small></span></li>)}</ol>;
 }
 
 function RequestItem({ request }: { request: RequestRecord }) {
-  return <article className="client-request-row"><div><strong>{request.title || label(request.category) || request.category}</strong><p>{request.message}</p><small>{date(request.created_at)}{request.resolved_at ? ` · Terminée le ${date(request.resolved_at)}` : ""}</small></div><span className={`client-chip ${request.status}`}>{label(request.status)}</span></article>;
+  const humanStatus = request.status === "terminee" ? "Terminée" : request.status === "en_cours" ? "En cours" : "Demande reçue";
+  return <article className="client-request-row"><div><strong>{request.title || request.category}</strong><p>{request.message}</p><small>{date(request.created_at)}{request.resolved_at ? ` · Terminée le ${date(request.resolved_at)}` : ""}</small></div><span className={`client-chip ${request.status}`}>{humanStatus}</span></article>;
 }
 
 export function ClientSpaceNavigation() {
@@ -73,22 +71,24 @@ export function ProductionDossierCard({ completeness }: { completeness: Producti
   return <section className="client-card production-dashboard-card"><div><p className="client-eyebrow">PRÉPARATION DU PROJET</p><h2>Préparons votre site</h2><p>{completeness?.readyForBuild ? "Votre dossier contient les informations nécessaires pour démarrer la création." : "Complétez les informations utiles à la création de votre site."}</p>{completeness && completeness.blockersForBuild.length > 0 && <p className="production-blocker-note">{completeness.blockersForBuild.length} information{completeness.blockersForBuild.length > 1 ? "s" : ""} nécessaire{completeness.blockersForBuild.length > 1 ? "s" : ""} reste{completeness.blockersForBuild.length > 1 ? "nt" : ""} à préciser.</p>}</div><div className="production-dashboard-progress"><strong>{score} %</strong><span>Dossier de production</span><div><i style={{ width: `${score}%` }} /></div><a className="client-button" href="/espace-client/production">{completeness?.readyForBuild ? "Consulter mon dossier" : "Continuer mon dossier"}</a></div></section>;
 }
 
-export function ClientSpaceSections({ client, profile, project, site, subscription, payments, updates, requests, seoActions, seoMetrics }: ClientSpaceSectionsProps) {
+export function ClientSpaceSections({ client, profile, project, site, subscription, payments, updates, requests, seoActions, appointment, validation }: ClientSpaceSectionsProps) {
   const openRequests = requests.filter((request) => !["terminee", "hors_perimetre"].includes(request.status));
   const nextUpdate = updates.find((update) => update.status !== "termine");
-  const metrics = seoMetrics[0];
-  const hasMetric = metrics && [metrics.clicks, metrics.impressions, metrics.ctr, metrics.average_position].some((value) => value !== null && value !== undefined);
   const firstName = client.first_name || profile?.first_name || "";
   const fullName = [client.first_name || profile?.first_name, client.last_name || profile?.last_name].filter(Boolean).join(" ");
   const requestedPages = project?.requestedPages.length ? project.requestedPages.map((item) => item === "rendez_vous" ? "Prise de rendez-vous" : onboardingLabels[item] ?? item).join(", ") : null;
   const assets = project?.availableAssets.length ? project.availableAssets.map((item) => onboardingLabels[item] ?? item).join(", ") : null;
   const projectType = project ? (project.hasExistingSite ? onboardingLabels[project.existingSiteProject ?? ""] ?? project.existingSiteProject : "Création d'un nouveau site") : null;
+  const firstPayment = payments.filter((payment) => payment.status === "paye").sort((a, b) => a.created_at.localeCompare(b.created_at))[0];
+  const paymentConfirmed = Boolean(firstPayment);
+  const live = project?.projectStatus === "live" || site?.status === "actif";
+  const approved = validation?.validation_status === "approved";
   return <>
     <ClientSpaceNavigation />
     <section id="tableau-de-bord" className="client-space-section client-dashboard-section">
       <SectionHeading eyebrow="TABLEAU DE BORD" title={site?.name ? `Le suivi de ${site.name}` : `Bonjour${firstName ? ` ${firstName}` : ""}.`} detail="Retrouvez ici l'état réel de votre projet et les dernières interventions de FeaseWeb." />
       <div className="client-dashboard-overview">
-        <section className="client-card client-project-status-card"><div className="client-card-heading"><div><p className="client-eyebrow">ÉTAT DU PROJET</p><h3>{project ? label(project.projectStatus) : site ? label(site.status) : "Dossier client"}</h3></div>{site?.production_url && <a className="client-button" href={site.production_url} target="_blank" rel="noreferrer">Voir mon site ↗</a>}</div><ProjectTimeline project={project} /></section>
+        <section className="client-card client-project-status-card"><div className="client-card-heading"><div><p className="client-eyebrow">VOTRE PARCOURS</p><h3>{live ? "Votre site est en ligne" : paymentConfirmed ? "Votre site est en création" : approved ? "Votre projet est validé" : "Votre projet est en préparation"}</h3></div>{site?.production_url && <a className="client-button" href={site.production_url} target="_blank" rel="noreferrer">Voir mon site ↗</a>}</div><ProjectTimeline project={project} appointment={appointment} paymentConfirmed={paymentConfirmed} paymentDate={firstPayment?.created_at} live={live} /></section>
         <section className="client-card client-next-step-card"><SectionHeading eyebrow="À FAIRE ENSUITE" title="Prochaine étape" />{nextUpdate ? <div className="client-next-step"><span className="client-chip">{label(nextUpdate.status)}</span><strong>{nextUpdate.title}</strong><p>{nextUpdate.description}</p></div> : <p className="client-muted-note">Aucune prochaine intervention n'est enregistrée pour le moment.</p>}</section>
         <section className="client-card"><SectionHeading eyebrow="APERÇU" title="Votre site" />{site?.preview_url ? <><p className="client-card-lead">Une version de votre site est disponible pour consultation.</p><a className="client-button secondary" href={site.preview_url} target="_blank" rel="noreferrer">Ouvrir l'aperçu ↗</a></> : <p className="client-muted-note">Aucun aperçu n'est encore enregistré.</p>}</section>
         <section className="client-card"><SectionHeading eyebrow="ABONNEMENT" title="Votre formule" />{subscription ? <><p className="client-price">{money(subscription.amount_cents)}<span>/mois</span></p><p className="client-muted-note">{label(subscription.status)}</p></> : <p className="client-muted-note">Aucun abonnement enregistré.</p>}</section>
@@ -111,12 +111,11 @@ export function ClientSpaceSections({ client, profile, project, site, subscripti
     <section id="seo-visibilite" className="client-space-section">
       <SectionHeading eyebrow="SEO & VISIBILITÉ" title="Le travail de référencement réalisé" detail="Le journal ci-dessous reprend uniquement les actions SEO enregistrées par FeaseWeb." />
       <section className="client-card client-seo-journal"><SectionHeading eyebrow="JOURNAL DES ACTIONS SEO" title="Interventions enregistrées" />{seoActions.length ? <div className="client-seo-list">{seoActions.map((action) => <article className="client-seo-entry" key={action.id}><div className="client-seo-entry-meta"><span>{date(action.date)}</span><span className={`client-chip ${action.status}`}>{label(action.status)}</span></div><h3>{action.action}</h3>{action.description && <p>{action.description}</p>}</article>)}</div> : <div className="client-empty compact"><p>Aucune action SEO n&apos;a encore été enregistrée. Les interventions réalisées par FeaseWeb apparaîtront ici.</p></div>}</section>
-      {hasMetric && <section className="client-card client-seo-metrics"><SectionHeading eyebrow="VISIBILITÉ" title="Dernières métriques disponibles" detail={metrics.synced_at ? `Données synchronisées le ${date(metrics.synced_at)}.` : undefined} /><div className="client-metric-grid">{metrics.clicks !== null && metrics.clicks !== undefined && <div><strong>{metrics.clicks}</strong><span>Clics</span></div>}{metrics.impressions !== null && metrics.impressions !== undefined && <div><strong>{metrics.impressions}</strong><span>Impressions</span></div>}{metrics.ctr !== null && metrics.ctr !== undefined && <div><strong>{metrics.ctr}%</strong><span>Taux de clic</span></div>}{metrics.average_position !== null && metrics.average_position !== undefined && <div><strong>{metrics.average_position}</strong><span>Position moyenne</span></div>}</div></section>}
     </section>
 
     <section id="abonnement-factures" className="client-space-section">
       <SectionHeading eyebrow="ABONNEMENT & FACTURES" title="Votre formule FeaseWeb" detail="Retrouvez le statut et l'historique déjà enregistrés pour votre abonnement." />
-      <section className="client-card client-billing-card"><div><p className="client-eyebrow">FORMULE ACTUELLE</p><h3>FeaseWeb</h3><p className="client-price">{subscription ? money(subscription.amount_cents) : "49 €"}<span>/mois</span></p>{subscription ? <p className="client-muted-note">Statut : {label(subscription.status)}{subscription.next_billing_at ? ` · prochaine échéance ${date(subscription.next_billing_at)}` : ""}</p> : <p className="client-muted-note">Aucun abonnement enregistré.</p>}</div><div>{subscription ? <ManageSubscriptionButton /> : <StartSubscriptionButton />}<p className="client-footnote">Les paiements et factures sont gérés de manière sécurisée par Stripe.</p></div></section>
+        <section className="client-card client-billing-card"><div><p className="client-eyebrow">ABONNEMENT</p><h3>{paymentConfirmed ? "Votre abonnement est actif" : approved ? "Votre projet est validé" : "Votre projet est en préparation"}</h3><p className="client-price">49 €<span>/mois</span></p>{paymentConfirmed ? <p className="client-muted-note">Votre premier paiement a bien été confirmé par Stripe.</p> : approved ? <p className="client-muted-note">Tout est prêt pour démarrer la création de votre site.</p> : <p className="client-muted-note">Votre projet est en cours de préparation par FeaseWeb.</p>}</div><div>{paymentConfirmed ? <ManageSubscriptionButton /> : approved ? <><StartSubscriptionButton label="S'abonner — 49 €/mois" /><p className="client-footnote">L'abonnement comprend la création ou la refonte de votre site, sa mise en ligne, son hébergement, sa maintenance et son suivi.</p></> : <p className="client-footnote">Le paiement sera disponible dès que FeaseWeb aura validé votre projet.</p>}</div></section>
       <section className="client-card"><SectionHeading eyebrow="PAIEMENTS" title="Historique des factures" />{payments.length ? <div className="client-payments">{payments.map((payment) => <div key={payment.id}><span>{date(payment.created_at)}</span><strong>{money(payment.amount_cents)}</strong><small>{label(payment.status)}{payment.invoice_reference ? ` · ${payment.invoice_reference}` : ""}</small></div>)}</div> : <div className="client-empty compact"><p>Aucun paiement ou facture n'est encore enregistré.</p></div>}</section>
     </section>
 
