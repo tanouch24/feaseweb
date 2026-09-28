@@ -1,2 +1,2 @@
-import { SitesPage } from "@/components/admin/AdminApp";
+import { SitesPage } from "@/components/admin/AdminOperationalViews";
 export default function AdminSitesPage() { return <SitesPage />; }

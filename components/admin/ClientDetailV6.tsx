@@ -21,7 +21,7 @@ export function ClientDetailV6({ clientId }: { clientId: string }) {
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteError, setInviteError] = useState("");
   const client = data.clients.find((item) => item.id === clientId);
-  if (!client) return <><div className="admin-page-heading"><div><p className="admin-kicker">Portefeuille</p><h1>Client introuvable</h1><p>Ce dossier n'existe pas dans la base Supabase actuelle.</p></div></div><Link href="/admin/clients" className="admin-button secondary">Retour aux clients</Link></>;
+  if (!client) return <><div className="admin-page-heading"><div><p className="admin-kicker">Portefeuille</p><h1>Client introuvable</h1><p>Ce dossier n'existe pas dans les données disponibles.</p></div></div><Link href="/admin/clients" className="admin-button secondary">Retour aux clients</Link></>;
   const site = data.sites.find((item) => item.id === client.siteId);
   const subscription = data.subscriptions.find((item) => item.id === client.subscriptionId);
   const domain = data.domains.find((item) => item.id === client.domainId);
