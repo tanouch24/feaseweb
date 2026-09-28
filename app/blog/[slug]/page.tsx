@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { mdxComponents } from "@/components/blog/mdx-components";
+import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { getAllSlugs, getPostBySlug } from "@/lib/blog";
 import { pageMetadata } from "@/lib/seo-metadata";
 
@@ -55,6 +56,13 @@ export default async function BlogPostPage({
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-20">
+      <Breadcrumbs
+        items={[
+          { label: "Accueil", href: "/" },
+          { label: "Blog", href: "/blog" },
+          { label: post.title, href: `/blog/${slug}` },
+        ]}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

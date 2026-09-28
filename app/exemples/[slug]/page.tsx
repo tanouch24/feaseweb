@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DemoSitePreview, type DemoSiteSlug } from "@/components/demo-sites/DemoSitePreview";
+import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { demoSites } from "@/lib/demo-sites.demo";
 import { pageMetadata } from "@/lib/seo-metadata";
 
@@ -36,6 +37,13 @@ export default async function ExempleDetailPage({
 
   return (
     <main>
+      <Breadcrumbs
+        items={[
+          { label: "Accueil", href: "/" },
+          { label: "Exemples", href: "/exemples" },
+          { label: `${site.name} — démonstration`, href: `/exemples/${slug}` },
+        ]}
+      />
       <h1 className="sr-only">{site.name} — Exemple de site FeaseWeb</h1>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-bg-alt px-6 py-3 text-sm">
         <span className="text-ink-soft">

@@ -9,6 +9,7 @@ import BlogPage from "@/app/blog/page";
 import HomePage from "@/app/page";
 import SiteInternetArtisanPage from "@/app/site-internet-artisan/page";
 import MaintenanceSiteInternetPage from "@/app/maintenance-site-internet/page";
+import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { metadata as homeMetadata } from "@/app/page";
 import { metadata as commentMetadata } from "@/app/comment-ca-marche/page";
 import { metadata as tarifsMetadata } from "@/app/tarifs/page";
@@ -134,5 +135,27 @@ describe("SEO foundations", () => {
   it("does not present demo sites as real client work on the home links", () => {
     const { container } = render(<HomePage />);
     expect(container.textContent).not.toContain("sites créés par FeaseWeb");
+  });
+
+  it("renders matching visual breadcrumbs and BreadcrumbList schema", () => {
+    const { container } = render(
+      <Breadcrumbs
+        items={[
+          { label: "Accueil", href: "/" },
+          { label: "Blog", href: "/blog" },
+          { label: "Article test", href: "/blog/article-test" },
+        ]}
+      />,
+    );
+    const schema = JSON.parse(container.querySelector('script[type="application/ld+json"]')?.textContent ?? "{}");
+    const links = [...container.querySelectorAll("nav a")].map((link) => link.getAttribute("href"));
+
+    expect(container.querySelector('nav[aria-label="Fil d’Ariane"]')).toBeTruthy();
+    expect(container.textContent).toContain("Article test");
+    expect(links).toEqual(["/", "/blog"]);
+    expect(schema["@type"]).toBe("BreadcrumbList");
+    expect(schema.itemListElement).toHaveLength(3);
+    expect(schema.itemListElement.map((item: { position: number }) => item.position)).toEqual([1, 2, 3]);
+    expect(schema.itemListElement.every((item: { item: string }) => item.item.startsWith("https://feaseweb.fr/"))).toBe(true);
   });
 });
