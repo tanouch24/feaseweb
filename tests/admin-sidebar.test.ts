@@ -23,8 +23,8 @@ describe("admin sidebar accessibility", () => {
     const admin = source("components/admin/AdminApp.tsx");
 
     expect(admin).toContain("await supabase.auth.signOut()");
-    expect(admin).toContain('await fetch("/api/auth/logout", { method: "POST", cache: "no-store" })');
-    expect(admin).toContain('router.replace("/connexion")');
+    expect(admin).toContain('await fetch("/api/auth/logout", { method: "POST", cache: "no-store", credentials: "same-origin" })');
+    expect(admin).toContain('window.location.replace("/connexion")');
     expect(admin).toContain("Se déconnecter");
   });
 });

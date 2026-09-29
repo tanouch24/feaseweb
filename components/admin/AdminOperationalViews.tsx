@@ -20,6 +20,21 @@ export function ProspectsPage() {
   return <><PageHeading eyebrow="Prospects" title="Les prochains échanges, clairement." description="Chaque dossier affiche son état métier et la prochaine action utile." /><div className="admin-toolbar"><input aria-label="Rechercher un prospect" placeholder="Entreprise, nom ou email" value={query} onChange={(event) => setQuery(event.target.value)} /><select aria-label="Filtrer les prospects" value={filter} onChange={(event) => setFilter(event.target.value as ProspectBusinessFilter)}>{prospectFilters.map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></div><div className="admin-filter-pills">{prospectFilters.map(([value, label]) => <button type="button" className={filter === value ? "active" : ""} onClick={() => setFilter(value)} key={value}>{label}</button>)}</div><div className="admin-table-wrap admin-responsive-list">{rows.length ? <table className="admin-table"><thead><tr><th>Prospect</th><th>Entreprise</th><th>État actuel</th><th>Prochaine action</th><th>Rendez-vous</th><th /></tr></thead><tbody>{rows.map(({ prospect, state }) => <tr key={prospect.id}><td><Link href={`/admin/prospects/${prospect.id}`} className="admin-table-link">{prospect.firstName} {prospect.lastName}</Link><small>{prospect.email}</small></td><td><strong>{prospect.company}</strong><small>{prospect.phone || "Téléphone non renseigné"}</small></td><td><StatusBadge value={state.filter === "declined" ? "declined" : state.filter === "to_validate" ? "pending" : "neutral"} /><small>{state.label}</small></td><td>{state.nextAction}</td><td>{prospect.review?.appointmentDate ? `${prospect.review.appointmentDate} ${prospect.review.appointmentTime ?? ""}` : "—"}</td><td><Link href={`/admin/prospects/${prospect.id}`} className="admin-text-button">Ouvrir →</Link></td></tr>)}</tbody></table> : <EmptyState title="Aucun prospect" detail="Les dossiers correspondant à ce filtre apparaîtront ici." />}</div></>;
 }
 
+export function DossiersPage() {
+  const { data } = useBackoffice();
+  const prospectRows = data.prospects.map((prospect) => {
+    const state = getProspectBusinessState(prospect, data.projectIntakes.find((project) => project.prospectId === prospect.id));
+    return { id: `prospect-${prospect.id}`, name: `${prospect.firstName} ${prospect.lastName}`.trim(), company: prospect.company, contact: prospect.phone || prospect.email, state: state.label, action: state.nextAction, href: `/admin/prospects/${prospect.id}` };
+  });
+  const clientRows = data.clients.map((client) => {
+    const project = getClientProject(client, data.projectIntakes);
+    const site = data.sites.find((item) => item.id === client.siteId);
+    return { id: `client-${client.id}`, name: getClientName(client), company: client.company, contact: client.phone || client.email, state: getProjectStatusLabel(project?.status ?? site?.status), action: site?.status === "actif" ? "Site en ligne" : "Ouvrir le suivi", href: `/admin/clients/${client.id}` };
+  });
+  const rows = [...prospectRows, ...clientRows];
+  return <><PageHeading eyebrow="Dossiers" title="Tous les dossiers au même endroit." description="Prospects et clients sont regroupés ici. Ouvrez un dossier pour agir." /><div className="admin-table-wrap admin-responsive-list">{rows.length ? <table className="admin-table"><thead><tr><th>Entreprise</th><th>Contact</th><th>État actuel</th><th>Prochaine action</th><th /></tr></thead><tbody>{rows.map((row) => <tr key={row.id}><td><Link href={row.href} className="admin-table-link">{row.company}</Link><small>{row.name}</small></td><td>{row.contact}</td><td>{row.state}</td><td>{row.action}</td><td><Link href={row.href} className="admin-text-button">Ouvrir →</Link></td></tr>)}</tbody></table> : <EmptyState title="Aucun dossier" detail="Les demandes et clients apparaîtront ici." />}</div></>;
+}
+
 export function ClientsPage() {
   const { data, setClientStatus } = useBackoffice();
   const [query, setQuery] = useState("");

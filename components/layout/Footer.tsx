@@ -12,8 +12,8 @@ const navLinks = [
   { label: "Référencement", href: "/seo" },
   { label: "Blog", href: "/blog" },
   { label: "FAQ", href: "/faq" },
-  { label: "Espace client", href: "/espace-client" },
-  { label: "Créer mon site", href: "/creer-mon-site" },
+  { label: "Créer mon espace", href: "/creer-mon-site" },
+  { label: "Se connecter", href: "/connexion" },
   { label: "À propos", href: "/a-propos" },
   { label: "Contact", href: "/contact" },
 ];

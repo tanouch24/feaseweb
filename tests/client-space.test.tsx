@@ -30,14 +30,14 @@ describe("ClientSpaceSections", () => {
     expect(screen.getByText("VOTRE PARCOURS")).toBeInTheDocument();
     expect(screen.getAllByText("Besoin d'une modification ?").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Structure en préparation").length).toBeGreaterThan(0);
-    expect(screen.getByText("Title modifié")).toBeInTheDocument();
-    expect(screen.getAllByText(/49/).length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Ajouter une page").length).toBe(2);
+    expect(screen.queryByText("Title modifié")).not.toBeInTheDocument();
+    expect(screen.queryByText(/49/)).not.toBeInTheDocument();
+    expect(screen.getAllByText("Ajouter une page").length).toBe(1);
   });
 
   it("keeps the SEO empty state honest and does not invent metrics", () => {
     render(<ClientSpaceSections {...baseProps} seoActions={[]} />);
-    expect(screen.getByText("Aucune action SEO n'a encore été enregistrée. Les interventions réalisées par FeaseWeb apparaîtront ici.")).toBeInTheDocument();
+    expect(screen.queryByText("Aucune action SEO n'a encore été enregistrée. Les interventions réalisées par FeaseWeb apparaîtront ici.")).not.toBeInTheDocument();
     expect(screen.queryByText("Clics")).not.toBeInTheDocument();
     expect(screen.queryByText("Impressions")).not.toBeInTheDocument();
     expect(screen.queryByText("Position moyenne")).not.toBeInTheDocument();

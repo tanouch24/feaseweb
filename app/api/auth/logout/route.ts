@@ -5,5 +5,6 @@ import { setAdminSessionCookie } from "@/lib/admin-session";
 export async function POST() {
   const supabase = await createClient();
   if (supabase) await supabase.auth.signOut();
-  return setAdminSessionCookie(NextResponse.json({ redirect: "/connexion" }), true);
+  const response = NextResponse.json({ redirect: "/connexion" }, { headers: { "Cache-Control": "no-store" } });
+  return setAdminSessionCookie(response, true);
 }

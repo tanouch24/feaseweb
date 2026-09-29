@@ -30,7 +30,7 @@ describe("simplified client flow", () => {
     const route = source("app/api/auth/logout/route.ts");
     const auth = source("lib/authz.ts");
     expect(logout).toContain('fetch("/api/auth/logout"');
-    expect(logout).toContain('router.replace("/connexion")');
+    expect(logout).toContain('window.location.replace("/connexion")');
     expect(route).toContain("supabase.auth.signOut()");
     expect(auth).toContain('redirect("/connexion")');
   });

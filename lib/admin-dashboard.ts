@@ -2,12 +2,12 @@ import type { BackofficeData, Client, Payment, ProjectIntake, Prospect, Site } f
 
 export const adminDashboardStages = [
   "Rendez-vous à faire",
-  "Rendez-vous effectué",
-  "Paiement à faire",
-  "Premier paiement OK",
-  "Site à faire",
-  "Site fait",
-  "Prélèvement rejeté",
+  "Paiements à demander",
+  "Paiements en attente",
+  "Paiements reçus",
+  "Sites à faire",
+  "Sites en ligne",
+  "Paiements rejetés",
 ] as const;
 
 export type AdminDashboardStage = (typeof adminDashboardStages)[number];
@@ -42,7 +42,7 @@ function appointmentTimestamp(date?: string, time?: string) {
   return Number.isNaN(timestamp.getTime()) ? null : timestamp;
 }
 
-function appointmentItem(prospect: Prospect, stage: "Rendez-vous à faire" | "Rendez-vous effectué", now: Date): AdminDashboardItem {
+function appointmentItem(prospect: Prospect, stage: "Rendez-vous à faire" | "Paiements à demander", now: Date): AdminDashboardItem {
   const review = prospect.review;
   const timestamp = appointmentTimestamp(review?.appointmentDate, review?.appointmentTime);
   return {
@@ -105,9 +105,9 @@ export function getAdminDashboardSections(data: BackofficeData, now = new Date()
     const appointment = prospect.review?.appointmentStatus;
     const client = clientsByProspect.get(prospect.id);
     if (appointment === "scheduled") sections["Rendez-vous à faire"].push(appointmentItem(prospect, "Rendez-vous à faire", now));
-    if (appointment === "completed" && prospect.review?.validationStatus !== "approved" && !client) sections["Rendez-vous effectué"].push(appointmentItem(prospect, "Rendez-vous effectué", now));
+    if (appointment === "completed" && prospect.review?.validationStatus !== "approved" && !client) sections["Paiements à demander"].push({ ...appointmentItem(prospect, "Rendez-vous à faire", now), stage: "Paiements à demander", detail: "Rendez-vous effectué · paiement à demander" });
     if (prospect.review?.validationStatus === "approved" && (!client || !hasConfirmedFirstPayment(payments, client.id))) {
-      sections["Paiement à faire"].push({ id: `payment-${prospect.id}`, stage: "Paiement à faire", company: prospect.company, contact: contactName(prospect), phone: prospect.phone, href: client ? `/admin/clients/${client.id}` : `/admin/prospects/${prospect.id}`, detail: "49 €/mois · Paiement en attente" });
+      sections["Paiements en attente"].push({ id: `payment-${prospect.id}`, stage: "Paiements en attente", company: prospect.company, contact: contactName(prospect), phone: prospect.phone, href: client ? `/admin/clients/${client.id}` : `/admin/prospects/${prospect.id}`, detail: "49 €/mois · paiement attendu" });
     }
   }
 
@@ -117,21 +117,21 @@ export function getAdminDashboardSections(data: BackofficeData, now = new Date()
     const site = siteForClient(sites, client.id);
     const failedPayment = latestPayment?.status === "echoue";
     if (failedPayment) {
-      sections["Prélèvement rejeté"].push(clientItem(client, "Prélèvement rejeté", "Paiement rejeté", { paymentDate: latestPayment.paidAt }));
+      sections["Paiements rejetés"].push(clientItem(client, "Paiements rejetés", "Paiement rejeté", { paymentDate: latestPayment.paidAt }));
       continue;
     }
     if (!hasConfirmedFirstPayment(payments, client.id)) continue;
     if (isSiteDone(project, site)) {
-      sections["Site fait"].push(clientItem(client, "Site fait", site?.finalDomain || site?.previewUrl || undefined, { siteUrl: site?.finalDomain || site?.previewUrl || undefined }));
+      sections["Sites en ligne"].push(clientItem(client, "Sites en ligne", site?.finalDomain || site?.previewUrl || undefined, { siteUrl: site?.finalDomain || site?.previewUrl || undefined }));
     } else if (isSiteToBuild(project, site)) {
-      sections["Site à faire"].push(clientItem(client, "Site à faire", project ? `Dossier ${project.currentStep >= 8 || project.completedAt ? "complet" : "à compléter"}` : undefined));
+      sections["Sites à faire"].push(clientItem(client, "Sites à faire", project ? `Dossier ${project.currentStep >= 8 || project.completedAt ? "complet" : "à compléter"}` : undefined));
     } else {
-      sections["Premier paiement OK"].push(clientItem(client, "Premier paiement OK", "Premier paiement reçu", { paymentDate: paymentDate(payments, client.id) }));
+      sections["Paiements reçus"].push(clientItem(client, "Paiements reçus", "Premier paiement reçu", { paymentDate: paymentDate(payments, client.id) }));
     }
   }
 
   sections["Rendez-vous à faire"].sort((a, b) => (a.appointmentAt ?? "").localeCompare(b.appointmentAt ?? ""));
-  sections["Rendez-vous effectué"].sort((a, b) => (b.appointmentAt ?? "").localeCompare(a.appointmentAt ?? ""));
+  sections["Paiements à demander"].sort((a, b) => (b.appointmentAt ?? "").localeCompare(a.appointmentAt ?? ""));
   return sections;
 }
 

@@ -4,7 +4,7 @@ import { addCalendarDays, clientOrderTimeline } from "@/lib/client-order-timelin
 describe("client order timeline", () => {
   it("uses real appointment and payment state without exposing database statuses", () => {
     const stages = clientOrderTimeline({ hasProject: true, appointmentStatus: "scheduled", appointmentDate: "2026-09-30", appointmentTime: "14:30", paymentConfirmed: false, live: false });
-    expect(stages.map((stage) => stage.label)).toEqual(["Site demandé", "Rendez-vous", "Paiement", "Site en création", "Site livré"]);
+    expect(stages.map((stage) => stage.label)).toEqual(["Demande envoyée", "Rendez-vous", "Paiement", "Création du site", "Site en ligne"]);
     expect(stages[1].detail).toContain("30 septembre 2026");
     expect(stages[2].state).toBe("current");
     expect(stages[3].state).toBe("upcoming");

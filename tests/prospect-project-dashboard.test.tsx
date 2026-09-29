@@ -16,25 +16,21 @@ const incompleteProject = { ...completeProject, primaryObjective: null, requeste
 describe("ProspectProjectDashboard", () => {
   it("explains a completed configuration, current step, summary and subscription", () => {
     render(<ProspectProjectDashboard project={completeProject} review={{ appointment: { id: "appointment-1", projectIntakeId: "intake-1", status: "completed", date: "2026-09-26", time: "10:00", phone: "0612345678", note: null }, validation: { status: "approved" } }} />);
-    expect(screen.getAllByText("Votre projet est configuré").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Nous avons toutes les informations nécessaires pour préparer votre site.").length).toBe(2);
-    expect(screen.getByText("Site demandé")).toBeInTheDocument();
+    expect(screen.getByText("Mon site FeaseWeb")).toBeInTheDocument();
+    expect(screen.getByText("Demande envoyée")).toBeInTheDocument();
     expect(screen.getAllByText("Terminée").length).toBeGreaterThan(0);
     expect(screen.getByText("Paiement")).toBeInTheDocument();
     expect(screen.getByText("Étape actuelle")).toBeInTheDocument();
-    expect(screen.getByText("Services aux entreprises")).toBeInTheDocument();
-    expect(screen.getByText("Modifier ma configuration")).toHaveAttribute("href", "/creer-mon-site");
     expect(screen.getByText("49 €")).toBeInTheDocument();
     expect(screen.getByText("/mois")).toBeInTheDocument();
-    expect(screen.getByText("0 € de frais de création")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Activer mon abonnement — 49 €/mois" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Payer mon abonnement" })).toBeInTheDocument();
     expect(screen.queryByText("Action impossible pour le moment.")).not.toBeInTheDocument();
   });
 
   it("requires the appointment and FeaseWeb approval before showing payment", () => {
     render(<ProspectProjectDashboard project={completeProject} />);
     expect(screen.getByRole("heading", { name: "Planifiez mon appel de validation" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Activer mon abonnement/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Payer mon abonnement/ })).not.toBeInTheDocument();
     expect(screen.getByText("Rendez-vous")).toBeInTheDocument();
     expect(screen.getByText("Paiement")).toBeInTheDocument();
   });
@@ -42,7 +38,7 @@ describe("ProspectProjectDashboard", () => {
   it("keeps the configuration continuation and hides payment until all eight steps are complete", () => {
     render(<ProspectProjectDashboard project={incompleteProject} />);
     expect(screen.getByRole("link", { name: "Continuer la configuration" })).toHaveAttribute("href", "/creer-mon-site");
-    expect(screen.queryByRole("button", { name: /Activer mon abonnement/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Payer mon abonnement/ })).not.toBeInTheDocument();
     expect(screen.queryByText("Action impossible pour le moment.")).not.toBeInTheDocument();
   });
 });

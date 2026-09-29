@@ -56,7 +56,7 @@ export function Header({ role = null }: { role?: Role | null }) {
           ))}
         </nav>
         <div className="hidden items-center gap-4 md:flex">
-          {role ? <><Link href={accountHref} className="text-sm text-ink-soft hover:text-ink">Mon compte</Link><LogoutButton /></> : <><Link href="/connexion" className="text-sm text-ink-soft hover:text-ink">Se connecter à mon compte</Link><CTAButton href="/creer-mon-site">Créer mon site</CTAButton></>}
+          {role ? <><Link href={accountHref} className="text-sm text-ink-soft hover:text-ink">Mon espace</Link><LogoutButton /></> : <><CTAButton href="/creer-mon-site">Créer mon espace</CTAButton><Link href="/connexion" className="text-sm text-ink-soft hover:text-ink">Se connecter</Link></>}
         </div>
         <button
           type="button"
@@ -86,7 +86,7 @@ export function Header({ role = null }: { role?: Role | null }) {
               {link.label}
             </Link>
           ))}
-          {role ? <><Link href={accountHref} onClick={() => setMobileOpen(false)} className="text-base text-ink-soft">Mon compte</Link><LogoutButton /></> : <><Link href="/connexion" className="text-base text-ink-soft">Se connecter à mon compte</Link><CTAButton href="/creer-mon-site">Créer mon site</CTAButton></>}
+          {role ? <><Link href={accountHref} onClick={() => setMobileOpen(false)} className="text-base text-ink-soft">Mon espace</Link><LogoutButton /></> : <><CTAButton href="/creer-mon-site">Créer mon espace</CTAButton><Link href="/connexion" className="text-base text-ink-soft">Se connecter</Link></>}
         </nav>
       )}
     </header>

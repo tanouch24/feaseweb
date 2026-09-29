@@ -28,7 +28,7 @@ export function ProspectReviewDetail({ prospectId }: { prospectId: string }) {
     try { await updateProspectReview(selectedProspectId, action, note.trim() || undefined); setNote(""); } catch (caught) { setError(caught instanceof Error ? caught.message : "Impossible d'enregistrer cette action."); }
   }
   return <>
-    <PageHeading eyebrow="Dossier prospect" title={prospect.company} description={`${prospect.firstName} ${prospect.lastName} · ${prospect.email} · ${prospect.phone}`} action={<Link href="/admin/prospects" className="admin-button secondary">← Prospects</Link>} />
+    <PageHeading eyebrow="Dossier" title={prospect.company} description={`${prospect.firstName} ${prospect.lastName} · ${prospect.email} · ${prospect.phone}`} action={<div className="admin-detail-header-actions">{canAskForPayment && <button className="admin-button admin-payment-primary" onClick={() => void run("approve")}>Demander le paiement</button>}<Link href="/admin/dossiers" className="admin-button secondary">← Dossiers</Link></div>} />
     <div className="admin-detail-grid">
       <section className="admin-panel">
         <PanelTitle title="État du dossier" />
@@ -43,7 +43,6 @@ export function ProspectReviewDetail({ prospectId }: { prospectId: string }) {
         <div className="admin-detail-action"><span>Décision</span><StatusBadge value={review?.validationStatus ?? "pending"} /></div>
         <div className="admin-detail-actions">
           {review?.appointmentStatus === "scheduled" && <><button className="admin-button" onClick={() => void run("complete_appointment")}>Marquer le rendez-vous effectué</button><button className="admin-button secondary" onClick={() => void run("cancel_appointment")}>Annuler le rendez-vous</button></>}
-          {canAskForPayment && <button className="admin-button" onClick={() => void run("approve")}>Demander le paiement</button>}
           {review?.appointmentStatus === "completed" && review.validationStatus !== "approved" && <><button className="admin-button secondary" onClick={() => void run("needs_information")}>Demander des informations</button><button className="admin-button secondary" onClick={() => void run("decline")}>Refuser le projet</button></>}
         </div>
         {review?.validationStatus === "approved" && <p className="admin-panel-intro"><strong>Paiement demandé.</strong> Le bouton de paiement est disponible dans l'espace client. Stripe confirmera ensuite le paiement.</p>}

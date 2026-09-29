@@ -36,7 +36,7 @@ describe("onboarding DB/DTO boundary", () => {
     expect(dashboard).toContain("Commencer la configuration");
     expect(dashboard).toContain("Continuer la configuration");
     expect(dashboard).toContain("{complete && <>");
-    expect(dashboard).toContain("Activez votre abonnement pour lancer la création");
+    expect(dashboard).toContain("Votre projet est prêt à démarrer.");
     expect(dashboard).toContain("completedOnboardingSteps(project)");
   });
 

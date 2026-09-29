@@ -11,11 +11,11 @@ vi.mock("next/navigation", () => ({
 describe("Header", () => {
   it("shows the primary CTA and nav links on desktop", () => {
     render(<Header />);
-    expect(screen.getByRole("link", { name: "Se connecter à mon compte" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Se connecter" })).toHaveAttribute(
       "href",
       "/connexion"
     );
-    expect(screen.getByRole("link", { name: "Créer mon site" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Créer mon espace" })).toHaveAttribute(
       "href",
       "/creer-mon-site"
     );
@@ -45,8 +45,8 @@ describe("Header", () => {
 
   it("switches to the account and logout actions for a real session", () => {
     render(<Header role="client" />);
-    expect(screen.getByRole("link", { name: "Mon compte" })).toHaveAttribute("href", "/espace-client");
+    expect(screen.getByRole("link", { name: "Mon espace" })).toHaveAttribute("href", "/espace-client");
     expect(screen.getByRole("button", { name: "Se déconnecter" })).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Créer mon site" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Créer mon espace" })).not.toBeInTheDocument();
   });
 });

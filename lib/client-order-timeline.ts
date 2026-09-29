@@ -37,10 +37,10 @@ export function clientOrderTimeline(input: {
     ? formatAppointmentDate(input.appointmentDate, input.appointmentTime) ?? "Rendez-vous planifié"
     : input.appointmentStatus === "completed" ? "Rendez-vous effectué" : undefined;
   return [
-    { key: "requested", label: "Site demandé", state: input.hasProject ? "complete" : "current" },
+    { key: "requested", label: "Demande envoyée", state: input.hasProject ? "complete" : "current" },
     { key: "appointment", label: "Rendez-vous", state: appointmentDone ? "complete" : appointmentScheduled ? "current" : "upcoming", detail: appointmentDetail },
     { key: "payment", label: "Paiement", state: input.paymentConfirmed ? "complete" : input.hasProject ? "current" : "upcoming", detail: input.paymentConfirmed ? "Paiement effectué" : undefined },
-    { key: "building", label: "Site en création", state: input.paymentConfirmed ? (input.live ? "complete" : "current") : "upcoming", detail: input.paymentConfirmed && !input.live ? "Votre site est en création" : undefined },
-    { key: "delivered", label: "Site livré", state: input.live ? "complete" : "upcoming", detail: input.live ? "Votre site est en ligne" : delivery ? `Livraison estimée le ${formatClientDate(delivery)}` : undefined },
+    { key: "building", label: "Création du site", state: input.paymentConfirmed ? (input.live ? "complete" : "current") : "upcoming", detail: input.paymentConfirmed && !input.live ? "Votre site est en création" : undefined },
+    { key: "delivered", label: "Site en ligne", state: input.live ? "complete" : "upcoming", detail: input.live ? "Votre site est en ligne" : delivery ? `Livraison estimée le ${formatClientDate(delivery)}` : undefined },
   ];
 }

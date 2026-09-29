@@ -42,6 +42,6 @@ describe("client updates lifecycle safeguards", () => {
   it("performs an explicit Supabase sign out in the admin shell", () => {
     const admin = source("components/admin/AdminApp.tsx");
     expect(admin).toContain("supabase.auth.signOut()");
-    expect(admin).toContain('router.replace("/connexion")');
+    expect(admin).toContain('window.location.replace("/connexion")');
   });
 });

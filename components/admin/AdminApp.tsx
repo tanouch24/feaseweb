@@ -10,9 +10,9 @@ import { formatAdminAppointment, formatAdminPaymentDate, getAdminDashboardSectio
 import { useBackoffice } from "@/lib/backoffice-store";
 import { createClient } from "@/lib/supabase/client";
 
-const nav = [{ href: "/admin", label: "Tableau de bord", icon: "⌂" }, { href: "/admin/prospects", label: "Prospects", icon: "↗" }, { href: "/admin/clients", label: "Clients", icon: "◎" }, { href: "/admin/sites", label: "Production", icon: "◫" }, { href: "/admin/demandes", label: "Demandes", icon: "✦" }, { href: "/admin/seo", label: "SEO", icon: "⌁" }, { href: "/admin/paiements", label: "Paiements", icon: "€" }, { href: "/admin/domaines", label: "Domaines", icon: "⌘" }];
+const nav = [{ href: "/admin", label: "Tableau de bord", icon: "⌂" }, { href: "/admin/dossiers", label: "Dossiers", icon: "◎" }, { href: "/admin/demandes", label: "Demandes", icon: "✦" }];
 const tone = (value: string) => ["actif", "gagne", "valide", "preview", "paye", "terminee", "configure", "scheduled", "completed", "approved"].includes(value) ? "good" : ["echoue", "impaye", "retard", "suspendu", "perdu", "probleme", "declined"].includes(value) ? "bad" : "neutral";
-function LogoutButton({ mobile = false }: { mobile?: boolean }) { const router = useRouter(); const logout = async () => { const supabase = createClient(); try { if (supabase) await supabase.auth.signOut(); } catch { /* The server logout below remains authoritative. */ } try { await fetch("/api/auth/logout", { method: "POST", cache: "no-store" }); } catch { /* Redirect even when the network is unavailable. */ } router.replace("/connexion"); router.refresh(); }; return <button type="button" className={mobile ? "admin-mobile-logout" : "admin-logout-button"} onClick={() => void logout}>↪ Se déconnecter</button>; }
+function LogoutButton({ mobile = false }: { mobile?: boolean }) { const router = useRouter(); const logout = async () => { const supabase = createClient(); try { if (supabase) await supabase.auth.signOut(); } catch { /* The server logout below remains authoritative. */ } try { await fetch("/api/auth/logout", { method: "POST", cache: "no-store", credentials: "same-origin" }); } catch { /* Redirect even when the network is unavailable. */ } window.location.replace("/connexion"); router.refresh(); }; return <button type="button" className={mobile ? "admin-mobile-logout" : "admin-logout-button"} onClick={() => void logout}>↪ Se déconnecter</button>; }
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname(); const { ready, error } = useBackoffice();
@@ -29,7 +29,7 @@ export function EmptyState({ title, detail }: { title: string; detail: string })
 function DashboardCard({ item }: { item: AdminDashboardItem }) {
   return <Link href={item.href} className={`admin-dashboard-card${item.overdue ? " overdue" : ""}`}>
     <span className="admin-dashboard-card-main"><strong>{item.company}</strong><small>{item.contact}</small>{item.phone && <small>{item.phone}</small>}</span>
-    <span className="admin-dashboard-card-detail">{item.stage === "Rendez-vous à faire" || item.stage === "Rendez-vous effectué" ? <>{formatAdminAppointment(item)}{item.overdue && <em>En retard</em>}</> : item.detail}{item.paymentDate && <>{item.detail ? " · " : ""}{formatAdminPaymentDate(item.paymentDate)}</>}{item.siteUrl && <small>{item.siteUrl}</small>}</span>
+    <span className="admin-dashboard-card-detail">{item.stage === "Rendez-vous à faire" || item.stage === "Paiements à demander" ? <>{formatAdminAppointment(item)}{item.overdue && <em>En retard</em>}</> : item.detail}{item.paymentDate && <>{item.detail ? " · " : ""}{formatAdminPaymentDate(item.paymentDate)}</>}{item.siteUrl && <small>{item.siteUrl}</small>}</span>
     <span className="admin-dashboard-open">Ouvrir →</span>
   </Link>;
 }
@@ -37,7 +37,7 @@ function DashboardCard({ item }: { item: AdminDashboardItem }) {
 export function AdminOverview() {
   const { data } = useBackoffice();
   const sections = getAdminDashboardSections(data);
-  return <><PageHeading eyebrow="Tableau de bord" title="Le suivi, simplement." description="Les rendez-vous, paiements et sites qui demandent votre attention." /><div className="admin-dashboard-grid">{adminDashboardStages.map((stage) => { const items = sections[stage]; return <section key={stage} className={`admin-dashboard-section${stage === "Prélèvement rejeté" && items.length ? " alert" : ""}`}><div className="admin-dashboard-section-heading"><h2>{stage}</h2><span>{items.length}</span></div>{items.length ? <div className="admin-dashboard-list">{items.map((item) => <DashboardCard item={item} key={item.id} />)}</div> : <p className="admin-dashboard-empty">Aucun dossier</p>}</section>; })}</div></>;
+  return <><PageHeading eyebrow="Tableau de bord" title="Le suivi, simplement." description="Les rendez-vous, paiements et sites qui demandent votre attention." /><div className="admin-dashboard-grid">{adminDashboardStages.map((stage) => { const items = sections[stage]; return <section key={stage} className={`admin-dashboard-section${stage === "Paiements rejetés" && items.length ? " alert" : ""}`}><div className="admin-dashboard-section-heading"><h2>{stage}</h2><span>{items.length}</span></div>{items.length ? <div className="admin-dashboard-list">{items.map((item) => <DashboardCard item={item} key={item.id} />)}</div> : <p className="admin-dashboard-empty">Aucun dossier</p>}</section>; })}</div></>;
 }
 export function PanelTitle({ title, link }: { title: string; link?: string }) { return <div className="admin-panel-title"><h2>{title}</h2>{link && <Link href={link}>Voir tout →</Link>}</div>; }
 
