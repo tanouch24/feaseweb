@@ -27,11 +27,9 @@ describe("tracking consent UI", () => {
 
   it("restores the saved choices when preferences are reopened", async () => {
     window.localStorage.setItem("feaseweb-consent", JSON.stringify({ analytics: true, marketing: false }));
-    const user = userEvent.setup();
     render(<TrackingConsent />);
 
-    await user.click(screen.getByRole("button", { name: "Gérer mes cookies" }));
-
+    await act(async () => { window.dispatchEvent(new Event("feaseweb-open-consent")); });
     expect(screen.getByRole("checkbox", { name: /Mesure d’audience/ })).toBeChecked();
     expect(screen.getByRole("checkbox", { name: /Marketing/ })).not.toBeChecked();
   });

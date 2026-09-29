@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Logo } from "@/components/layout/Logo";
 import { CTAButton } from "@/components/ui/CTAButton";
+import { LogoutButton } from "@/components/layout/LogoutButton";
+import type { Role } from "@/lib/authz";
 
 const navLinks = [
   { label: "Comment ça marche", href: "/comment-ca-marche" },
@@ -14,9 +17,12 @@ const navLinks = [
   { label: "FAQ", href: "/faq" },
 ];
 
-export function Header() {
+export function Header({ role = null }: { role?: Role | null }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
+
+  const accountHref = role === "admin" ? "/admin" : "/espace-client";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -24,6 +30,8 @@ export function Header() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/espace-client")) return null;
 
   return (
     <header
@@ -48,10 +56,7 @@ export function Header() {
           ))}
         </nav>
         <div className="hidden items-center gap-4 md:flex">
-          <Link href="/connexion" className="text-sm text-ink-soft hover:text-ink">
-            Espace client
-          </Link>
-          <CTAButton href="/creer-mon-site">Créer mon site</CTAButton>
+          {role ? <><Link href={accountHref} className="text-sm text-ink-soft hover:text-ink">Mon compte</Link><LogoutButton /></> : <><Link href="/connexion" className="text-sm text-ink-soft hover:text-ink">Se connecter à mon compte</Link><CTAButton href="/creer-mon-site">Créer mon site</CTAButton></>}
         </div>
         <button
           type="button"
@@ -81,10 +86,7 @@ export function Header() {
               {link.label}
             </Link>
           ))}
-          <Link href="/connexion" className="text-base text-ink-soft">
-            Espace client
-          </Link>
-          <CTAButton href="/creer-mon-site">Créer mon site</CTAButton>
+          {role ? <><Link href={accountHref} onClick={() => setMobileOpen(false)} className="text-base text-ink-soft">Mon compte</Link><LogoutButton /></> : <><Link href="/connexion" className="text-base text-ink-soft">Se connecter à mon compte</Link><CTAButton href="/creer-mon-site">Créer mon site</CTAButton></>}
         </nav>
       )}
     </header>

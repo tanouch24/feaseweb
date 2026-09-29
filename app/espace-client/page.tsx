@@ -4,9 +4,8 @@ import { requireClientSpace } from "@/lib/authz";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/layout/LogoutButton";
 import { ProspectProjectDashboard } from "@/components/client/ProspectProjectDashboard";
-import { ClientSpaceNavigation, ClientSpaceSections, ProductionDossierCard } from "@/components/client/ClientSpaceSections";
+import { ClientSpaceSections } from "@/components/client/ClientSpaceSections";
 import { mapProjectIntake, onboardingProjectSelect } from "@/lib/onboarding";
-import { calculateProductionCompleteness, mapProductionDossier, productionDossierSelect, type ProductionAccess, type ProductionMedia } from "@/lib/production";
 import { SubscriptionPaidTracker } from "@/components/analytics/TrackingEvent";
 import { TrackingEvent } from "@/components/analytics/TrackingEvent";
 import { mapProjectReview } from "@/lib/project-review";
@@ -30,7 +29,7 @@ export default async function EspaceClientPage({ searchParams }: { searchParams:
   if (!supabase) return <main className="client-space"><header className="client-header"><div><p className="client-eyebrow">ESPACE CLIENT FEASEWEB</p><h1>Votre espace est indisponible.</h1><p>Réessayez dans quelques instants.</p></div><LogoutButton /></header></main>;
 
   const { data: client } = await supabase.from("clients").select("id, first_name, last_name, company, email, phone, status, started_at").eq("user_id", current.user.id).maybeSingle();
-  if (!client) return <main className="client-space"><header className="client-header"><div><p className="client-eyebrow">ESPACE CLIENT FEASEWEB</p><h1>Votre espace est prêt.</h1><p>Aucun dossier client n'est encore associé à ce compte.</p></div><LogoutButton /></header><ClientSpaceNavigation /><section className="client-card client-empty"><p>Les informations de votre projet apparaîtront ici dès que le dossier sera associé.</p></section></main>;
+  if (!client) return <main className="client-space"><header className="client-header"><div><p className="client-eyebrow">ESPACE CLIENT FEASEWEB</p><h1>Votre espace est prêt.</h1><p>Aucun dossier client n'est encore associé à ce compte.</p></div><LogoutButton /></header><section className="client-card client-empty"><p>Les informations de votre projet apparaîtront ici dès que le dossier sera associé.</p></section></main>;
 
   const { data: site } = await supabase.from("sites").select("id, name, domain, preview_url, production_url, status, created_at, launched_at").eq("client_id", client.id).order("created_at").limit(1).maybeSingle();
   const [{ data: subscription }, { data: payments }, { data: updates }, { data: requests }, { data: seoActions }, { data: appointment }, { data: validation }] = await Promise.all([
@@ -44,12 +43,6 @@ export default async function EspaceClientPage({ searchParams }: { searchParams:
   ]);
 
   const project = intake ? mapProjectIntake(intake) : null;
-  const [{ data: production }, { data: access }, { data: media }] = await Promise.all([
-    supabase.from("production_dossiers").select(productionDossierSelect).eq("client_id", client.id).maybeSingle(),
-    intake ? supabase.from("project_access_requirements").select("category, status, client_choice, client_note").eq("project_intake_id", (intake as unknown as { id: string }).id) : Promise.resolve({ data: [] }),
-    supabase.from("project_media").select("id, original_name, media_type, mime_type, size_bytes, status, created_at").eq("client_id", client.id),
-  ]);
-  const completeness = project ? calculateProductionCompleteness(production ? mapProductionDossier(production) : null, project, (access ?? []) as ProductionAccess[], (media ?? []) as ProductionMedia[]) : null;
   const statusEvent = project && (project.projectStatus === "preview_ready" || project.projectStatus === "live") ? (project.projectStatus === "preview_ready" ? "preview_ready" : "site_live") : null;
-  return <main className="client-space client-space-v2">{statusEvent && <TrackingEvent name={statusEvent} eventId={`project_status:${intake?.id}:${statusEvent}`} />}<SubscriptionPaidTracker enabled={subscription?.status === "actif" && (payments ?? []).some((payment) => payment.status === "paye")} /><header className="client-header"><div><p className="client-eyebrow">ESPACE CLIENT FEASEWEB</p><h1>Votre espace de suivi</h1><p>Suivez la production, les interventions et votre abonnement depuis un même endroit.</p></div><LogoutButton /></header>{checkout === "success" && <div className="client-alert" role="status">Votre demande d'abonnement a bien été reçue. Le statut se met à jour après confirmation de Stripe.</div>}{checkout === "cancelled" && <div className="client-alert muted" role="status">Le paiement a été annulé. Votre dossier est conservé.</div>}{project && <ProductionDossierCard completeness={completeness} />}<ClientSpaceSections client={client} profile={current.profile} project={project} site={site} subscription={subscription} payments={payments ?? []} updates={updates ?? []} requests={requests ?? []} seoActions={seoActions ?? []} appointment={appointment} validation={validation} /></main>;
+  return <main className="client-space client-space-v2 client-space-simple">{statusEvent && <TrackingEvent name={statusEvent} eventId={`project_status:${intake?.id}:${statusEvent}`} />}<SubscriptionPaidTracker enabled={subscription?.status === "actif" && (payments ?? []).some((payment) => payment.status === "paye")} /><header className="client-header"><div><p className="client-eyebrow">ESPACE CLIENT FEASEWEB</p><h1>Bonjour{current.profile?.first_name ? ` ${current.profile.first_name}` : ""}</h1><p>Voici le suivi de votre site, en quelques étapes.</p></div><LogoutButton /></header>{checkout === "success" && <div className="client-alert" role="status">Votre demande d'abonnement a bien été reçue. Le statut se met à jour après confirmation de Stripe.</div>}{checkout === "cancelled" && <div className="client-alert muted" role="status">Le paiement a été annulé. Votre dossier est conservé.</div>}<ClientSpaceSections client={client} profile={current.profile} project={project} site={site} subscription={subscription} payments={payments ?? []} updates={updates ?? []} requests={requests ?? []} seoActions={seoActions ?? []} appointment={appointment} validation={validation} /></main>;
 }

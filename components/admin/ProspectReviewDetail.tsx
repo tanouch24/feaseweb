@@ -7,6 +7,7 @@ import { formatDate } from "@/lib/backoffice";
 import { getProspectBusinessState } from "@/lib/admin-presentation";
 import { useBackoffice } from "@/lib/backoffice-store";
 import { EmptyState, PageHeading, PanelTitle, StatusBadge } from "@/components/admin/AdminApp";
+import { canRequestPayment } from "@/lib/admin-payment-request";
 
 export function ProspectReviewDetail({ prospectId }: { prospectId: string }) {
   const { data, updateProspectReview } = useBackoffice();
@@ -17,6 +18,9 @@ export function ProspectReviewDetail({ prospectId }: { prospectId: string }) {
   const project = data.projectIntakes.find((item) => item.prospectId === prospect.id);
   const selectedProspectId = prospect.id;
   const review = prospect.review;
+  const linkedClient = data.clients.find((client) => client.prospectId === prospect.id);
+  const paymentConfirmed = Boolean(linkedClient && data.payments.some((payment) => payment.clientId === linkedClient.id && payment.provider === "stripe" && payment.status === "paye"));
+  const canAskForPayment = canRequestPayment({ appointmentStatus: review?.appointmentStatus, validationStatus: review?.validationStatus, prospectStatus: prospect.status, paymentConfirmed });
   const businessState = getProspectBusinessState(prospect, project);
   async function run(action: "complete_appointment" | "cancel_appointment" | "approve" | "needs_information" | "decline") {
     if (action === "decline" && !window.confirm("Confirmer le refus de ce projet ? Aucune donnée ne sera supprimée.")) return;
@@ -39,9 +43,10 @@ export function ProspectReviewDetail({ prospectId }: { prospectId: string }) {
         <div className="admin-detail-action"><span>Décision</span><StatusBadge value={review?.validationStatus ?? "pending"} /></div>
         <div className="admin-detail-actions">
           {review?.appointmentStatus === "scheduled" && <><button className="admin-button" onClick={() => void run("complete_appointment")}>Marquer le rendez-vous effectué</button><button className="admin-button secondary" onClick={() => void run("cancel_appointment")}>Annuler le rendez-vous</button></>}
-          {review?.appointmentStatus === "completed" && review.validationStatus !== "approved" && <><button className="admin-button" onClick={() => void run("approve")}>Demander le paiement</button><button className="admin-button secondary" onClick={() => void run("needs_information")}>Demander des informations</button><button className="admin-button secondary" onClick={() => void run("decline")}>Refuser le projet</button></>}
+          {canAskForPayment && <button className="admin-button" onClick={() => void run("approve")}>Demander le paiement</button>}
+          {review?.appointmentStatus === "completed" && review.validationStatus !== "approved" && <><button className="admin-button secondary" onClick={() => void run("needs_information")}>Demander des informations</button><button className="admin-button secondary" onClick={() => void run("decline")}>Refuser le projet</button></>}
         </div>
-        {review?.validationStatus === "approved" && <p className="admin-panel-intro">Le paiement est maintenant disponible dans l'espace client. Stripe confirmera ensuite le paiement et la création du dossier client.</p>}
+        {review?.validationStatus === "approved" && <p className="admin-panel-intro"><strong>Paiement demandé.</strong> Le bouton de paiement est disponible dans l'espace client. Stripe confirmera ensuite le paiement.</p>}
         <textarea aria-label="Note interne de validation" className="mt-4 w-full rounded-sm border border-line p-3" rows={3} placeholder="Note interne facultative, invisible au prospect" value={note} onChange={(event) => setNote(event.target.value)} />
         {error && <p className="mt-2 text-sm text-red-700" role="alert">{error}</p>}
       </section>

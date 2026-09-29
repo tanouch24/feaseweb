@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Logo } from "@/components/layout/Logo";
 import { feasewebConfig } from "@/lib/feaseweb-config";
 
@@ -23,6 +26,13 @@ const legalLinks = [
 ];
 
 export function Footer() {
+  const pathname = usePathname();
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/espace-client")) return null;
+
+  function openCookiePreferences() {
+    window.dispatchEvent(new Event("feaseweb-open-consent"));
+  }
+
   return (
     <footer className="border-t border-line bg-bg-alt">
       <div className="mx-auto max-w-6xl px-6 py-14">
@@ -52,6 +62,7 @@ export function Footer() {
                 {link.label}
               </Link>
             ))}
+            <button type="button" className="hover:text-ink" onClick={openCookiePreferences}>Préférences cookies</button>
           </div>
           <p>
             © {new Date().getFullYear()} {feasewebConfig.brand} — {feasewebConfig.operator.tradeName}

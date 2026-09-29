@@ -24,11 +24,12 @@ const baseProps = {
 };
 
 describe("ClientSpaceSections", () => {
-  it("renders the permanent navigation and real client sections", () => {
+  it("renders a simple tracking view and real client sections", () => {
     render(<ClientSpaceSections {...baseProps} seoActions={[{ id: "seo-1", date: "2026-09-24T10:00:00.000Z", action: "Title modifié", description: "Le title de la page d'accueil a été optimisé.", status: "terminee" }]} />);
-    expect(screen.getByRole("navigation", { name: "Navigation de l'espace client" })).toBeInTheDocument();
-    for (const label of ["Tableau de bord", "Mon entreprise", "Mon site", "SEO & visibilité", "Abonnement & factures", "Support / demandes"]) expect(screen.getByRole("link", { name: label })).toBeInTheDocument();
-    expect(screen.getAllByText("Structure en préparation").length).toBe(2);
+    expect(screen.queryByRole("navigation", { name: "Navigation de l'espace client" })).not.toBeInTheDocument();
+    expect(screen.getByText("VOTRE PARCOURS")).toBeInTheDocument();
+    expect(screen.getAllByText("Besoin d'une modification ?").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Structure en préparation").length).toBeGreaterThan(0);
     expect(screen.getByText("Title modifié")).toBeInTheDocument();
     expect(screen.getAllByText(/49/).length).toBeGreaterThan(0);
     expect(screen.getAllByText("Ajouter une page").length).toBe(2);

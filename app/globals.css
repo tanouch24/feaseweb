@@ -73,7 +73,7 @@ body {
 
 /* Back-office: dense, quiet and operational; intentionally separate from the public site. */
 .admin-shell { --admin-ink: #17201d; --admin-muted: #60706a; --admin-line: #dfe5e1; --admin-brand: #1e4a43; }
-.admin-sidebar { position: fixed; inset: 0 auto 0 0; width: 248px; height: 100dvh; flex-direction: column; padding: 28px 18px 22px; overflow: hidden; background: #173b35; color: #eaf1ed; }
+.admin-sidebar { position: fixed; inset: 0 auto 0 0; width: 248px; height: 100dvh; min-height: 100dvh; max-height: 100dvh; flex-direction: column; padding: 28px 18px 22px; overflow: hidden; background: #173b35; color: #eaf1ed; }
 .admin-sidebar-navigation { min-height: 0; display: flex; flex: 1 1 auto; flex-direction: column; overflow: hidden; }
 .admin-sidebar-nav { min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgba(185,208,196,.45) transparent; }
 .admin-sidebar-actions { flex: 0 0 auto; padding-top: 16px; background: #173b35; }
@@ -200,6 +200,11 @@ body {
 }
 
 .client-space-v2 { scroll-behavior: smooth; }
+.client-space-simple .client-space-section:not(#tableau-de-bord) { display: none; }
+.client-space-simple .client-dashboard-overview { display: block; }
+.client-space-simple .client-project-status-card { grid-row: auto; }
+.client-space-simple .client-dashboard-requests { margin-top: 16px; }
+.client-space-simple .client-dashboard-requests .client-request-form { margin-top: 18px; }
 .client-space-v2 .client-button.secondary { border-color: #1e4a43; background: transparent; color: #1e4a43; }
 .client-space-nav { position: sticky; z-index: 10; top: 0; display: flex; align-items: center; gap: 4px; max-width: 1120px; margin: 0 auto 22px; border: 1px solid #dfe5e1; padding: 5px; background: rgba(246,247,245,.96); box-shadow: 0 6px 18px rgba(23,32,29,.05); backdrop-filter: blur(10px); }
 .client-space-nav a { flex: 1 1 auto; padding: 11px 10px; color: #60706a; font-size: 11px; font-weight: 700; letter-spacing: .02em; text-align: center; text-decoration: none; white-space: nowrap; }
