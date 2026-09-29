@@ -1,18 +1,27 @@
 import { NextResponse } from "next/server";
 import { requireApiAdmin } from "@/lib/authz";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { adminReviewSchema } from "@/lib/project-review";
+import { adminReviewSchema, adminScheduleAppointmentSchema } from "@/lib/project-review";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireApiAdmin();
   if ("response" in auth) return auth.response;
-  const parsed = adminReviewSchema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) return NextResponse.json({ error: "Action de validation invalide." }, { status: 422 });
+  const payload = await request.json().catch(() => null) as Record<string, unknown> | null;
+  const parsed = payload?.action === "schedule_appointment"
+    ? adminScheduleAppointmentSchema.safeParse(payload)
+    : adminReviewSchema.safeParse(payload);
+  if (!parsed.success) return NextResponse.json({ error: "Action de dossier invalide." }, { status: 422 });
   const admin = createAdminClient();
   if (!admin) return NextResponse.json({ error: "Supabase n'est pas configuré." }, { status: 503 });
   const { id } = await params;
   const { data: intake } = await admin.from("project_intakes").select("id").eq("prospect_id", id).maybeSingle();
   if (!intake) return NextResponse.json({ error: "Configuration prospect introuvable." }, { status: 404 });
+
+  if (parsed.data.action === "schedule_appointment") {
+    const { error } = await admin.from("project_appointments").upsert({ project_intake_id: intake.id, appointment_status: "scheduled", appointment_date: parsed.data.date, appointment_time: parsed.data.time }, { onConflict: "project_intake_id" });
+    if (error) { console.error("admin_appointment_schedule_failed", error.code); return NextResponse.json({ error: "Impossible d'enregistrer le rendez-vous." }, { status: 500 }); }
+    return NextResponse.json({ ok: true, appointmentStatus: "scheduled" });
+  }
 
   if (parsed.data.action === "complete_appointment" || parsed.data.action === "cancel_appointment") {
     const nextStatus = parsed.data.action === "complete_appointment" ? "completed" : "cancelled";

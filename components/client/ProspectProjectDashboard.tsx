@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { StartSubscriptionButton } from "@/components/billing/BillingActions";
-import { completedOnboardingSteps, isOnboardingComplete, onboardingLabels, type OnboardingProject, type ProjectTimelineStage } from "@/lib/onboarding";
+import { completedOnboardingSteps, isOnboardingComplete, type OnboardingProject, type ProjectTimelineStage } from "@/lib/onboarding";
 import type { ProjectAppointment, ProjectReview } from "@/lib/project-review";
 import { trackEvent } from "@/lib/analytics";
 import { TrackingEvent } from "@/components/analytics/TrackingEvent";

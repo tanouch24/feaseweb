@@ -10,8 +10,10 @@ import { EmptyState, PageHeading, PanelTitle, StatusBadge } from "@/components/a
 import { canRequestPayment } from "@/lib/admin-payment-request";
 
 export function ProspectReviewDetail({ prospectId }: { prospectId: string }) {
-  const { data, updateProspectReview } = useBackoffice();
+  const { data, scheduleProspectAppointment, updateProspectReview } = useBackoffice();
   const [note, setNote] = useState("");
+  const [appointmentDate, setAppointmentDate] = useState("");
+  const [appointmentTime, setAppointmentTime] = useState("");
   const [error, setError] = useState("");
   const prospect = data.prospects.find((item) => item.id === prospectId);
   if (!prospect) return <><PageHeading eyebrow="Acquisition" title="Prospect introuvable" /><Link href="/admin/prospects" className="admin-button secondary">Retour aux prospects</Link></>;
@@ -27,6 +29,11 @@ export function ProspectReviewDetail({ prospectId }: { prospectId: string }) {
     setError("");
     try { await updateProspectReview(selectedProspectId, action, note.trim() || undefined); setNote(""); } catch (caught) { setError(caught instanceof Error ? caught.message : "Impossible d'enregistrer cette action."); }
   }
+  async function schedule(event: React.FormEvent) {
+    event.preventDefault();
+    setError("");
+    try { await scheduleProspectAppointment(selectedProspectId, appointmentDate, appointmentTime); setAppointmentDate(""); setAppointmentTime(""); } catch (caught) { setError(caught instanceof Error ? caught.message : "Impossible d'enregistrer le rendez-vous."); }
+  }
   return <>
     <PageHeading eyebrow="Dossier" title={prospect.company} description={`${prospect.firstName} ${prospect.lastName} · ${prospect.email} · ${prospect.phone}`} action={<div className="admin-detail-header-actions">{canAskForPayment && <button className="admin-button admin-payment-primary" onClick={() => void run("approve")}>Demander le paiement</button>}<Link href="/admin/dossiers" className="admin-button secondary">← Dossiers</Link></div>} />
     <div className="admin-detail-grid">
@@ -39,9 +46,10 @@ export function ProspectReviewDetail({ prospectId }: { prospectId: string }) {
       {project && <section className="admin-panel"><PanelTitle title="Projet configuré" /><dl className="admin-detail-rows"><div><dt>Objectif</dt><dd>{project.objective || "—"}</dd></div><div><dt>Pages</dt><dd>{project.pages.join(", ") || "—"}</dd></div><div><dt>Design</dt><dd>{project.style || "—"} · {project.palette || "—"}</dd></div><div><dt>Configuration</dt><dd>{project.currentStep >= 8 || project.completedAt ? "Informations reçues" : `En cours · étape ${project.currentStep}/8`}</dd></div></dl></section>}
       <section className="admin-panel admin-panel-wide">
         <PanelTitle title="Rendez-vous & décision FeaseWeb" />
-        <div className="admin-detail-action"><span>Rendez-vous</span><StatusBadge value={review?.appointmentStatus ?? "not_scheduled"} />{review?.appointmentDate && <span>{review.appointmentDate} {review.appointmentTime ?? ""}</span>}</div>
-        <div className="admin-detail-action"><span>Décision</span><StatusBadge value={review?.validationStatus ?? "pending"} /></div>
+        <div className="admin-detail-action"><span>Rendez-vous</span>{review?.appointmentStatus === "scheduled" || review?.appointmentStatus === "completed" ? <><strong>{review.appointmentDate ? `${review.appointmentDate}${review.appointmentTime ? ` à ${review.appointmentTime}` : ""}` : "Date non renseignée"}</strong><StatusBadge value={review.appointmentStatus} /></> : <strong>Aucun rendez-vous planifié</strong>}</div>
+        {review?.validationStatus === "approved" && <div className="admin-detail-action"><span>Paiement</span><strong>Paiement demandé</strong></div>}
         <div className="admin-detail-actions">
+          {(!review || review.appointmentStatus === "not_scheduled" || review.appointmentStatus === "cancelled") && <form className="admin-appointment-form" onSubmit={(event) => void schedule(event)}><label>Date<input required type="date" value={appointmentDate} onChange={(event) => setAppointmentDate(event.target.value)} /></label><label>Heure<input required type="time" value={appointmentTime} onChange={(event) => setAppointmentTime(event.target.value)} /></label><button className="admin-button" type="submit">Planifier le rendez-vous</button></form>}
           {review?.appointmentStatus === "scheduled" && <><button className="admin-button" onClick={() => void run("complete_appointment")}>Marquer le rendez-vous effectué</button><button className="admin-button secondary" onClick={() => void run("cancel_appointment")}>Annuler le rendez-vous</button></>}
           {review?.appointmentStatus === "completed" && review.validationStatus !== "approved" && <><button className="admin-button secondary" onClick={() => void run("needs_information")}>Demander des informations</button><button className="admin-button secondary" onClick={() => void run("decline")}>Refuser le projet</button></>}
         </div>

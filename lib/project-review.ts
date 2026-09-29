@@ -44,6 +44,12 @@ export const adminReviewSchema = z.object({
   note: z.string().trim().max(5000).optional().nullable(),
 }).strict();
 
+export const adminScheduleAppointmentSchema = z.object({
+  action: z.literal("schedule_appointment"),
+  date: z.string().date(),
+  time: z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "Créneau invalide."),
+}).strict();
+
 export function mapProjectAppointment(row: Record<string, unknown>): ProjectAppointment {
   return {
     id: String(row.id),

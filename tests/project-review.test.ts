@@ -37,6 +37,15 @@ describe("V9 prospect review gate", () => {
     expect(webhook).not.toContain("project_validations");
   });
 
+  it("lets an authenticated admin schedule the existing appointment record", () => {
+    const reviewRoute = read("app/api/admin/prospects/[id]/review/route.ts");
+    const reviewTypes = read("lib/project-review.ts");
+    expect(reviewRoute).toContain('action === "schedule_appointment"');
+    expect(reviewRoute).toContain('.from("project_appointments").upsert');
+    expect(reviewTypes).toContain('z.literal("schedule_appointment")');
+    expect(reviewRoute).toContain("requireApiAdmin");
+  });
+
   it("does not expose the internal validation note to the prospect", () => {
     const route = read("app/api/prospect/appointment/route.ts");
     expect(route).toContain('select("id, project_intake_id, validation_status")');

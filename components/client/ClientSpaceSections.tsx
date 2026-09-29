@@ -45,7 +45,7 @@ function RequestItem({ request }: { request: RequestRecord }) {
   return <article className="client-request-row"><div><strong>{request.title || request.category}</strong><p>{request.message}</p><small>{date(request.created_at)}</small></div><span className={`client-chip ${request.status}`}>{humanStatus}</span></article>;
 }
 
-export function ClientSpaceSections({ client, profile, project, site, payments, updates, requests, appointment, validation }: ClientSpaceSectionsProps) {
+export function ClientSpaceSections({ project, site, payments, updates, requests, appointment, validation }: ClientSpaceSectionsProps) {
   const firstPayment = payments.filter((payment) => payment.status === "paye").sort((a, b) => a.created_at.localeCompare(b.created_at))[0];
   const paymentConfirmed = Boolean(firstPayment);
   const live = project?.projectStatus === "live" || site?.status === "actif";
