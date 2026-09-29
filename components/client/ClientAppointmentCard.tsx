@@ -21,6 +21,7 @@ export function ClientAppointmentCard({ initialAppointment }: { initialAppointme
   const [time, setTime] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [expanded, setExpanded] = useState(false);
   const availableDates = JSON.parse(useSyncExternalStore(subscribeCalendar, getCalendarSnapshot, getServerCalendarSnapshot)) as string[];
   const availableSlots = JSON.parse(useSyncExternalStore(subscribeCalendar, () => JSON.stringify(date ? availableAppointmentSlots(date) : []), getServerCalendarSnapshot)) as string[];
   const scheduled = appointment?.appointment_status === "scheduled";
@@ -47,6 +48,8 @@ export function ClientAppointmentCard({ initialAppointment }: { initialAppointme
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Impossible d'annuler le rendez-vous."); }
     finally { setLoading(false); }
   }
+
+  if (!scheduled && !completed && !expanded) return <section className="client-card client-appointment-card" aria-labelledby="client-appointment-title"><p className="client-eyebrow">VOTRE RENDEZ-VOUS</p><h2 id="client-appointment-title">Planifions un échange</h2><p className="client-muted-note">Choisissez un moment pour parler de votre projet.</p><button type="button" className="client-button" onClick={() => setExpanded(true)}>Choisir mon rendez-vous</button>{error && <p className="client-form-error" role="alert">{error}</p>}</section>;
 
   return <section className="client-card client-appointment-card" aria-labelledby="client-appointment-title"><p className="client-eyebrow">RENDEZ-VOUS</p><h2 id="client-appointment-title">{completed ? "Rendez-vous effectué ✓" : scheduled ? "Votre prochain rendez-vous" : "Choisissez votre rendez-vous"}</h2>{completed ? <p className="client-muted-note">Votre échange avec FeaseWeb est terminé.</p> : scheduled ? <><p className="client-muted-note">{formatAppointmentDate(appointment?.appointment_date, appointment?.appointment_time) ?? "Rendez-vous planifié"}</p><button type="button" className="client-button secondary" disabled={loading} onClick={() => void cancel()}>Annuler le rendez-vous</button></> : <form className="client-appointment-form" onSubmit={(event) => void submit(event)}><fieldset><legend>Date</legend><div className="appointment-choice-grid">{availableDates.map((availableDate) => <button type="button" key={availableDate} aria-pressed={date === availableDate} className={date === availableDate ? "selected" : ""} onClick={() => setDate(availableDate)}>{formatAppointmentDay(availableDate)}</button>)}</div></fieldset><fieldset><legend>Heure</legend><div className="appointment-choice-grid appointment-time-grid">{availableSlots.map((slot) => <button type="button" key={slot} aria-pressed={time === slot} className={time === slot ? "selected" : ""} onClick={() => setTime(slot)}>{slot}</button>)}</div></fieldset><button className="client-button" type="submit" disabled={loading || !date || !time}>{loading ? "Enregistrement…" : "Confirmer mon rendez-vous"}</button></form>}{error && <p className="client-form-error" role="alert">{error}</p>}</section>;
 }

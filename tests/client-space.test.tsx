@@ -32,7 +32,7 @@ describe("ClientSpaceSections", () => {
     expect(screen.getAllByText("Structure en préparation").length).toBeGreaterThan(0);
     expect(screen.getByText("Title modifié")).toBeInTheDocument();
     expect(screen.getByText("TRAVAIL RÉALISÉ PAR FEASEWEB")).toBeInTheDocument();
-    expect(screen.queryByText(/49/)).not.toBeInTheDocument();
+    expect(screen.getByText(/49 €/)).toBeInTheDocument();
     expect(screen.getAllByText("Ajouter une page").length).toBe(1);
   });
 
@@ -43,6 +43,15 @@ describe("ClientSpaceSections", () => {
     expect(screen.queryByText("Impressions")).not.toBeInTheDocument();
     expect(screen.queryByText("Position moyenne")).not.toBeInTheDocument();
     expect(screen.getByText("Les actions réalisées par FeaseWeb apparaîtront ici.")).toBeInTheDocument();
+  });
+
+  it("shows a safe site link when a domain exists, including during construction", () => {
+    const { rerender } = render(<ClientSpaceSections {...baseProps} seoActions={[]} />);
+    expect(screen.getByRole("link", { name: /Voir mon site/ })).toHaveAttribute("href", "https://analytical-engines.fr");
+    rerender(<ClientSpaceSections {...baseProps} site={{ ...baseProps.site, domain: null }} seoActions={[]} />);
+    expect(screen.queryByRole("link", { name: /Voir mon site/ })).not.toBeInTheDocument();
+    rerender(<ClientSpaceSections {...baseProps} site={{ ...baseProps.site, status: "actif", production_url: "https://analytical-engines.fr" }} seoActions={[]} />);
+    expect(screen.getByRole("link", { name: /Voir mon site/ })).toHaveAttribute("href", "https://analytical-engines.fr");
   });
 });
 

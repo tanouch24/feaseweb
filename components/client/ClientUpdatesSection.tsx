@@ -14,5 +14,6 @@ function actionHref(action?: ClientUpdateActionType) {
 }
 
 export function ClientUpdatesSection({ updates }: { updates: UpdateRecord[] }) {
+  if (!updates.length) return null;
   return <section id="suivi-site" className="client-card client-activity-card client-dashboard-activity" aria-labelledby="client-updates-title"><div className="client-section-heading"><p className="client-eyebrow">SUIVI DE VOTRE SITE</p><div className="client-updates-heading"><h2 id="client-updates-title">Mises à jour client</h2></div><p>Les informations publiées par FeaseWeb pour votre projet apparaîtront ici.</p></div>{updates.length ? <div className="client-update-list">{updates.map((update) => <article className="client-update" key={update.id}><div className="client-update-date">{date(update.activityDate)}</div><div className="client-update-mark" aria-hidden="true" /><div><p className="client-update-category">{typeLabels[update.updateType ?? "information"] ?? "Information"}</p><h3>{update.title}</h3><p>{update.description}</p>{update.actionType && <a className="client-text-link" href={actionHref(update.actionType)}>{update.updateType === "mise_en_ligne" ? "Voir mon site" : actionLabels[update.actionType]} →</a>}</div></article>)}</div> : <div className="client-empty compact"><p>Aucune mise à jour publiée pour le moment.</p></div>}</section>;
 }
