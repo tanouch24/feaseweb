@@ -25,7 +25,8 @@ export const loginSchema = z.object({ email: z.string().trim().toLowerCase().ema
 export const passwordSchema = z.object({ password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères.").max(200), confirmation: z.string().max(200) }).superRefine((value, context) => { if (value.password !== value.confirmation) context.addIssue({ code: "custom", path: ["confirmation"], message: "Les deux mots de passe doivent correspondre." }); });
 export const emailSchema = z.object({ email: z.string().trim().toLowerCase().email("L'adresse email n'est pas valide.").max(320) });
 export const noteSchema = z.object({ body: z.string().trim().min(1).max(5000) });
-export const sitePatchSchema = z.object({ previewUrl: z.string().trim().url().optional(), productionUrl: z.string().trim().url().optional(), domain: z.string().trim().max(253).optional(), repository: z.string().trim().max(500).optional(), hostingProvider: z.string().trim().max(120).optional(), status: z.enum(["a_preparer", "en_creation", "preview", "corrections", "valide", "mise_en_ligne", "actif", "suspendu", "archive"]).optional() }).strict();
+const safeSiteValue = (max: number) => z.string().trim().max(max).refine((value) => !value.startsWith("//") && (!/^[a-z][a-z\d+.-]*:/i.test(value) || /^https:\/\//i.test(value) || /^http:\/\//i.test(value)), "URL de site invalide.");
+export const sitePatchSchema = z.object({ previewUrl: z.string().trim().url().optional(), productionUrl: safeSiteValue(2048).optional(), domain: safeSiteValue(253).optional(), repository: z.string().trim().max(500).optional(), hostingProvider: z.string().trim().max(120).optional(), status: z.enum(["a_preparer", "en_creation", "preview", "corrections", "valide", "mise_en_ligne", "actif", "suspendu", "archive"]).optional() }).strict();
 export const statusSchema = z.object({ status: z.string().min(1).max(40) });
 export const prospectStatusSchema = z.object({ status: z.enum(["nouveau", "a_contacter", "contacte", "qualifie", "preview_en_cours", "preview_envoyee", "gagne", "perdu"]) });
 export const requestStatusSchema = z.object({ status: z.enum(["recue", "en_cours", "besoin_information", "terminee", "hors_perimetre"]) });
@@ -36,12 +37,13 @@ const clientUpdateFields = {
   actionType: z.enum(["voir_apercu", "completer_informations", "voir_projet"]).nullable().optional(),
   title: z.string().trim().min(1).max(180),
   message: z.string().trim().min(1).max(5000),
+  activityDate: z.string().date().optional(),
 };
 const legacyClientUpdateSchema = z.object({
   clientId: z.string().uuid(), siteId: z.string().uuid().nullable().optional(), category: z.enum(["seo", "contenu", "maintenance", "site", "securite", "autre"]), title: z.string().trim().min(1).max(180), description: z.string().trim().min(1).max(5000), status: z.enum(["prevu", "en_cours", "termine"]), visibleToClient: z.boolean(), activityDate: z.string().date(),
 }).transform((value) => ({ client_id: value.clientId, site_id: value.siteId ?? null, category: value.category, title: value.title, description: value.description, status: value.status, visible_to_client: value.visibleToClient, activity_date: value.activityDate }));
 export const clientUpdateSchema = z.union([z.object(clientUpdateFields).transform((value) => ({
-  client_id: value.clientId, site_id: value.siteId ?? null, update_type: value.updateType, action_type: value.actionType ?? null, title: value.title, description: value.message, category: "site" as const, status: "termine" as const, visible_to_client: true, activity_date: new Date().toISOString().slice(0, 10),
+  client_id: value.clientId, site_id: value.siteId ?? null, update_type: value.updateType, action_type: value.actionType ?? null, title: value.title, description: value.message, category: "site" as const, status: "termine" as const, visible_to_client: true, activity_date: value.activityDate ?? new Date().toISOString().slice(0, 10),
 })), legacyClientUpdateSchema]);
 const modernClientUpdatePatchSchema = z.object({
   siteId: z.string().uuid().nullable().optional(), updateType: clientUpdateFields.updateType.optional(), actionType: clientUpdateFields.actionType.optional(), title: clientUpdateFields.title.optional(),
@@ -67,5 +69,6 @@ export const onboardingPatchSchema = z.object({
   availableAssets: z.array(z.enum(["logo","photos","textes","avis","aucun"])).max(5).optional(), contactChannel: z.enum(["telephone","whatsapp","email"]).nullable().optional(), contactSlot: z.enum(["matin","apres_midi","fin_journee"]).nullable().optional(), currentStep: z.number().int().min(1).max(8).optional(),
 }).strict();
 export const supportMessageSchema = z.object({ message: z.string().trim().min(1).max(2000) });
+export const profileUpdateSchema = z.object({ firstName: z.string().trim().min(1).max(100), lastName: z.string().trim().min(1).max(100), company: z.string().trim().min(1).max(180), phone: optionalText(40) });
 export const projectStatusSchema = z.object({ status: z.enum(["project_configured","subscription_active","preparation","building","preview_ready","client_feedback","finalizing","live"]) });
 export const accessRequirementSchema = z.object({ category: z.enum(["cms","hebergement","domaine","dns","ftp_sftp"]), status: z.enum(["non_necessaire","a_fournir","aide_demandee","recu","valide"]) });

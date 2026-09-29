@@ -3,22 +3,21 @@
 /* eslint-disable react/no-unescaped-entities */
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { formatDate, formatMoney, getClientName, labelMap } from "@/lib/backoffice";
 import { formatAdminAppointment, formatAdminPaymentDate, getAdminDashboardSections, type AdminDashboardItem, adminDashboardStages } from "@/lib/admin-dashboard";
 import { useBackoffice } from "@/lib/backoffice-store";
-import { createClient } from "@/lib/supabase/client";
+import { LogoutButton } from "@/components/layout/LogoutButton";
 
 const nav = [{ href: "/admin", label: "Tableau de bord", icon: "⌂" }, { href: "/admin/dossiers", label: "Dossiers", icon: "◎" }, { href: "/admin/demandes", label: "Demandes", icon: "✦" }];
 const tone = (value: string) => ["actif", "gagne", "valide", "preview", "paye", "terminee", "configure", "scheduled", "completed", "approved"].includes(value) ? "good" : ["echoue", "impaye", "retard", "suspendu", "perdu", "probleme", "declined"].includes(value) ? "bad" : "neutral";
-function LogoutButton({ mobile = false }: { mobile?: boolean }) { const router = useRouter(); const logout = async () => { const supabase = createClient(); void supabase?.auth.signOut().catch(() => undefined); try { await fetch("/api/auth/logout", { method: "POST", cache: "no-store", credentials: "same-origin", keepalive: true }); } catch { /* Redirect even when the network is unavailable. */ } window.location.replace("/connexion"); router.refresh(); }; return <button type="button" className={mobile ? "admin-mobile-logout" : "admin-logout-button"} onClick={() => void logout}>↪ Se déconnecter</button>; }
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname(); const { ready, error } = useBackoffice();
   return <div className="admin-shell min-h-screen bg-[#f6f7f5] text-[#17201d]">
-    <aside className="admin-sidebar hidden lg:flex"><div className="admin-sidebar-navigation"><Link href="/admin" className="admin-brand"><span className="admin-brand-mark">F</span><span>fease<span>web</span></span></Link><p className="admin-eyebrow">POSTE DE PILOTAGE</p><nav className="admin-sidebar-nav mt-5 space-y-1" aria-label="Navigation administrateur">{nav.map((item) => <Link key={item.href} href={item.href} className={`admin-nav-link ${pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href)) ? "active" : ""}`}><span className="admin-nav-icon">{item.icon}</span>{item.label}</Link>)}</nav></div><div className="admin-sidebar-actions space-y-3"><div className="admin-security-note"><span className="status-dot" />Accès administrateur<br /><small>Session vérifiée côté serveur</small></div><Link href="/" className="admin-public-link">↗ Voir le site FeaseWeb</Link><LogoutButton /></div></aside>
-    <div className="lg:hidden border-b border-[#dfe5e1] bg-white px-4 py-3"><div className="flex items-center justify-between"><Link href="/admin" className="admin-brand"><span className="admin-brand-mark">F</span><span>fease<span>web</span></span></Link><div className="flex items-center gap-3"><Link href="/" className="text-xs text-[#60706a]">Voir le site ↗</Link><LogoutButton mobile /></div></div><nav className="admin-mobile-nav">{nav.map((item) => <Link key={item.href} href={item.href} className={pathname === item.href ? "active" : ""}>{item.label}</Link>)}</nav></div>
+    <aside className="admin-sidebar hidden lg:flex"><div className="admin-sidebar-navigation"><Link href="/admin" className="admin-brand"><span className="admin-brand-mark">F</span><span>fease<span>web</span></span></Link><p className="admin-eyebrow">POSTE DE PILOTAGE</p><nav className="admin-sidebar-nav mt-5 space-y-1" aria-label="Navigation administrateur">{nav.map((item) => <Link key={item.href} href={item.href} className={`admin-nav-link ${pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href)) ? "active" : ""}`}><span className="admin-nav-icon">{item.icon}</span>{item.label}</Link>)}</nav></div><div className="admin-sidebar-actions space-y-3"><div className="admin-security-note"><span className="status-dot" />Accès administrateur<br /><small>Session vérifiée côté serveur</small></div><Link href="/" className="admin-public-link">↗ Voir le site FeaseWeb</Link><LogoutButton className="admin-logout-button" /></div></aside>
+    <div className="lg:hidden border-b border-[#dfe5e1] bg-white px-4 py-3"><div className="flex items-center justify-between"><Link href="/admin" className="admin-brand"><span className="admin-brand-mark">F</span><span>fease<span>web</span></span></Link><div className="flex items-center gap-3"><Link href="/" className="text-xs text-[#60706a]">Voir le site ↗</Link><LogoutButton className="admin-mobile-logout" /></div></div><nav className="admin-mobile-nav">{nav.map((item) => <Link key={item.href} href={item.href} className={pathname === item.href ? "active" : ""}>{item.label}</Link>)}</nav></div>
     <main className="admin-main"><div className="admin-topbar"><div><p className="admin-kicker">FEASEWEB / INTERNE</p><p className="admin-mode">{error ? error : ready ? "Données à jour" : "Chargement des données…"}</p></div></div>{children}</main>
   </div>;
 }

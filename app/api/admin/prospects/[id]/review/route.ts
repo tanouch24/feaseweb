@@ -14,7 +14,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const admin = createAdminClient();
   if (!admin) return NextResponse.json({ error: "Supabase n'est pas configuré." }, { status: 503 });
   const { id } = await params;
-  const { data: intake } = await admin.from("project_intakes").select("id").eq("prospect_id", id).maybeSingle();
+  const { data: prospectIntake } = await admin.from("project_intakes").select("id").eq("prospect_id", id).maybeSingle();
+  const { data: clientIntake } = prospectIntake ? { data: null } : await admin.from("project_intakes").select("id").eq("client_id", id).maybeSingle();
+  const intake = prospectIntake ?? clientIntake;
   if (!intake) return NextResponse.json({ error: "Configuration prospect introuvable." }, { status: 404 });
 
   if (parsed.data.action === "schedule_appointment") {

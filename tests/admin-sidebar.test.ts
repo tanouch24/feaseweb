@@ -12,7 +12,8 @@ describe("admin sidebar accessibility", () => {
     expect(admin).toContain('className="admin-sidebar-navigation"');
     expect(admin).toContain('className="admin-sidebar-actions space-y-3"');
     expect(admin).toContain('className="admin-sidebar-nav mt-5 space-y-1"');
-    expect(admin).toContain('className={mobile ? "admin-mobile-logout" : "admin-logout-button"}');
+    expect(admin).toContain('import { LogoutButton } from "@/components/layout/LogoutButton"');
+    expect(admin).toContain('className="admin-mobile-logout"');
     expect(styles).toContain("height: 100dvh");
     expect(styles).toContain("overflow: hidden");
     expect(styles).toContain(".admin-sidebar-nav { min-height: 0; overflow-y: auto");
@@ -21,10 +22,12 @@ describe("admin sidebar accessibility", () => {
 
   it("keeps logout as a real sign-out action with a protected redirect", () => {
     const admin = source("components/admin/AdminApp.tsx");
+    const logout = source("components/layout/LogoutButton.tsx");
 
-    expect(admin).toContain("supabase?.auth.signOut()");
-    expect(admin).toContain('fetch("/api/auth/logout", { method: "POST", cache: "no-store", credentials: "same-origin", keepalive: true })');
-    expect(admin).toContain('window.location.replace("/connexion")');
-    expect(admin).toContain("Se déconnecter");
+    expect(admin).toContain('import { LogoutButton } from "@/components/layout/LogoutButton"');
+    expect(logout).toContain("supabase?.auth.signOut()");
+    expect(logout).toContain('fetch("/api/auth/logout"');
+    expect(logout).toContain('window.location.replace("/connexion")');
+    expect(logout).toContain("Se déconnecter");
   });
 });

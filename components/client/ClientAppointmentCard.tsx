@@ -5,8 +5,15 @@ import { formatAppointmentDate } from "@/lib/client-order-timeline";
 import { availableAppointmentDates, availableAppointmentSlots, formatAppointmentDay } from "@/lib/appointment-availability";
 
 type Appointment = { appointment_status?: string | null; appointment_date?: string | null; appointment_time?: string | null } | null;
-const subscribeCalendar = () => () => undefined;
-const serverCalendarSnapshot = "[]";
+const calendarListeners = new Set<() => void>();
+let calendarSnapshot = "[]";
+function subscribeCalendar(listener: () => void) {
+  calendarListeners.add(listener);
+  if (calendarListeners.size === 1 && typeof window !== "undefined") queueMicrotask(() => { calendarSnapshot = JSON.stringify(availableAppointmentDates()); calendarListeners.forEach((item) => item()); });
+  return () => calendarListeners.delete(listener);
+}
+const getCalendarSnapshot = () => calendarSnapshot;
+const getServerCalendarSnapshot = () => "[]";
 
 export function ClientAppointmentCard({ initialAppointment }: { initialAppointment: Appointment }) {
   const [appointment, setAppointment] = useState(initialAppointment);
@@ -14,8 +21,8 @@ export function ClientAppointmentCard({ initialAppointment }: { initialAppointme
   const [time, setTime] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const availableDates = JSON.parse(useSyncExternalStore(subscribeCalendar, () => JSON.stringify(availableAppointmentDates()), () => serverCalendarSnapshot)) as string[];
-  const availableSlots = JSON.parse(useSyncExternalStore(subscribeCalendar, () => JSON.stringify(date ? availableAppointmentSlots(date) : []), () => serverCalendarSnapshot)) as string[];
+  const availableDates = JSON.parse(useSyncExternalStore(subscribeCalendar, getCalendarSnapshot, getServerCalendarSnapshot)) as string[];
+  const availableSlots = JSON.parse(useSyncExternalStore(subscribeCalendar, () => JSON.stringify(date ? availableAppointmentSlots(date) : []), getServerCalendarSnapshot)) as string[];
   const scheduled = appointment?.appointment_status === "scheduled";
   const completed = appointment?.appointment_status === "completed";
 

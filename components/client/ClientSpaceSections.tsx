@@ -6,8 +6,8 @@ import { ClientAppointmentCard } from "@/components/client/ClientAppointmentCard
 import { StartSubscriptionButton } from "@/components/billing/BillingActions";
 import { isOnboardingComplete, type OnboardingProject } from "@/lib/onboarding";
 import { addCalendarDays, clientOrderTimeline, formatClientDate } from "@/lib/client-order-timeline";
-import { canOpenClientSite } from "@/lib/client-site-access";
 import { whatsappContactUrl } from "@/lib/whatsapp";
+import { displayPublicSiteUrl, normalizePublicSiteUrl } from "@/lib/public-site-url";
 
 type ClientRecord = { first_name: string | null; last_name: string | null; company: string; email: string; phone: string | null; status: string; started_at: string | null };
 type ProfileRecord = { first_name?: string | null; last_name?: string | null; email?: string | null } | null;
@@ -50,15 +50,18 @@ function RequestItem({ request }: { request: RequestRecord }) {
   return <article className="client-request-row"><div><strong>{request.title || request.category}</strong><p>{request.message}</p><small>{date(request.created_at)}</small></div><span className={`client-chip ${request.status}`}>{humanStatus}</span></article>;
 }
 
-function SeoFollowUp({ actions }: { actions: SeoActionRecord[] }) {
+function WorkHistory({ actions, updates }: { actions: SeoActionRecord[]; updates: UpdateRecord[] }) {
   const statusLabel = (status: string) => status === "terminee" ? "Terminée" : status === "en_cours" ? "En cours" : "À faire";
-  return <section className="client-card client-seo-follow-up" aria-labelledby="client-seo-title"><p className="client-eyebrow">SEO &amp; SUIVI</p><h2 id="client-seo-title">Le travail réalisé par FeaseWeb</h2>{actions.length ? <div className="client-seo-list">{actions.map((action) => <article className="client-seo-entry" key={action.id}><div className="client-seo-entry-meta"><span>{date(action.date)}</span><span className="client-chip">{statusLabel(action.status)}</span></div><h3>{action.action}</h3>{action.description && <p>{action.description}</p>}</article>)}</div> : <p className="client-muted-note">Les actions réalisées par FeaseWeb apparaîtront ici.</p>}</section>;
+  const entries = [...actions.map((action) => ({ id: `seo:${action.id}`, date: action.date, title: action.action, description: action.description, status: action.status })), ...updates.filter((update) => ["information", "avancement"].includes(update.update_type ?? "")).map((update) => ({ id: `update:${update.id}`, date: update.activity_date, title: update.title, description: update.description, status: "terminee" }))].sort((a, b) => b.date.localeCompare(a.date));
+  return <section className="client-card client-seo-follow-up" aria-labelledby="client-seo-title"><p className="client-eyebrow">TRAVAIL RÉALISÉ PAR FEASEWEB</p><h2 id="client-seo-title">Le travail réalisé par FeaseWeb</h2>{entries.length ? <div className="client-seo-list">{entries.map((entry) => <article className="client-seo-entry" key={entry.id}><div className="client-seo-entry-meta"><span>{date(entry.date)}</span><span className="client-chip">{statusLabel(entry.status)}</span></div><h3>{entry.title}</h3>{entry.description && <p>{entry.description}</p>}</article>)}</div> : <p className="client-muted-note">Les actions réalisées par FeaseWeb apparaîtront ici.</p>}</section>;
 }
 
 export function ClientSpaceSections({ client, project, site, payments, updates, requests, seoActions, appointment, validation, projectComplete = true }: ClientSpaceSectionsProps) {
   const firstPayment = payments.filter((payment) => payment.status === "paye").sort((a, b) => a.created_at.localeCompare(b.created_at))[0];
   const paymentConfirmed = Boolean(firstPayment);
-  const live = canOpenClientSite({ projectStatus: project?.projectStatus, siteStatus: site?.status, productionUrl: site?.production_url });
+  const siteUrl = normalizePublicSiteUrl(site?.production_url || site?.domain);
+  const siteUrlLabel = displayPublicSiteUrl(site?.production_url || site?.domain);
+  const live = Boolean(siteUrl && (site?.status === "actif" || project?.projectStatus === "live"));
   const approved = validation?.validation_status === "approved";
   const openRequests = requests.filter((request) => !["terminee", "hors_perimetre"].includes(request.status));
   const deliveryEstimate = paymentConfirmed && !live && firstPayment ? addCalendarDays(firstPayment.created_at) : null;
@@ -68,9 +71,9 @@ export function ClientSpaceSections({ client, project, site, payments, updates, 
     {projectComplete ? <ClientAppointmentCard initialAppointment={appointment ?? null} /> : null}
     <section className="client-card client-project-status-card"><p className="client-eyebrow">VOTRE PARCOURS</p><ProjectTimeline project={project} appointment={appointment} paymentConfirmed={paymentConfirmed} paymentDate={firstPayment?.created_at} live={live} /></section>
     <section className="client-card client-payment-status"><p className="client-eyebrow">PAIEMENT</p><h2>{paymentConfirmed ? "Paiement effectué ✓" : approved ? "Votre projet est prêt à démarrer." : "Le paiement sera disponible lorsque votre dossier sera prêt."}</h2>{paymentConfirmed ? <p className="client-muted-note">Votre premier paiement a bien été confirmé.</p> : approved ? <><p className="client-price">49 €<span>/mois</span></p><StartSubscriptionButton label="Payer mon abonnement" /><p className="client-footnote">Création ou refonte du site, hébergement, maintenance et suivi.</p></> : <p className="client-muted-note">Nous vous indiquerons ici lorsque votre abonnement pourra être activé.</p>}</section>
-    <section className="client-card client-site-status"><p className="client-eyebrow">MON SITE</p><h2>{live ? "Votre site est en ligne ✓" : "Votre site est en cours de création."}</h2>{live && site?.production_url ? <a className="client-button" href={site.production_url} target="_blank" rel="noreferrer">Voir mon site ↗</a> : <p className="client-muted-note">{deliveryEstimate ? `Livraison estimée : ${formatClientDate(deliveryEstimate)}` : "Le lien sera disponible lorsque FeaseWeb aura terminé et validé votre site."}</p>}</section>
-    <SeoFollowUp actions={seoActions} />
-    <ClientUpdatesSection updates={updates.map((update) => ({ id: update.id, updateType: update.update_type as never, actionType: update.action_type as never, title: update.title, description: update.description, status: update.status, activityDate: update.activity_date, createdAt: update.created_at, readAt: update.read_at }))} />
+    <section id="mon-site" className="client-card client-site-status"><p className="client-eyebrow">MON SITE</p><h2>{siteUrl ? (site?.status === "actif" || project?.projectStatus === "live" ? "Votre site est en ligne ✓" : "Votre site est en construction") : "Votre site est en préparation"}</h2>{siteUrl ? <><p className="client-muted-note">{siteUrlLabel}</p><a className="client-button" href={siteUrl} target="_blank" rel="noreferrer">Voir mon site ↗</a></> : <p className="client-muted-note">{deliveryEstimate ? `Livraison estimée : ${formatClientDate(deliveryEstimate)}` : "FeaseWeb prépare actuellement votre site internet."}</p>}</section>
+    <WorkHistory actions={seoActions} updates={updates} />
+    <ClientUpdatesSection updates={updates.filter((update) => !["information", "avancement"].includes(update.update_type ?? "")).map((update) => ({ id: update.id, updateType: update.update_type as never, actionType: update.action_type as never, title: update.title, description: update.description, status: update.status, activityDate: update.activity_date, createdAt: update.created_at, readAt: update.read_at }))} />
     <section className="client-card client-dashboard-requests"><SectionHeading title="Mes demandes" detail="Suivez les demandes envoyées à FeaseWeb." />{openRequests.length > 0 && <div className="client-request-list">{openRequests.map((request) => <RequestItem key={request.id} request={request} />)}</div>}{openRequests.length === 0 && <p className="client-muted-note">Aucune demande en cours.</p>}</section>
     <section className="client-card client-whatsapp-card" aria-labelledby="client-whatsapp-title"><p className="client-eyebrow">BESOIN D'AIDE ?</p><h2 id="client-whatsapp-title">Une question concernant votre site ?</h2><a className="client-button" href={whatsappContactUrl} target="_blank" rel="noopener noreferrer">Nous contacter sur WhatsApp ↗</a></section>
   </section>;

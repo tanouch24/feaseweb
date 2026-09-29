@@ -57,7 +57,7 @@ export type Client = {
 };
 export type Site = {
   id: string; clientId?: string; name: string; slug: string; previewUrl: string;
-  finalDomain: string; repository: string; host: string; createdAt: string;
+  finalDomain: string; productionUrl?: string; repository: string; host: string; createdAt: string;
   publishedAt?: string; status: SiteStatus; technicalNotes: string;
 };
 export type Subscription = {
@@ -80,7 +80,7 @@ export type SeoMetric = { id: string; siteId: string; clicks: number; impression
 export type Domain = { id: string; clientId: string; name: string; registrar: string; owner: string; expiresAt?: string; renewal: "manuel" | "automatique"; dnsStatus: "a_configurer" | "configure" | "probleme"; ssl: "actif" | "a_verifier" | "inactif"; notes: string };
 export type ActivityLog = { id: string; occurredAt: string; actor: "admin" | "system"; entityType: string; entityId: string; message: string };
 export type ClientUpdate = { id: string; clientId: string; siteId?: string; category: ClientUpdateCategory; updateType: ClientUpdateType; actionType?: ClientUpdateActionType; readAt?: string; title: string; description: string; status: ClientUpdateStatus; visibleToClient: boolean; activityDate: string; createdAt: string; updatedAt: string };
-export type ProjectIntake = { id: string; userId: string; prospectId?: string; clientId?: string; firstName: string; lastName: string; company: string; email: string; phone: string; activity: string; hasExistingSite: boolean; existingSiteUrl: string; existingSiteProject: string; objective: string; pages: string[]; style: string; palette: string; assets: string[]; contactChannel: string; contactSlot: string; status: string; currentStep: number; completedAt?: string };
+export type ProjectIntake = { id: string; userId: string; prospectId?: string; clientId?: string; firstName: string; lastName: string; company: string; email: string; phone: string; activity: string; hasExistingSite: boolean; existingSiteUrl: string; existingSiteProject: string; objective: string; pages: string[]; style: string; palette: string; assets: string[]; contactChannel: string; contactSlot: string; status: string; currentStep: number; completedAt?: string; appointmentStatus?: AppointmentStatus; appointmentDate?: string; appointmentTime?: string; validationStatus?: ValidationStatus; supportMessage?: string; supportRequestedAt?: string };
 
 export type BackofficeData = {
   prospects: Prospect[]; clients: Client[]; sites: Site[]; subscriptions: Subscription[];

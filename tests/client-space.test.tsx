@@ -31,7 +31,7 @@ describe("ClientSpaceSections", () => {
     expect(screen.getByText("Envoyer un message à FeaseWeb")).toBeInTheDocument();
     expect(screen.getAllByText("Structure en préparation").length).toBeGreaterThan(0);
     expect(screen.getByText("Title modifié")).toBeInTheDocument();
-    expect(screen.getByText("SEO & SUIVI")).toBeInTheDocument();
+    expect(screen.getByText("TRAVAIL RÉALISÉ PAR FEASEWEB")).toBeInTheDocument();
     expect(screen.queryByText(/49/)).not.toBeInTheDocument();
     expect(screen.getAllByText("Ajouter une page").length).toBe(1);
   });

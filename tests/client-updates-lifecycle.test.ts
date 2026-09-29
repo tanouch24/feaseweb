@@ -43,9 +43,11 @@ describe("client updates lifecycle safeguards", () => {
 
   it("performs an explicit Supabase sign out in the admin shell", () => {
     const admin = source("components/admin/AdminApp.tsx");
-    expect(admin).toContain("supabase?.auth.signOut()");
-    expect(admin).toContain('fetch("/api/auth/logout"');
-    expect(admin).toContain('window.location.replace("/connexion")');
+    const logout = source("components/layout/LogoutButton.tsx");
+    expect(admin).toContain('import { LogoutButton } from "@/components/layout/LogoutButton"');
+    expect(logout).toContain("supabase?.auth.signOut()");
+    expect(logout).toContain('fetch("/api/auth/logout"');
+    expect(logout).toContain('window.location.replace("/connexion")');
   });
 
   it("keeps notifications visible until the client opens one", () => {

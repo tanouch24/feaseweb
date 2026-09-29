@@ -9,6 +9,7 @@ type Store = {
   convertProspect: (id: string) => Promise<void>;
   setClientStatus: (id: string, status: ClientStatus) => Promise<void>;
   setSiteStatus: (id: string, status: SiteStatus) => Promise<void>;
+  setSiteDomain: (id: string, domain: string) => Promise<void>;
   setSitePreview: (id: string, previewUrl: string) => Promise<void>;
   addClientNote: (id: string, note: string) => Promise<void>;
   inviteClient: (id: string) => Promise<void>;
@@ -16,8 +17,8 @@ type Store = {
   scheduleProspectAppointment: (id: string, date: string, time: string) => Promise<void>;
   updateProspectReview: (id: string, action: "complete_appointment" | "cancel_appointment" | "approve" | "needs_information" | "decline", note?: string) => Promise<void>;
   setRequestStatus: (id: string, status: ModificationRequest["status"]) => Promise<void>;
-  addSeoAction: (siteId: string, action: string, description: string) => Promise<void>;
-  createClientUpdate: (input: { clientId: string; siteId?: string; updateType: ClientUpdate["updateType"]; actionType?: ClientUpdate["actionType"]; title: string; message: string }) => Promise<{ emailSent: boolean; warning?: string }>;
+  addSeoAction: (siteId: string, action: string, description: string, date?: string) => Promise<void>;
+  createClientUpdate: (input: { clientId: string; siteId?: string; updateType: ClientUpdate["updateType"]; actionType?: ClientUpdate["actionType"]; title: string; message: string; activityDate?: string }) => Promise<{ emailSent: boolean; warning?: string }>;
   updateClientUpdate: (id: string, input: { siteId?: string | null; updateType?: ClientUpdate["updateType"]; actionType?: ClientUpdate["actionType"] | null; title?: string; message?: string }) => Promise<void>;
   deleteClientUpdate: (id: string) => Promise<void>;
   setProjectStatus: (id: string, status: string) => Promise<void>;
@@ -44,6 +45,7 @@ export function BackofficeProvider({ children }: { children: React.ReactNode }) 
     convertProspect: async (id) => { await api(`/api/admin/prospects/${id}/convert`, { method: "POST", body: JSON.stringify({}) }); await refresh(); },
     setClientStatus: (id, status) => mutate(`/api/admin/clients/${id}`, { status }),
     setSiteStatus: (id, status) => mutate(`/api/admin/sites/${id}`, { status }),
+    setSiteDomain: (id, domain) => mutate(`/api/admin/sites/${id}`, { domain }),
     setSitePreview: async (id, previewUrl) => { await mutate(`/api/admin/sites/${id}`, { previewUrl }); },
     addClientNote: async (id, body) => { await api("/api/admin/notes", { method: "POST", body: JSON.stringify({ clientId: id, body }) }); await refresh(); },
     inviteClient: async (id) => { await api(`/api/admin/clients/${id}/invite`, { method: "POST", body: JSON.stringify({}) }); await refresh(); },
@@ -51,7 +53,7 @@ export function BackofficeProvider({ children }: { children: React.ReactNode }) 
     scheduleProspectAppointment: async (id, date, time) => { await api(`/api/admin/prospects/${id}/review`, { method: "PATCH", body: JSON.stringify({ action: "schedule_appointment", date, time }) }); await refresh(); },
     updateProspectReview: async (id, action, note) => { await api(`/api/admin/prospects/${id}/review`, { method: "PATCH", body: JSON.stringify({ action, note: note ?? null }) }); await refresh(); },
     setRequestStatus: (id, status) => mutate(`/api/admin/requests/${id}`, { status }),
-    addSeoAction: async (siteId, action, description) => { await api("/api/admin/seo/actions", { method: "POST", body: JSON.stringify({ siteId, action, description }) }); await refresh(); },
+    addSeoAction: async (siteId, action, description, date) => { await api("/api/admin/seo/actions", { method: "POST", body: JSON.stringify({ siteId, action, description, date }) }); await refresh(); },
     createClientUpdate: async (input) => { const idempotencyKey = crypto.randomUUID(); const result = await api("/api/admin/client-updates", { method: "POST", headers: { "Idempotency-Key": idempotencyKey }, body: JSON.stringify(input) }); await refresh(); return { emailSent: Boolean(result?.emailSent), warning: typeof result?.warning === "string" ? result.warning : undefined }; },
     updateClientUpdate: async (id, input) => { await api(`/api/admin/client-updates/${id}`, { method: "PATCH", body: JSON.stringify(input) }); await refresh(); },
     deleteClientUpdate: async (id) => { await api(`/api/admin/client-updates/${id}`, { method: "DELETE" }); await refresh(); },
