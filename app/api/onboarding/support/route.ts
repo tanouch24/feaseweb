@@ -9,7 +9,8 @@ export async function POST(request: Request) {
   const parsed = supportMessageSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Votre message est invalide." }, { status: 422 });
   const supabase = await createClient();
-  const { error } = await supabase!.from("project_intakes").update({ support_message: parsed.data.message, support_requested_at: new Date().toISOString() }).eq("user_id", current.user.id);
+  const { data, error } = await supabase!.from("project_intakes").update({ support_message: parsed.data.message, support_requested_at: new Date().toISOString() }).eq("user_id", current.user.id).select("id").maybeSingle();
   if (error) return NextResponse.json({ error: "Impossible d'envoyer votre demande." }, { status: 500 });
+  if (!data) return NextResponse.json({ error: "Commencez votre projet avant d'envoyer un message." }, { status: 404 });
   return NextResponse.json({ ok: true });
 }

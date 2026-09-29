@@ -14,21 +14,27 @@ async function getBookingContext() {
   const supabase = await createClient();
   const admin = createAdminClient();
   if (!supabase || !admin) return { response: NextResponse.json({ error: "Supabase n'est pas configuré." }, { status: 503 }) };
-  let intakeQuery = admin.from("project_intakes").select(`id, ${onboardingProjectSelect}`);
   let clientPhone: string | null = null;
-  if (current.role === "prospect") {
-    intakeQuery = intakeQuery.eq("user_id", current.user.id);
-  } else {
+  const { data: userIntake, error: userIntakeError } = await admin.from("project_intakes").select(`id, ${onboardingProjectSelect}`).eq("user_id", current.user.id).maybeSingle();
+  if (userIntakeError) return { response: NextResponse.json({ error: "Projet indisponible." }, { status: 500 }) };
+  if (userIntake) {
+    if (current.role === "client") {
+      const { data: linkedClient } = await admin.from("clients").select("phone").eq("user_id", current.user.id).maybeSingle();
+      clientPhone = typeof linkedClient?.phone === "string" ? linkedClient.phone : null;
+    }
+    return { current, intake: userIntake, supabase, admin, clientPhone };
+  }
+  if (current.role === "client") {
     const { data: client, error: clientError } = await admin.from("clients").select("id, phone").eq("user_id", current.user.id).maybeSingle();
     if (clientError) return { response: NextResponse.json({ error: "Projet indisponible." }, { status: 500 }) };
     if (!client) return { response: NextResponse.json({ error: "Projet introuvable." }, { status: 404 }) };
-    intakeQuery = intakeQuery.eq("client_id", client.id);
     clientPhone = typeof client.phone === "string" ? client.phone : null;
+    const { data: linkedIntake, error: linkedIntakeError } = await admin.from("project_intakes").select(`id, ${onboardingProjectSelect}`).eq("client_id", client.id).maybeSingle();
+    if (linkedIntakeError) return { response: NextResponse.json({ error: "Projet indisponible." }, { status: 500 }) };
+    if (!linkedIntake) return { response: NextResponse.json({ error: "Projet introuvable." }, { status: 404 }) };
+    return { current, intake: linkedIntake, supabase, admin, clientPhone };
   }
-  const { data: intake, error } = await intakeQuery.maybeSingle();
-  if (error) return { response: NextResponse.json({ error: "Projet indisponible." }, { status: 500 }) };
-  if (!intake) return { response: NextResponse.json({ error: "Projet introuvable." }, { status: 404 }) };
-  return { current, intake, supabase, admin, clientPhone };
+  return { response: NextResponse.json({ error: "Projet introuvable." }, { status: 404 }) };
 }
 
 export async function GET(request: Request) {

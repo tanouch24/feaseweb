@@ -47,10 +47,11 @@ describe("ClientSpaceSections", () => {
 });
 
 describe("client space architecture", () => {
-  it("keeps prospect/client boundaries and reads SEO from existing tables", () => {
+  it("keeps user-to-intake continuity and reads SEO from existing tables", () => {
     const page = readFileSync(resolve(process.cwd(), "app/espace-client/page.tsx"), "utf8");
-    expect(page).toContain('current.role === "prospect"');
-    expect(page).toContain("ProspectProjectDashboard");
+    expect(page).toContain('.eq("user_id", current.user.id)');
+    expect(page).toContain("Commencez votre projet FeaseWeb");
+    expect(page).not.toContain("Aucun dossier client n'est encore associé");
     expect(page).toContain('from("seo_actions")');
     expect(page).toContain('from("modification_requests")');
     expect(page).toContain('from("client_updates")');
