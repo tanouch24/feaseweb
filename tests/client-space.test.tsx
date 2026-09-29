@@ -30,7 +30,8 @@ describe("ClientSpaceSections", () => {
     expect(screen.getByText("VOTRE PARCOURS")).toBeInTheDocument();
     expect(screen.getAllByText("Besoin d'une modification ?").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Structure en préparation").length).toBeGreaterThan(0);
-    expect(screen.queryByText("Title modifié")).not.toBeInTheDocument();
+    expect(screen.getByText("Title modifié")).toBeInTheDocument();
+    expect(screen.getByText("SEO & SUIVI")).toBeInTheDocument();
     expect(screen.queryByText(/49/)).not.toBeInTheDocument();
     expect(screen.getAllByText("Ajouter une page").length).toBe(1);
   });
@@ -41,6 +42,7 @@ describe("ClientSpaceSections", () => {
     expect(screen.queryByText("Clics")).not.toBeInTheDocument();
     expect(screen.queryByText("Impressions")).not.toBeInTheDocument();
     expect(screen.queryByText("Position moyenne")).not.toBeInTheDocument();
+    expect(screen.getByText("Les actions réalisées par FeaseWeb apparaîtront ici.")).toBeInTheDocument();
   });
 });
 

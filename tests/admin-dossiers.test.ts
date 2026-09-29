@@ -23,4 +23,11 @@ describe("admin dossier workspace", () => {
     expect(detail).toContain("createClientUpdate");
     expect(detail).toContain("setRequestStatus");
   });
+
+  it("lets the admin complete a site only from the dossier", () => {
+    const detail = read("components/admin/DossierDetail.tsx");
+    expect(detail).toContain("Marquer le site comme terminé");
+    expect(detail).toContain('setSiteStatus(site.id, "actif")');
+    expect(detail).toContain("site.finalDomain.trim()");
+  });
 });

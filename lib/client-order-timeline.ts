@@ -35,7 +35,7 @@ export function clientOrderTimeline(input: {
   const delivery = input.paymentDate ? addCalendarDays(input.paymentDate) : null;
   const appointmentDetail = appointmentScheduled
     ? formatAppointmentDate(input.appointmentDate, input.appointmentTime) ?? "Rendez-vous planifié"
-    : input.appointmentStatus === "completed" ? "Rendez-vous effectué" : undefined;
+    : input.appointmentStatus === "completed" ? "Rendez-vous effectué" : "Aucun rendez-vous planifié";
   return [
     { key: "requested", label: "Demande envoyée", state: input.hasProject ? "complete" : "current" },
     { key: "appointment", label: "Rendez-vous", state: appointmentDone ? "complete" : appointmentScheduled ? "current" : "upcoming", detail: appointmentDetail },
