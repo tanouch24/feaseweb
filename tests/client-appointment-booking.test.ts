@@ -17,7 +17,7 @@ describe("shared appointment booking", () => {
   it("keeps the client form minimal and uses the existing appointment endpoint", () => {
     const form = read("components/client/ClientAppointmentCard.tsx");
     expect(form).toContain('fetch("/api/prospect/appointment"');
-    expect(form).toContain("Prendre rendez-vous");
+    expect(form).toContain("Confirmer mon rendez-vous");
     expect(form).toContain("Rendez-vous effectué ✓");
   });
 

@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { formatAppointmentDate } from "@/lib/client-order-timeline";
+import { availableAppointmentDates, availableAppointmentSlots, formatAppointmentDay } from "@/lib/appointment-availability";
 
 type Appointment = { appointment_status?: string | null; appointment_date?: string | null; appointment_time?: string | null } | null;
+const subscribeCalendar = () => () => undefined;
+const serverCalendarSnapshot = "[]";
 
 export function ClientAppointmentCard({ initialAppointment }: { initialAppointment: Appointment }) {
   const [appointment, setAppointment] = useState(initialAppointment);
@@ -11,6 +14,8 @@ export function ClientAppointmentCard({ initialAppointment }: { initialAppointme
   const [time, setTime] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const availableDates = JSON.parse(useSyncExternalStore(subscribeCalendar, () => JSON.stringify(availableAppointmentDates()), () => serverCalendarSnapshot)) as string[];
+  const availableSlots = JSON.parse(useSyncExternalStore(subscribeCalendar, () => JSON.stringify(date ? availableAppointmentSlots(date) : []), () => serverCalendarSnapshot)) as string[];
   const scheduled = appointment?.appointment_status === "scheduled";
   const completed = appointment?.appointment_status === "completed";
 
@@ -36,5 +41,5 @@ export function ClientAppointmentCard({ initialAppointment }: { initialAppointme
     finally { setLoading(false); }
   }
 
-  return <section className="client-card client-appointment-card" aria-labelledby="client-appointment-title"><p className="client-eyebrow">RENDEZ-VOUS</p><h2 id="client-appointment-title">{completed ? "Rendez-vous effectué ✓" : scheduled ? "Votre prochain rendez-vous" : "Vous n'avez pas encore de rendez-vous."}</h2>{completed ? <p className="client-muted-note">Votre échange avec FeaseWeb est terminé.</p> : scheduled ? <><p className="client-muted-note">{formatAppointmentDate(appointment?.appointment_date, appointment?.appointment_time) ?? "Rendez-vous planifié"}</p><button type="button" className="client-button secondary" disabled={loading} onClick={() => void cancel()}>Annuler le rendez-vous</button></> : <form className="client-appointment-form" onSubmit={(event) => void submit(event)}><label>Date<input required type="date" value={date} onChange={(event) => setDate(event.target.value)} /></label><label>Heure<input required type="time" value={time} onChange={(event) => setTime(event.target.value)} /></label><button className="client-button" type="submit" disabled={loading}>{loading ? "Enregistrement…" : "Prendre rendez-vous"}</button></form>}{error && <p className="client-form-error" role="alert">{error}</p>}</section>;
+  return <section className="client-card client-appointment-card" aria-labelledby="client-appointment-title"><p className="client-eyebrow">RENDEZ-VOUS</p><h2 id="client-appointment-title">{completed ? "Rendez-vous effectué ✓" : scheduled ? "Votre prochain rendez-vous" : "Choisissez votre rendez-vous"}</h2>{completed ? <p className="client-muted-note">Votre échange avec FeaseWeb est terminé.</p> : scheduled ? <><p className="client-muted-note">{formatAppointmentDate(appointment?.appointment_date, appointment?.appointment_time) ?? "Rendez-vous planifié"}</p><button type="button" className="client-button secondary" disabled={loading} onClick={() => void cancel()}>Annuler le rendez-vous</button></> : <form className="client-appointment-form" onSubmit={(event) => void submit(event)}><fieldset><legend>Date</legend><div className="appointment-choice-grid">{availableDates.map((availableDate) => <button type="button" key={availableDate} aria-pressed={date === availableDate} className={date === availableDate ? "selected" : ""} onClick={() => setDate(availableDate)}>{formatAppointmentDay(availableDate)}</button>)}</div></fieldset><fieldset><legend>Heure</legend><div className="appointment-choice-grid appointment-time-grid">{availableSlots.map((slot) => <button type="button" key={slot} aria-pressed={time === slot} className={time === slot ? "selected" : ""} onClick={() => setTime(slot)}>{slot}</button>)}</div></fieldset><button className="client-button" type="submit" disabled={loading || !date || !time}>{loading ? "Enregistrement…" : "Confirmer mon rendez-vous"}</button></form>}{error && <p className="client-form-error" role="alert">{error}</p>}</section>;
 }

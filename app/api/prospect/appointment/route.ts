@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { appointmentInputSchema, clientAppointmentInputSchema, mapProjectAppointment, mapProjectValidation } from "@/lib/project-review";
 import { isOnboardingComplete, mapProjectIntake, onboardingProjectSelect } from "@/lib/onboarding";
 import { sendMetaConversionEvent } from "@/lib/meta-conversions";
+import { isBookableAppointment } from "@/lib/appointment-availability";
 
 async function getBookingContext() {
   const current = await getAuthenticatedProfile();
@@ -51,6 +52,7 @@ export async function POST(request: Request) {
   if (!project.completedAt || !isOnboardingComplete(project)) return NextResponse.json({ error: "Terminez votre configuration avant de planifier un appel." }, { status: 409 });
   const parsed = (context.current.role === "client" ? clientAppointmentInputSchema : appointmentInputSchema).safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Les informations du rendez-vous sont invalides." }, { status: 422 });
+  if (!isBookableAppointment(parsed.data.date, parsed.data.time)) return NextResponse.json({ error: "Ce créneau n'est plus disponible. Choisissez une autre date ou une autre heure." }, { status: 409 });
   const phone = context.current.role === "client" ? context.clientPhone : "phone" in parsed.data ? parsed.data.phone : null;
   const { data, error } = await context.admin.from("project_appointments").upsert({ project_intake_id: context.intake.id, appointment_status: "scheduled", appointment_date: parsed.data.date, appointment_time: parsed.data.time, phone, note: parsed.data.note || null }, { onConflict: "project_intake_id" }).select("id, project_intake_id, appointment_status, appointment_date, appointment_time, phone, note").single();
   if (error) { console.error("prospect_appointment_save_failed", error.code); return NextResponse.json({ error: "Impossible d'enregistrer votre rendez-vous." }, { status: 500 }); }

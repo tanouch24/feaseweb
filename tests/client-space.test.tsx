@@ -28,7 +28,7 @@ describe("ClientSpaceSections", () => {
     render(<ClientSpaceSections {...baseProps} seoActions={[{ id: "seo-1", date: "2026-09-24T10:00:00.000Z", action: "Title modifié", description: "Le title de la page d'accueil a été optimisé.", status: "terminee" }]} />);
     expect(screen.queryByRole("navigation", { name: "Navigation de l'espace client" })).not.toBeInTheDocument();
     expect(screen.getByText("VOTRE PARCOURS")).toBeInTheDocument();
-    expect(screen.getAllByText("Besoin d'une modification ?").length).toBeGreaterThan(0);
+    expect(screen.getByText("Envoyer un message à FeaseWeb")).toBeInTheDocument();
     expect(screen.getAllByText("Structure en préparation").length).toBeGreaterThan(0);
     expect(screen.getByText("Title modifié")).toBeInTheDocument();
     expect(screen.getByText("SEO & SUIVI")).toBeInTheDocument();

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const onboardingProjectSelect = "first_name, last_name, company, email, phone, activity, has_existing_site, existing_site_url, existing_site_project, primary_objective, requested_pages, style_direction, color_mood, available_assets, contact_channel, contact_slot, current_step, project_status, completed_at";
+export const onboardingProjectSelect = "first_name, last_name, company, email, phone, activity, has_existing_site, existing_site_url, existing_site_project, primary_objective, primary_objectives, requested_pages, style_direction, color_mood, available_assets, contact_channel, contact_slot, current_step, project_status, completed_at";
 
 export type OnboardingProject = {
   firstName: string | null;
@@ -13,6 +13,7 @@ export type OnboardingProject = {
   existingSiteUrl: string | null;
   existingSiteProject: string | null;
   primaryObjective: string | null;
+  primaryObjectives?: string[];
   requestedPages: string[];
   styleDirection: string | null;
   colorMood: string | null;
@@ -32,7 +33,7 @@ export function mapProjectIntake(row: Record<string, unknown>): OnboardingProjec
   return {
     firstName: text(row.first_name), lastName: text(row.last_name), company: text(row.company), email: text(row.email), phone: text(row.phone),
     activity: text(row.activity), hasExistingSite: row.has_existing_site === true, existingSiteUrl: text(row.existing_site_url), existingSiteProject: text(row.existing_site_project),
-    primaryObjective: text(row.primary_objective), requestedPages: list(row.requested_pages), styleDirection: text(row.style_direction), colorMood: text(row.color_mood), availableAssets: list(row.available_assets),
+    primaryObjective: text(row.primary_objective), primaryObjectives: list(row.primary_objectives).length ? list(row.primary_objectives) : (text(row.primary_objective) ? [text(row.primary_objective)!] : []), requestedPages: list(row.requested_pages), styleDirection: text(row.style_direction), colorMood: text(row.color_mood), availableAssets: list(row.available_assets),
     contactChannel: text(row.contact_channel), contactSlot: text(row.contact_slot), currentStep: typeof row.current_step === "number" ? row.current_step : 1,
     projectStatus: text(row.project_status) ?? "prospect", completedAt: text(row.completed_at),
   };
@@ -41,7 +42,7 @@ export function mapProjectIntake(row: Record<string, unknown>): OnboardingProjec
 export type OnboardingPatch = {
   firstName?: string; lastName?: string; company?: string; email?: string; phone?: string | null; activity?: string | null;
   hasExistingSite?: boolean; existingSiteUrl?: string | null; existingSiteProject?: string | null; primaryObjective?: string | null;
-  requestedPages?: string[]; styleDirection?: string | null; colorMood?: string | null; availableAssets?: string[]; contactChannel?: string | null; contactSlot?: string | null; currentStep?: number;
+  requestedPages?: string[]; primaryObjectives?: string[]; styleDirection?: string | null; colorMood?: string | null; availableAssets?: string[]; contactChannel?: string | null; contactSlot?: string | null; currentStep?: number;
 };
 
 /** Only sends fields accepted by onboardingPatchSchema; never spreads a DB row. */
@@ -49,16 +50,16 @@ export function toOnboardingPatch(project: OnboardingProject, currentStep: numbe
   return {
     firstName: project.firstName ?? undefined, lastName: project.lastName ?? undefined, company: project.company ?? undefined, email: project.email ?? undefined, phone: project.phone,
     activity: project.activity, hasExistingSite: project.hasExistingSite, existingSiteUrl: project.existingSiteUrl, existingSiteProject: project.existingSiteProject,
-    primaryObjective: project.primaryObjective, requestedPages: project.requestedPages, styleDirection: project.styleDirection, colorMood: project.colorMood, availableAssets: project.availableAssets,
+    primaryObjective: project.primaryObjective, primaryObjectives: project.primaryObjectives, requestedPages: project.requestedPages, styleDirection: project.styleDirection, colorMood: project.colorMood, availableAssets: project.availableAssets,
     contactChannel: project.contactChannel, contactSlot: project.contactSlot, currentStep,
   };
 }
 
-export function completedOnboardingSteps(project: Pick<OnboardingProject, "activity" | "hasExistingSite" | "existingSiteUrl" | "existingSiteProject" | "primaryObjective" | "requestedPages" | "styleDirection" | "colorMood" | "availableAssets" | "contactChannel" | "contactSlot">): number {
+export function completedOnboardingSteps(project: Pick<OnboardingProject, "activity" | "hasExistingSite" | "existingSiteUrl" | "existingSiteProject" | "primaryObjective" | "primaryObjectives" | "requestedPages" | "styleDirection" | "colorMood" | "availableAssets" | "contactChannel" | "contactSlot">): number {
   return [
     Boolean(project.activity),
     project.hasExistingSite ? Boolean(project.existingSiteUrl && project.existingSiteProject) : true,
-    Boolean(project.primaryObjective),
+    (project.primaryObjectives?.length ?? 0) > 0 || Boolean(project.primaryObjective),
     project.requestedPages.length > 0,
     Boolean(project.styleDirection),
     project.availableAssets.length > 0,
@@ -66,7 +67,7 @@ export function completedOnboardingSteps(project: Pick<OnboardingProject, "activ
   ].filter(Boolean).length;
 }
 
-export function isOnboardingComplete(project: Pick<OnboardingProject, "activity" | "hasExistingSite" | "existingSiteUrl" | "existingSiteProject" | "primaryObjective" | "requestedPages" | "styleDirection" | "colorMood" | "availableAssets" | "contactChannel" | "contactSlot">): boolean {
+export function isOnboardingComplete(project: Pick<OnboardingProject, "activity" | "hasExistingSite" | "existingSiteUrl" | "existingSiteProject" | "primaryObjective" | "primaryObjectives" | "requestedPages" | "styleDirection" | "colorMood" | "availableAssets" | "contactChannel" | "contactSlot">): boolean {
   return completedOnboardingSteps(project) === 7;
 }
 
@@ -116,7 +117,7 @@ export function projectTimeline(status: string, complete: boolean, appointmentSt
 
 export const onboardingDtoSchema = z.object({
   firstName: z.string().nullable(), lastName: z.string().nullable(), company: z.string().nullable(), email: z.string().nullable(), phone: z.string().nullable(),
-  activity: z.string().nullable(), hasExistingSite: z.boolean(), existingSiteUrl: z.string().nullable(), existingSiteProject: z.string().nullable(), primaryObjective: z.string().nullable(),
+  activity: z.string().nullable(), hasExistingSite: z.boolean(), existingSiteUrl: z.string().nullable(), existingSiteProject: z.string().nullable(), primaryObjective: z.string().nullable(), primaryObjectives: z.array(z.string()),
   requestedPages: z.array(z.string()), styleDirection: z.string().nullable(), colorMood: z.string().nullable(), availableAssets: z.array(z.string()), contactChannel: z.string().nullable(), contactSlot: z.string().nullable(),
   currentStep: z.number(), projectStatus: z.string(), completedAt: z.string().nullable(),
 });
