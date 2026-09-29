@@ -24,7 +24,11 @@ describe("final client UX safeguards", () => {
   it("keeps six distinct visual models and no color step or daypart step", () => {
     const onboarding = source("components/onboarding/OnboardingConfigurator.tsx");
     const styles = source("app/globals.css");
-    expect((onboarding.match(/model-(classic|modern|premium|local|minimal|impact)/g) ?? []).length).toBe(6);
+    const modelVariants = new Set(onboarding.match(/model-(classic|modern|premium|local|minimal|impact)/g) ?? []);
+    expect(modelVariants.size).toBe(6);
+    expect(onboarding).toContain("styleDirections");
+    expect(onboarding).toContain("Quels styles vous plaisent ?");
+    expect(onboarding).not.toContain(">Photo<");
     expect(onboarding).not.toContain("colorMood");
     expect(onboarding).not.toContain("matin");
     expect(onboarding).not.toContain("Après-midi");
