@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import { ClientRequestForm } from "@/components/client/ClientRequestForm";
 import { ClientUpdatesSection } from "@/components/client/ClientUpdatesSection";
+import { ClientAppointmentCard } from "@/components/client/ClientAppointmentCard";
 import { StartSubscriptionButton } from "@/components/billing/BillingActions";
 import { isOnboardingComplete, type OnboardingProject } from "@/lib/onboarding";
 import { addCalendarDays, clientOrderTimeline, formatClientDate } from "@/lib/client-order-timeline";
@@ -61,6 +62,7 @@ export function ClientSpaceSections({ project, site, payments, updates, requests
   const deliveryEstimate = paymentConfirmed && !live && firstPayment ? addCalendarDays(firstPayment.created_at) : null;
 
   return <section id="tableau-de-bord" className="client-space-section client-dashboard-section client-simple-dashboard">
+    <ClientAppointmentCard initialAppointment={appointment ?? null} />
     <section className="client-card client-project-status-card"><p className="client-eyebrow">VOTRE PARCOURS</p><ProjectTimeline project={project} appointment={appointment} paymentConfirmed={paymentConfirmed} paymentDate={firstPayment?.created_at} live={live} /></section>
     <section className="client-card client-payment-status"><p className="client-eyebrow">PAIEMENT</p><h2>{paymentConfirmed ? "Paiement effectué ✓" : approved ? "Votre projet est prêt à démarrer." : "Le paiement sera disponible lorsque votre dossier sera prêt."}</h2>{paymentConfirmed ? <p className="client-muted-note">Votre premier paiement a bien été confirmé.</p> : approved ? <><p className="client-price">49 €<span>/mois</span></p><StartSubscriptionButton label="Payer mon abonnement" /><p className="client-footnote">Création ou refonte du site, hébergement, maintenance et suivi.</p></> : <p className="client-muted-note">Nous vous indiquerons ici lorsque votre abonnement pourra être activé.</p>}</section>
     <section className="client-card client-site-status"><p className="client-eyebrow">MON SITE</p><h2>{live ? "Votre site est en ligne ✓" : "Votre site est en cours de création."}</h2>{live && site?.production_url ? <a className="client-button" href={site.production_url} target="_blank" rel="noreferrer">Voir mon site ↗</a> : <p className="client-muted-note">{deliveryEstimate ? `Livraison estimée : ${formatClientDate(deliveryEstimate)}` : "Le lien sera disponible lorsque FeaseWeb aura terminé et validé votre site."}</p>}</section>

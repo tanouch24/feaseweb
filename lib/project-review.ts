@@ -39,6 +39,12 @@ export const appointmentInputSchema = z.object({
   note: z.string().trim().max(1000).optional().nullable(),
 }).strict();
 
+export const clientAppointmentInputSchema = z.object({
+  date: z.string().date(),
+  time: z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "Créneau invalide."),
+  note: z.string().trim().max(1000).optional().nullable(),
+}).strict();
+
 export const adminReviewSchema = z.object({
   action: z.enum(["complete_appointment", "cancel_appointment", "approve", "needs_information", "decline"]),
   note: z.string().trim().max(5000).optional().nullable(),
