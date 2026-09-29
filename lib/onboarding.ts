@@ -61,14 +61,13 @@ export function completedOnboardingSteps(project: Pick<OnboardingProject, "activ
     Boolean(project.primaryObjective),
     project.requestedPages.length > 0,
     Boolean(project.styleDirection),
-    Boolean(project.colorMood),
     project.availableAssets.length > 0,
     Boolean(project.contactChannel && project.contactSlot),
   ].filter(Boolean).length;
 }
 
 export function isOnboardingComplete(project: Pick<OnboardingProject, "activity" | "hasExistingSite" | "existingSiteUrl" | "existingSiteProject" | "primaryObjective" | "requestedPages" | "styleDirection" | "colorMood" | "availableAssets" | "contactChannel" | "contactSlot">): boolean {
-  return completedOnboardingSteps(project) === 8;
+  return completedOnboardingSteps(project) === 7;
 }
 
 export const onboardingLabels: Record<string, string> = {

@@ -30,6 +30,8 @@ describe("client updates lifecycle safeguards", () => {
     expect(route).toContain('current.role !== "client"');
     expect(route).toContain('eq("user_id", current.user.id)');
     expect(route).toContain('eq("client_id", client.id)');
+    expect(route).toContain('eq("id", updateId)');
+    expect(route).toContain("updateId");
     expect(route).toContain('is("read_at", null)');
   });
 
@@ -41,7 +43,23 @@ describe("client updates lifecycle safeguards", () => {
 
   it("performs an explicit Supabase sign out in the admin shell", () => {
     const admin = source("components/admin/AdminApp.tsx");
-    expect(admin).toContain("supabase.auth.signOut()");
+    expect(admin).toContain("supabase?.auth.signOut()");
+    expect(admin).toContain('fetch("/api/auth/logout"');
     expect(admin).toContain('window.location.replace("/connexion")');
+  });
+
+  it("keeps notifications visible until the client opens one", () => {
+    const notifications = source("components/client/ClientNotifications.tsx");
+    expect(notifications).toContain('client-unread-badge');
+    expect(notifications).toContain('JSON.stringify({ updateId: id })');
+    expect(notifications).toContain('Voir la demande');
+    expect(notifications).toContain('readAt: new Date().toISOString()');
+  });
+
+  it("exposes the admin request flow without creating a parallel system", () => {
+    const dossier = source("components/admin/DossierDetail.tsx");
+    expect(dossier).toContain("Demander une information au client");
+    expect(dossier).toContain('updateType: "action_requise"');
+    expect(dossier).toContain("clientMessage");
   });
 });

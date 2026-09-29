@@ -22,9 +22,9 @@ describe("onboarding DB/DTO boundary", () => {
     expect(toOnboardingPatch(dto, 8)).toHaveProperty("currentStep", 8);
   });
 
-  it("counts all eight steps and treats existing-site fields conditionally", () => {
+  it("counts the seven useful steps and treats existing-site fields conditionally", () => {
     const dto = mapProjectIntake(row);
-    expect(completedOnboardingSteps(dto)).toBe(8);
+    expect(completedOnboardingSteps(dto)).toBe(7);
     expect(isOnboardingComplete(dto)).toBe(true);
     const partial = mapProjectIntake({ ...row, has_existing_site: true, existing_site_url: null, existing_site_project: null, primary_objective: null, requested_pages: [], style_direction: null, color_mood: null, available_assets: [], contact_channel: null, contact_slot: null, current_step: 2, completed_at: null });
     expect(completedOnboardingSteps(partial)).toBe(1);
@@ -50,10 +50,13 @@ describe("onboarding DB/DTO boundary", () => {
     expect(projectTimeline("live", true).every((stage) => stage.state === "complete")).toBe(true);
   });
 
-  it("keeps all six visual directions and the eight-step save flow", () => {
+  it("keeps six real visual directions and the seven-step save flow", () => {
     const configurator = readFileSync(resolve(process.cwd(), "components/onboarding/OnboardingConfigurator.tsx"), "utf8");
     for (const value of ["elegant_premium", "moderne_epure", "artisan_rassurant", "dynamique_commercial", "sobre_professionnel", "chaleureux_humain"]) expect(configurator).toContain(value);
-    expect(configurator).toContain("toOnboardingPatch(changes,nextStep)");
-    expect(configurator).toContain("Étape {step} / 8");
+    expect(configurator).toContain("toOnboardingPatch(changes, nextStep)");
+    expect(configurator).toContain("TOTAL_STEPS = 7");
+    expect(configurator).not.toContain("colorMood");
+    expect(configurator).toContain("site-model-services");
+    expect(configurator).toContain("site-model-final-cta");
   });
 });

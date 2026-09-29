@@ -22,8 +22,8 @@ describe("admin sidebar accessibility", () => {
   it("keeps logout as a real sign-out action with a protected redirect", () => {
     const admin = source("components/admin/AdminApp.tsx");
 
-    expect(admin).toContain("await supabase.auth.signOut()");
-    expect(admin).toContain('await fetch("/api/auth/logout", { method: "POST", cache: "no-store", credentials: "same-origin" })');
+    expect(admin).toContain("supabase?.auth.signOut()");
+    expect(admin).toContain('fetch("/api/auth/logout", { method: "POST", cache: "no-store", credentials: "same-origin", keepalive: true })');
     expect(admin).toContain('window.location.replace("/connexion")');
     expect(admin).toContain("Se déconnecter");
   });

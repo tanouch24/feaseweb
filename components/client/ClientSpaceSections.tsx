@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import { ClientRequestForm } from "@/components/client/ClientRequestForm";
 import { ClientUpdatesSection } from "@/components/client/ClientUpdatesSection";
+import { ClientNotifications } from "@/components/client/ClientNotifications";
 import { ClientAppointmentCard } from "@/components/client/ClientAppointmentCard";
 import { StartSubscriptionButton } from "@/components/billing/BillingActions";
 import { isOnboardingComplete, type OnboardingProject } from "@/lib/onboarding";
@@ -62,6 +63,7 @@ export function ClientSpaceSections({ project, site, payments, updates, requests
   const deliveryEstimate = paymentConfirmed && !live && firstPayment ? addCalendarDays(firstPayment.created_at) : null;
 
   return <section id="tableau-de-bord" className="client-space-section client-dashboard-section client-simple-dashboard">
+    <ClientNotifications updates={updates.map((update) => ({ id: update.id, updateType: update.update_type as never, actionType: update.action_type as never, title: update.title, description: update.description, readAt: update.read_at }))} />
     <ClientAppointmentCard initialAppointment={appointment ?? null} />
     <section className="client-card client-project-status-card"><p className="client-eyebrow">VOTRE PARCOURS</p><ProjectTimeline project={project} appointment={appointment} paymentConfirmed={paymentConfirmed} paymentDate={firstPayment?.created_at} live={live} /></section>
     <section className="client-card client-payment-status"><p className="client-eyebrow">PAIEMENT</p><h2>{paymentConfirmed ? "Paiement effectué ✓" : approved ? "Votre projet est prêt à démarrer." : "Le paiement sera disponible lorsque votre dossier sera prêt."}</h2>{paymentConfirmed ? <p className="client-muted-note">Votre premier paiement a bien été confirmé.</p> : approved ? <><p className="client-price">49 €<span>/mois</span></p><StartSubscriptionButton label="Payer mon abonnement" /><p className="client-footnote">Création ou refonte du site, hébergement, maintenance et suivi.</p></> : <p className="client-muted-note">Nous vous indiquerons ici lorsque votre abonnement pourra être activé.</p>}</section>
