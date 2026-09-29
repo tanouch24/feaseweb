@@ -31,7 +31,7 @@ describe("V9 prospect review gate", () => {
     const reviewRoute = read("app/api/admin/prospects/[id]/review/route.ts");
     const webhook = read("app/api/stripe/webhook/route.ts");
     expect(reviewRoute).toContain("requireApiAdmin");
-    expect(reviewRoute).toContain('appointment?.appointment_status !== "completed"');
+    expect(reviewRoute).not.toContain('appointment?.appointment_status !== "completed"');
     expect(reviewRoute).toContain("decided_by: auth.user.id");
     expect(webhook).toContain("ensureClientForProject");
     expect(webhook).not.toContain("project_validations");

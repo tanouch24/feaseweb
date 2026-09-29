@@ -1,0 +1,64 @@
+"use client";
+
+import { FormEvent, useState } from "react";
+import { useBackoffice } from "@/lib/backoffice-store";
+import { formatDate, getClientName, type RequestStatus } from "@/lib/backoffice";
+import { getProjectStatusLabel } from "@/lib/admin-presentation";
+import { canRequestPayment } from "@/lib/admin-payment-request";
+import { PageHeading } from "@/components/admin/AdminApp";
+import Link from "next/link";
+
+function requestLabel(status: RequestStatus) {
+  return status === "terminee" ? "Terminée" : status === "en_cours" ? "En cours" : "À faire";
+}
+
+export function DossierDetail({ dossierId }: { dossierId: string }) {
+  const { data, scheduleProspectAppointment, updateProspectReview, setRequestStatus, addClientNote, addProspectNote, createClientUpdate } = useBackoffice();
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [note, setNote] = useState("");
+  const [clientMessage, setClientMessage] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const prospect = data.prospects.find((item) => item.id === dossierId);
+  const client = data.clients.find((item) => item.id === dossierId || (prospect && item.prospectId === prospect.id));
+  if (!prospect && !client) return <><PageHeading eyebrow="Dossier" title="Dossier introuvable" /><Link href="/admin/dossiers" className="admin-button secondary">Retour aux dossiers</Link></>;
+  const project = data.projectIntakes.find((item) => (prospect && item.prospectId === prospect.id) || (client && item.clientId === client.id));
+  const appointment = prospect?.review;
+  const payment = data.payments.filter((item) => item.clientId === client?.id && item.provider === "stripe").sort((a, b) => (b.paidAt ?? "").localeCompare(a.paidAt ?? ""))[0];
+  const paymentConfirmed = payment?.status === "paye";
+  const paymentRequested = prospect?.review?.validationStatus === "approved";
+  const canAskForPayment = Boolean(prospect && canRequestPayment({ validationStatus: prospect.review?.validationStatus, prospectStatus: prospect.status, paymentConfirmed }));
+  const requests = client ? data.requests.filter((item) => item.clientId === client.id) : [];
+  const activeRequests = requests.filter((item) => !["terminee", "hors_perimetre"].includes(item.status));
+  const configuration = !project || (project.currentStep < 8 && !project.completedAt) ? "À compléter" : project.status === "project_configured" ? "Reçue / Complète" : getProjectStatusLabel(project.status);
+  const person = prospect ? `${prospect.firstName} ${prospect.lastName}`.trim() : getClientName(client);
+  const company = prospect?.company ?? client?.company ?? "Dossier";
+
+  async function run(action: "complete_appointment" | "approve") {
+    setError("");
+    try { await updateProspectReview(prospect!.id, action); setMessage(action === "approve" ? "Paiement demandé." : "Rendez-vous marqué comme effectué."); } catch (caught) { setError(caught instanceof Error ? caught.message : "Impossible d'enregistrer l'action."); }
+  }
+  async function schedule(event: FormEvent) {
+    event.preventDefault(); setError("");
+    try { await scheduleProspectAppointment(prospect!.id, date, time); setDate(""); setTime(""); setMessage("Rendez-vous planifié."); } catch (caught) { setError(caught instanceof Error ? caught.message : "Impossible de planifier le rendez-vous."); }
+  }
+  async function saveNote(event: FormEvent) {
+    event.preventDefault(); if (!note.trim()) return; setError("");
+    try { if (client) await addClientNote(client.id, note.trim()); else await addProspectNote(prospect!.id, note.trim()); setNote(""); setMessage("Note interne enregistrée."); } catch (caught) { setError(caught instanceof Error ? caught.message : "Impossible d'enregistrer la note."); }
+  }
+  async function askClient(event: FormEvent) {
+    event.preventDefault(); if (!client || !clientMessage.trim()) return; setError("");
+    try { const result = await createClientUpdate({ clientId: client.id, siteId: client.siteId, updateType: "action_requise", actionType: "completer_informations", title: "FeaseWeb a besoin d'une information", message: clientMessage.trim() }); setClientMessage(""); setMessage(result.warning ? result.warning : "Demande envoyée au client."); } catch (caught) { setError(caught instanceof Error ? caught.message : "Impossible d'envoyer la demande."); }
+  }
+  return <>
+    <PageHeading eyebrow="Dossier" title={company} description={`${person} · ${prospect?.phone ?? client?.phone ?? "Téléphone non renseigné"} · ${prospect?.email ?? client?.email ?? "Email non renseigné"}`} action={<Link href="/admin/dossiers" className="admin-button secondary">← Dossiers</Link>} />
+    <div className="admin-dossier-detail">
+      <section className="admin-panel admin-dossier-payment"><p className="admin-kicker">PAIEMENT</p><h2>{paymentConfirmed ? "Paiement effectué" : paymentRequested ? "Demande de paiement envoyée" : "Demande de paiement à envoyer"}</h2>{paymentConfirmed ? <p>49 €/mois{payment?.paidAt ? ` · premier paiement le ${formatDate(payment.paidAt)}` : ""}</p> : paymentRequested ? <p>En attente du règlement du client.</p> : canAskForPayment ? <button className="admin-button admin-payment-primary" onClick={() => void run("approve")}>Demander le paiement</button> : <p>Le paiement n&apos;est pas disponible pour ce dossier.</p>}</section>
+      <section className="admin-panel"><p className="admin-kicker">À FAIRE</p><div className="admin-dossier-task"><div><strong>Rendez-vous</strong>{appointment?.appointmentStatus === "scheduled" && <p>{appointment.appointmentDate ?? "Date à préciser"}{appointment.appointmentTime ? ` à ${appointment.appointmentTime}` : ""}</p>}{appointment?.appointmentStatus === "completed" && <p>Effectué ✓</p>}{(!appointment || appointment.appointmentStatus === "not_scheduled" || appointment.appointmentStatus === "cancelled") && <p>À planifier</p>}</div>{appointment?.appointmentStatus === "scheduled" && <button className="admin-button" onClick={() => void run("complete_appointment")}>Marquer effectué</button>}{(!appointment || appointment.appointmentStatus === "not_scheduled" || appointment.appointmentStatus === "cancelled") && prospect && <form className="admin-appointment-form" onSubmit={(event) => void schedule(event)}><label>Date<input required type="date" value={date} onChange={(event) => setDate(event.target.value)} /></label><label>Heure<input required type="time" value={time} onChange={(event) => setTime(event.target.value)} /></label><button className="admin-button" type="submit">Planifier</button></form>}</div><div className="admin-dossier-task"><div><strong>Configuration du site</strong><p>{configuration}</p></div>{project && configuration === "À compléter" && <Link href={prospect ? `/admin/prospects/${prospect.id}` : `/admin/clients/${client?.id}`} className="admin-button secondary">Voir les informations manquantes</Link>}</div>{activeRequests.map((request) => <div className="admin-dossier-task" key={request.id}><div><strong>Demande client</strong><p>{request.title} · {requestLabel(request.status)}</p></div><div className="admin-detail-actions"><button className="admin-button secondary" disabled={request.status === "en_cours"} onClick={() => void setRequestStatus(request.id, "en_cours")}>Passer en cours</button><button className="admin-button" disabled={request.status === "terminee"} onClick={() => void setRequestStatus(request.id, "terminee")}>Terminer</button></div></div>)}{requests.filter((request) => request.status === "terminee").length > 0 && <details className="admin-dossier-history"><summary>Historique des demandes terminées</summary>{requests.filter((request) => request.status === "terminee").map((request) => <p key={request.id}>{request.title} · Terminée</p>)}</details>}</section>
+      <section className="admin-panel"><p className="admin-kicker">NOTE INTERNE</p><form className="admin-note-form" onSubmit={(event) => void saveNote(event)}><textarea aria-label="Note interne" placeholder="Note visible uniquement par FeaseWeb…" value={note} onChange={(event) => setNote(event.target.value)} /><button className="admin-button" type="submit">Enregistrer la note</button></form>{(client?.notes ?? prospect?.notes ?? []).map((item, index) => <p className="admin-note" key={`${item}-${index}`}>{item}</p>)}</section>
+      {client && <section className="admin-panel"><p className="admin-kicker">DEMANDER AU CLIENT</p><h2>Une information manque ?</h2><form className="admin-note-form" onSubmit={(event) => void askClient(event)}><textarea aria-label="Demande au client" placeholder="Que souhaitez-vous demander au client ?" value={clientMessage} onChange={(event) => setClientMessage(event.target.value)} /><button className="admin-button" type="submit">Envoyer la demande</button></form></section>}
+      {(message || error) && <p className={error ? "admin-form-error" : "admin-form-message"} role="status">{error || message}</p>}
+    </div>
+  </>;
+}

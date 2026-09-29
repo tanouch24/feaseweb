@@ -22,17 +22,23 @@ export function ProspectsPage() {
 
 export function DossiersPage() {
   const { data } = useBackoffice();
+  const paymentFor = (clientId?: string) => data.payments.filter((payment) => payment.clientId === clientId && payment.provider === "stripe").sort((a, b) => (b.paidAt ?? "").localeCompare(a.paidAt ?? ""))[0];
   const prospectRows = data.prospects.map((prospect) => {
-    const state = getProspectBusinessState(prospect, data.projectIntakes.find((project) => project.prospectId === prospect.id));
-    return { id: `prospect-${prospect.id}`, name: `${prospect.firstName} ${prospect.lastName}`.trim(), company: prospect.company, contact: prospect.phone || prospect.email, state: state.label, action: state.nextAction, href: `/admin/prospects/${prospect.id}` };
+    const project = data.projectIntakes.find((item) => item.prospectId === prospect.id);
+    const client = data.clients.find((item) => item.prospectId === prospect.id);
+    const payment = paymentFor(client?.id);
+    const paymentState = payment?.status === "paye" ? "Paiement effectué" : payment?.status === "echoue" ? "Paiement rejeté" : prospect.review?.validationStatus === "approved" ? "Demande envoyée" : "Demande à envoyer";
+    const appointmentState = prospect.review?.appointmentStatus === "completed" ? "Effectué" : prospect.review?.appointmentStatus === "scheduled" ? `Prévu le ${prospect.review.appointmentDate ?? "date à préciser"}${prospect.review.appointmentTime ? ` à ${prospect.review.appointmentTime}` : ""}` : "À planifier";
+    const openTasks = (prospect.review?.appointmentStatus === "completed" || prospect.review?.appointmentStatus === "scheduled" ? 1 : 1) + (!payment || payment.status !== "paye" ? 1 : 0) + (project && project.currentStep >= 8 || project?.completedAt ? 0 : 1) + (client ? data.requests.filter((request) => request.clientId === client.id && !["terminee", "hors_perimetre"].includes(request.status)).length : 0);
+    return { id: `prospect-${prospect.id}`, company: prospect.company, contact: `${prospect.firstName} ${prospect.lastName}`.trim(), email: prospect.email, paymentState, appointmentState, openTasks, href: `/admin/dossiers/${prospect.id}` };
   });
-  const clientRows = data.clients.map((client) => {
-    const project = getClientProject(client, data.projectIntakes);
+  const clientRows = data.clients.filter((client) => !client.prospectId).map((client) => {
     const site = data.sites.find((item) => item.id === client.siteId);
-    return { id: `client-${client.id}`, name: getClientName(client), company: client.company, contact: client.phone || client.email, state: getProjectStatusLabel(project?.status ?? site?.status), action: site?.status === "actif" ? "Site en ligne" : "Ouvrir le suivi", href: `/admin/clients/${client.id}` };
+    const payment = paymentFor(client.id);
+    return { id: `client-${client.id}`, company: client.company, contact: getClientName(client), email: client.email, paymentState: payment?.status === "paye" ? "Paiement effectué" : payment?.status === "echoue" ? "Paiement rejeté" : "Demande envoyée", appointmentState: "—", openTasks: data.requests.filter((request) => request.clientId === client.id && !["terminee", "hors_perimetre"].includes(request.status)).length + (site?.status === "actif" ? 0 : 1), href: `/admin/dossiers/${client.id}` };
   });
   const rows = [...prospectRows, ...clientRows];
-  return <><PageHeading eyebrow="Dossiers" title="Tous les dossiers au même endroit." description="Prospects et clients sont regroupés ici. Ouvrez un dossier pour agir." /><div className="admin-table-wrap admin-responsive-list">{rows.length ? <table className="admin-table"><thead><tr><th>Entreprise</th><th>Contact</th><th>État actuel</th><th>Prochaine action</th><th /></tr></thead><tbody>{rows.map((row) => <tr key={row.id}><td><Link href={row.href} className="admin-table-link">{row.company}</Link><small>{row.name}</small></td><td>{row.contact}</td><td>{row.state}</td><td>{row.action}</td><td><Link href={row.href} className="admin-text-button">Ouvrir →</Link></td></tr>)}</tbody></table> : <EmptyState title="Aucun dossier" detail="Les demandes et clients apparaîtront ici." />}</div></>;
+  return <><PageHeading eyebrow="Dossiers" title="Tous les dossiers au même endroit." description="Ouvrez un dossier pour voir le paiement, les rendez-vous et les demandes à traiter." /><div className="admin-table-wrap admin-responsive-list">{rows.length ? <table className="admin-table admin-dossiers-table"><thead><tr><th>Entreprise</th><th>Contact</th><th>Paiement</th><th>Rendez-vous</th><th>À traiter</th><th /></tr></thead><tbody>{rows.map((row) => <tr key={row.id}><td><Link href={row.href} className="admin-table-link">{row.company}</Link></td><td><strong>{row.contact}</strong><small>{row.email}</small></td><td>{row.paymentState}</td><td>{row.appointmentState}</td><td>{row.openTasks} élément{row.openTasks > 1 ? "s" : ""}</td><td><Link href={row.href} className="admin-button secondary">Ouvrir le dossier</Link></td></tr>)}</tbody></table> : <EmptyState title="Aucun dossier" detail="Les dossiers apparaîtront ici." />}</div></>;
 }
 
 export function ClientsPage() {

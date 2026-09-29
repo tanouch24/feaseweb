@@ -22,7 +22,7 @@ export function ProspectReviewDetail({ prospectId }: { prospectId: string }) {
   const review = prospect.review;
   const linkedClient = data.clients.find((client) => client.prospectId === prospect.id);
   const paymentConfirmed = Boolean(linkedClient && data.payments.some((payment) => payment.clientId === linkedClient.id && payment.provider === "stripe" && payment.status === "paye"));
-  const canAskForPayment = canRequestPayment({ appointmentStatus: review?.appointmentStatus, validationStatus: review?.validationStatus, prospectStatus: prospect.status, paymentConfirmed });
+  const canAskForPayment = canRequestPayment({ validationStatus: review?.validationStatus, prospectStatus: prospect.status, paymentConfirmed });
   const businessState = getProspectBusinessState(prospect, project);
   async function run(action: "complete_appointment" | "cancel_appointment" | "approve" | "needs_information" | "decline") {
     if (action === "decline" && !window.confirm("Confirmer le refus de ce projet ? Aucune donnée ne sera supprimée.")) return;

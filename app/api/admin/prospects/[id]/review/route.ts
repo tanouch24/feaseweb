@@ -32,10 +32,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ ok: true });
   }
 
-  if (parsed.data.action === "approve") {
-    const { data: appointment } = await admin.from("project_appointments").select("appointment_status").eq("project_intake_id", intake.id).maybeSingle();
-    if (appointment?.appointment_status !== "completed") return NextResponse.json({ error: "Marquez d'abord le rendez-vous comme réalisé." }, { status: 409 });
-  }
   const validationStatus = parsed.data.action === "approve" ? "approved" : parsed.data.action === "needs_information" ? "needs_information" : "declined";
   const { error } = await admin.from("project_validations").upsert({ project_intake_id: intake.id, validation_status: validationStatus, decided_at: new Date().toISOString(), decided_by: auth.user.id, internal_note: parsed.data.note || null }, { onConflict: "project_intake_id" });
   if (error) { console.error("prospect_review_save_failed", error.code); return NextResponse.json({ error: "Impossible d'enregistrer la validation." }, { status: 500 }); }
