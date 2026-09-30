@@ -29,7 +29,7 @@ describe("ClientSpaceSections", () => {
     expect(screen.queryByRole("navigation", { name: "Navigation de l'espace client" })).not.toBeInTheDocument();
     expect(screen.getByText("VOTRE PARCOURS")).toBeInTheDocument();
     expect(screen.getByText("Envoyer un message à FeaseWeb")).toBeInTheDocument();
-    expect(screen.getAllByText("Structure en préparation").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Structure en préparation")).not.toBeInTheDocument();
     expect(screen.getByText("Title modifié")).toBeInTheDocument();
     expect(screen.getByText("ACTIVITÉ DE VOTRE SITE")).toBeInTheDocument();
     expect(screen.getByText(/49 €/)).toBeInTheDocument();

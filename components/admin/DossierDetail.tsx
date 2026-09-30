@@ -14,7 +14,7 @@ function requestLabel(status: RequestStatus) {
 }
 
 export function DossierDetail({ dossierId }: { dossierId: string }) {
-  const { data, scheduleProspectAppointment, updateProspectReview, setRequestStatus, addClientNote, addProspectNote, createClientUpdate, setSiteStatus, setSiteDomain, ensureSiteForProject } = useBackoffice();
+  const { data, scheduleProspectAppointment, updateProspectReview, setRequestStatus, addClientNote, addProspectNote, createClientUpdate, setSiteStatus, saveSiteForProject } = useBackoffice();
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [note, setNote] = useState("");
@@ -59,7 +59,7 @@ export function DossierDetail({ dossierId }: { dossierId: string }) {
     try { const result = await createClientUpdate({ clientId: client?.id, projectIntakeId: project.id, siteId: site?.id, updateType: "action_requise", actionType: "completer_informations", title: "FeaseWeb a besoin d'une information", message: clientMessage.trim() }); setClientMessage(""); setMessage(result.warning ? result.warning : "Demande envoyée au client."); } catch (caught) { setError(caught instanceof Error ? caught.message : "Impossible d'envoyer la demande."); }
   }
   async function addWork(event: FormEvent) { event.preventDefault(); if (!project || !workAction.trim()) return; setError(""); try { await createClientUpdate({ clientId: client?.id, projectIntakeId: project.id, siteId: site?.id, updateType: "avancement", title: workAction.trim(), message: workDescription.trim() || workAction.trim(), activityDate: workDate }); setWorkAction(""); setWorkDescription(""); setMessage("Action publiée dans le suivi du client."); } catch (caught) { setError(caught instanceof Error ? caught.message : "Impossible de publier l'action."); } }
-  async function saveSiteDomain(event: FormEvent) { event.preventDefault(); if (!project || !siteDomain.trim()) return; setError(""); try { const ensured = site ? { id: site.id } : await ensureSiteForProject(project.id); await setSiteDomain(ensured.id, siteDomain.trim()); setSiteDomainValue(""); setMessage("Domaine enregistré."); } catch (caught) { setError(caught instanceof Error ? caught.message : "Impossible d'enregistrer le domaine."); } }
+  async function saveSiteDomain(event: FormEvent) { event.preventDefault(); if (!project || !siteDomain.trim()) return; setError(""); try { await saveSiteForProject(project.id, siteDomain.trim()); setSiteDomainValue(""); setMessage("Domaine enregistré."); } catch (caught) { setError(caught instanceof Error ? caught.message : "Impossible d'enregistrer le domaine."); } }
   return <>
     <PageHeading eyebrow="Dossier" title={company} description={`${person} · ${prospect?.phone ?? client?.phone ?? "Téléphone non renseigné"} · ${prospect?.email ?? client?.email ?? "Email non renseigné"}`} action={<Link href="/admin/dossiers" className="admin-button secondary">← Dossiers</Link>} />
     <div className="admin-dossier-detail">

@@ -502,3 +502,40 @@ body {
   .client-space-simple .client-contact-panel, .client-space-simple .client-seo-follow-up { padding-top: 18px; }
   .client-notifications-header .client-notifications-panel { top: 0; right: 0; left: 0; width: 100vw; padding: 76px 18px 22px; }
 }
+
+/* Final sync dashboard layout: connectors belong to marker rows, not labels. */
+.client-space-simple .client-project-grid { align-items: start; }
+.client-space-simple .client-next-action { min-height: 0; }
+.client-space-simple .client-next-action .client-button { margin-top: 14px; }
+.client-space-simple .client-dashboard-grid > div > .client-card, .client-space-simple .client-dashboard-grid > section { height: auto; align-self: start; }
+.client-space-simple .client-simple-dashboard { max-width: 1200px; }
+.client-space-simple .client-simple-dashboard > .client-card, .client-space-simple .client-simple-dashboard > .client-seo-follow-up { max-width: none; margin-left: 0; margin-right: 0; }
+.client-space-simple .client-project-grid { grid-template-columns: minmax(0, 1.65fr) minmax(260px, .85fr); }
+.client-space-simple .client-next-action { align-self: start; }
+.client-space-simple .client-project-status-card .client-project-timeline { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; }
+.client-space-simple .client-project-status-card .client-project-timeline-item { display: grid; grid-template-columns: 1fr; grid-template-rows: auto auto; min-height: 0; padding: 0 12px 18px 0; align-items: start; }
+.client-space-simple .client-project-status-card .client-project-timeline-item:not(:last-child)::after { display: none; }
+.client-space-simple .client-project-timeline-marker-row { display: flex; align-items: center; min-width: 0; height: 29px; }
+.client-space-simple .client-project-timeline-connector { height: 1px; flex: 1 1 auto; margin-left: 8px; background: #dfe5e1; }
+.client-space-simple .client-project-timeline-copy { display: block; padding-top: 9px; }
+.client-space-simple .client-project-timeline-copy strong, .client-space-simple .client-project-timeline-copy small { display: block; }
+.client-space-simple .client-dossier-detail, .admin-dossier-detail { min-height: 0; }
+.admin-dossier-detail { display: grid; gap: 14px; max-width: 1120px; }
+.admin-dossier-detail > .admin-panel { min-height: 0; height: auto; box-sizing: border-box; padding: 20px 22px; }
+.admin-dossier-detail .admin-panel h2 { margin: 8px 0 10px; font-size: 19px; }
+.admin-dossier-detail .admin-note-form { max-width: 720px; margin-bottom: 0; }
+.admin-dossier-detail .admin-note-form textarea { min-height: 76px; max-height: 180px; }
+.admin-dossier-detail .admin-preview-form { max-width: 720px; margin-bottom: 0; }
+@media (max-width: 760px) {
+  .client-space-simple .client-project-grid { grid-template-columns: 1fr; }
+  .client-space-simple .client-project-status-card .client-project-timeline { grid-template-columns: 1fr; }
+  .client-space-simple .client-project-status-card .client-project-timeline-item { grid-template-columns: 30px 1fr; grid-template-rows: 1fr; min-height: 0; padding: 0 0 16px; }
+  .client-space-simple .client-project-timeline-marker-row { height: auto; min-height: 29px; flex-direction: column; }
+  .client-space-simple .client-project-timeline-connector { width: 1px; min-height: 18px; flex: 1 1 auto; margin: 8px 0 0; }
+  .client-space-simple .client-project-timeline-copy { padding: 3px 0 0 10px; }
+  .admin-dossier-detail > .admin-panel { padding: 18px; }
+}
+@media (min-width: 761px) {
+  .client-space-simple .client-project-status-card .client-project-timeline-item { min-height: 0; align-items: start; padding-top: 0; padding-bottom: 18px; }
+  .client-space-simple .client-project-status-card .client-project-timeline-item:not(:last-child)::after { top: 14px; }
+}

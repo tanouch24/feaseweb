@@ -28,6 +28,7 @@ export const noteSchema = z.object({ body: z.string().trim().min(1).max(5000) })
 const safeSiteValue = (max: number) => z.string().trim().max(max).refine((value) => !value.startsWith("//") && (!/^[a-z][a-z\d+.-]*:/i.test(value) || /^https:\/\//i.test(value) || /^http:\/\//i.test(value)), "URL de site invalide.");
 export const sitePatchSchema = z.object({ previewUrl: z.string().trim().url().optional(), productionUrl: safeSiteValue(2048).optional(), domain: safeSiteValue(253).optional(), repository: z.string().trim().max(500).optional(), hostingProvider: z.string().trim().max(120).optional(), status: z.enum(["a_preparer", "en_creation", "preview", "corrections", "valide", "mise_en_ligne", "actif", "suspendu", "archive"]).optional() }).strict();
 export const siteCreateSchema = z.object({ projectIntakeId: z.string().uuid() }).strict();
+export const projectSiteSaveSchema = z.object({ domain: safeSiteValue(2048) }).strict();
 export const statusSchema = z.object({ status: z.string().min(1).max(40) });
 export const prospectStatusSchema = z.object({ status: z.enum(["nouveau", "a_contacter", "contacte", "qualifie", "preview_en_cours", "preview_envoyee", "gagne", "perdu"]) });
 export const requestStatusSchema = z.object({ status: z.enum(["recue", "en_cours", "besoin_information", "terminee", "hors_perimetre"]) });

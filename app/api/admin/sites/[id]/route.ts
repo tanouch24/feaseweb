@@ -21,13 +21,17 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     patch.status = parsed.data.status;
     if (parsed.data.status === "actif") patch.launched_at = new Date().toISOString();
   }
-  const { data: saved, error } = await supabase.from("sites").update(patch).eq("id", id).select("id, client_id, domain, production_url, status, launched_at").single();
+  const { data: saved, error } = await supabase.from("sites").update(patch).eq("id", id).select("id, project_intake_id, client_id, domain, production_url, status, launched_at").single();
   if (error || !saved) return NextResponse.json({ error: "Impossible de modifier le site." }, { status: 500 });
   if (parsed.data.status === "actif" && before.status !== "actif") {
     const idempotencyKey = id;
     const { data: existing } = await supabase.from("client_updates").select("id").eq("idempotency_key", idempotencyKey).maybeSingle();
     if (!existing) {
-      const { data: intake } = before.project_intake_id ? await supabase.from("project_intakes").select("id, client_id, email, first_name").eq("id", before.project_intake_id).maybeSingle() : { data: null };
+      const { data: intake } = before.project_intake_id
+        ? await supabase.from("project_intakes").select("id, client_id, email, first_name").eq("id", before.project_intake_id).maybeSingle()
+        : before.client_id
+          ? await supabase.from("project_intakes").select("id, client_id, email, first_name").eq("client_id", before.client_id).maybeSingle()
+          : { data: null };
       const { data: client } = before.client_id ? await supabase.from("clients").select("id, email, first_name").eq("id", before.client_id).maybeSingle() : { data: null };
       const { data: update } = await supabase.from("client_updates").insert({ client_id: before.client_id, project_intake_id: before.project_intake_id ?? intake?.id ?? null, site_id: id, category: "site", update_type: "mise_en_ligne", action_type: "voir_projet", title: "Votre site est en ligne", description: "Votre site internet est maintenant disponible.", status: "termine", visible_to_client: true, activity_date: new Date().toISOString().slice(0, 10), created_by: auth.user.id, idempotency_key: idempotencyKey }).select("id").maybeSingle();
       if (update && client?.email) {

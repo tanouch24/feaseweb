@@ -19,7 +19,7 @@ describe("dashboard synchronization regressions", () => {
     expect(route).toContain("createAdminClient");
     expect(route).toContain("patch.domain = parsed.data.domain");
     expect(route).toContain("patch.production_url = parsed.data.productionUrl");
-    expect(route).toContain("select(\"id, client_id, domain, production_url, status, launched_at\")");
+    expect(route).toContain("select(\"id, project_intake_id, client_id, domain, production_url, status, launched_at\")");
     expect(route).toContain("idempotencyKey = id");
   });
 
@@ -85,5 +85,32 @@ describe("dashboard synchronization regressions", () => {
     expect(migration).toContain("update public.project_intakes set client_id = c.id where id = intake.id");
     expect(migration).toContain("insert into public.sites (project_intake_id, client_id");
     expect(migration).toContain("coalesce(project_intake_id, intake.id)");
+  });
+
+  it("saves a site URL through the dossier identity and rereads the persisted row", () => {
+    const route = source("app/api/admin/project-intakes/[id]/site/route.ts");
+    const store = source("lib/backoffice-store.tsx");
+    const dossier = source("components/admin/DossierDetail.tsx");
+    expect(route).toContain('eq("project_intake_id", intake.id)');
+    expect(route).toContain('insert({ project_intake_id: intake.id');
+    expect(route).toContain("select(siteSelect).single()");
+    expect(store).toContain("/api/admin/project-intakes/${projectIntakeId}/site");
+    expect(dossier).toContain("saveSiteForProject(project.id, siteDomain.trim())");
+  });
+
+  it("keeps the client site and live notification intake-scoped", () => {
+    const page = source("app/espace-client/page.tsx");
+    const liveRoute = source("app/api/admin/sites/[id]/route.ts");
+    expect(page).toContain('eq("project_intake_id", intake.id)');
+    expect(page).toContain("project_intake_id.eq.${intake.id}");
+    expect(liveRoute).toContain("before.project_intake_id ?? intake?.id ?? null");
+    expect(liveRoute).toContain('idempotencyKey = id');
+  });
+
+  it("keeps the timeline connector at marker level and cards content-sized", () => {
+    const css = source("app/globals.css");
+    expect(css).toContain("client-project-timeline-item:not(:last-child)::after { top: 14px; }");
+    expect(css).toContain("client-dashboard-grid > div > .client-card, .client-space-simple .client-dashboard-grid > section { height: auto");
+    expect(css).toContain("client-project-grid { align-items: start; }");
   });
 });

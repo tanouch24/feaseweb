@@ -11,6 +11,7 @@ type Store = {
   setSiteStatus: (id: string, status: SiteStatus) => Promise<void>;
   setSiteDomain: (id: string, domain: string) => Promise<void>;
   ensureSiteForProject: (projectIntakeId: string) => Promise<{ id: string }>;
+  saveSiteForProject: (projectIntakeId: string, domain: string) => Promise<{ id: string }>;
   setSitePreview: (id: string, previewUrl: string) => Promise<void>;
   addClientNote: (id: string, note: string) => Promise<void>;
   inviteClient: (id: string) => Promise<void>;
@@ -48,6 +49,7 @@ export function BackofficeProvider({ children }: { children: React.ReactNode }) 
     setSiteStatus: (id, status) => mutate(`/api/admin/sites/${id}`, { status }),
     setSiteDomain: (id, domain) => mutate(`/api/admin/sites/${id}`, { domain }),
     ensureSiteForProject: async (projectIntakeId) => { const result = await api("/api/admin/sites", { method: "POST", body: JSON.stringify({ projectIntakeId }) }); await refresh(); return { id: result.site.id as string }; },
+    saveSiteForProject: async (projectIntakeId, domain) => { const result = await api(`/api/admin/project-intakes/${projectIntakeId}/site`, { method: "PUT", body: JSON.stringify({ domain }) }); await refresh(); return { id: result.site.id as string }; },
     setSitePreview: async (id, previewUrl) => { await mutate(`/api/admin/sites/${id}`, { previewUrl }); },
     addClientNote: async (id, body) => { await api("/api/admin/notes", { method: "POST", body: JSON.stringify({ clientId: id, body }) }); await refresh(); },
     inviteClient: async (id) => { await api(`/api/admin/clients/${id}/invite`, { method: "POST", body: JSON.stringify({}) }); await refresh(); },
