@@ -10,6 +10,7 @@ type Store = {
   setClientStatus: (id: string, status: ClientStatus) => Promise<void>;
   setSiteStatus: (id: string, status: SiteStatus) => Promise<void>;
   setSiteDomain: (id: string, domain: string) => Promise<void>;
+  ensureSiteForProject: (projectIntakeId: string) => Promise<{ id: string }>;
   setSitePreview: (id: string, previewUrl: string) => Promise<void>;
   addClientNote: (id: string, note: string) => Promise<void>;
   inviteClient: (id: string) => Promise<void>;
@@ -18,7 +19,7 @@ type Store = {
   updateProspectReview: (id: string, action: "complete_appointment" | "cancel_appointment" | "approve" | "needs_information" | "decline", note?: string) => Promise<void>;
   setRequestStatus: (id: string, status: ModificationRequest["status"]) => Promise<void>;
   addSeoAction: (siteId: string, action: string, description: string, date?: string) => Promise<void>;
-  createClientUpdate: (input: { clientId: string; siteId?: string; updateType: ClientUpdate["updateType"]; actionType?: ClientUpdate["actionType"]; title: string; message: string; activityDate?: string }) => Promise<{ emailSent: boolean; warning?: string }>;
+  createClientUpdate: (input: { clientId?: string; projectIntakeId?: string; siteId?: string; updateType: ClientUpdate["updateType"]; actionType?: ClientUpdate["actionType"]; title: string; message: string; activityDate?: string }) => Promise<{ emailSent: boolean; warning?: string }>;
   updateClientUpdate: (id: string, input: { siteId?: string | null; updateType?: ClientUpdate["updateType"]; actionType?: ClientUpdate["actionType"] | null; title?: string; message?: string }) => Promise<void>;
   deleteClientUpdate: (id: string) => Promise<void>;
   setProjectStatus: (id: string, status: string) => Promise<void>;
@@ -46,6 +47,7 @@ export function BackofficeProvider({ children }: { children: React.ReactNode }) 
     setClientStatus: (id, status) => mutate(`/api/admin/clients/${id}`, { status }),
     setSiteStatus: (id, status) => mutate(`/api/admin/sites/${id}`, { status }),
     setSiteDomain: (id, domain) => mutate(`/api/admin/sites/${id}`, { domain }),
+    ensureSiteForProject: async (projectIntakeId) => { const result = await api("/api/admin/sites", { method: "POST", body: JSON.stringify({ projectIntakeId }) }); await refresh(); return { id: result.site.id as string }; },
     setSitePreview: async (id, previewUrl) => { await mutate(`/api/admin/sites/${id}`, { previewUrl }); },
     addClientNote: async (id, body) => { await api("/api/admin/notes", { method: "POST", body: JSON.stringify({ clientId: id, body }) }); await refresh(); },
     inviteClient: async (id) => { await api(`/api/admin/clients/${id}/invite`, { method: "POST", body: JSON.stringify({}) }); await refresh(); },

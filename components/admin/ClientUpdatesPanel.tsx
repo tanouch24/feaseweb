@@ -13,9 +13,9 @@ const actionTypes: Array<{ value: ClientUpdateActionType; label: string }> = [{ 
 type UpdateForm = { updateType: ClientUpdateType; actionType: ClientUpdateActionType | ""; title: string; message: string };
 const emptyForm = (): UpdateForm => ({ updateType: "information", actionType: "", title: "", message: "" });
 
-export function ClientUpdatesPanel({ clientId, siteId }: { clientId: string; siteId?: string }) {
+export function ClientUpdatesPanel({ clientId, projectIntakeId, siteId }: { clientId?: string; projectIntakeId?: string; siteId?: string }) {
   const { data, createClientUpdate, updateClientUpdate, deleteClientUpdate } = useBackoffice();
-  const updates = data.clientUpdates.filter((update) => update.clientId === clientId);
+  const updates = data.clientUpdates.filter((update) => (projectIntakeId && update.projectIntakeId === projectIntakeId) || (clientId && update.clientId === clientId));
   const [editing, setEditing] = useState<ClientUpdate | null>(null);
   const [form, setForm] = useState<UpdateForm>(emptyForm());
   const [notice, setNotice] = useState("");
@@ -29,7 +29,7 @@ export function ClientUpdatesPanel({ clientId, siteId }: { clientId: string; sit
     try {
       if (editing) await updateClientUpdate(editing.id, payload);
       else {
-        const result = await createClientUpdate({ ...payload, actionType: form.actionType || undefined, clientId, siteId });
+        const result = await createClientUpdate({ ...payload, actionType: form.actionType || undefined, clientId, projectIntakeId, siteId });
         setNotice(result.warning ?? "Mise à jour publiée et email envoyé.");
       }
       reset();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { formatAppointmentDate } from "@/lib/client-order-timeline";
 import { availableAppointmentDates, availableAppointmentSlots, formatAppointmentDay } from "@/lib/appointment-availability";
 
@@ -26,6 +26,17 @@ export function ClientAppointmentCard({ initialAppointment }: { initialAppointme
   const availableSlots = JSON.parse(useSyncExternalStore(subscribeCalendar, () => JSON.stringify(date ? availableAppointmentSlots(date) : []), getServerCalendarSnapshot)) as string[];
   const scheduled = appointment?.appointment_status === "scheduled";
   const completed = appointment?.appointment_status === "completed";
+
+  useEffect(() => {
+    const openFromHash = () => {
+      if (window.location.hash !== "#rendez-vous") return;
+      setExpanded(true);
+      requestAnimationFrame(() => document.getElementById("rendez-vous")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    };
+    openFromHash();
+    window.addEventListener("hashchange", openFromHash);
+    return () => window.removeEventListener("hashchange", openFromHash);
+  }, []);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault(); setLoading(true); setError("");

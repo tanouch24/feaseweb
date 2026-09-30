@@ -71,10 +71,23 @@ export async function ensureClientForProject(projectId: string): Promise<string 
     else clientId = created.data.id;
   }
   if (!clientId) return null;
-  const { data: site } = await admin.from("sites").select("id").eq("client_id", clientId).maybeSingle();
+  // A pre-conversion site is canonically owned by the intake and may not yet
+  // have a client_id. Reuse it during conversion instead of creating a
+  // second site row.
+  const { data: siteByProject } = await admin
+    .from("sites")
+    .select("id")
+    .eq("project_intake_id", projectId)
+    .maybeSingle();
+  const { data: siteByClient } = siteByProject
+    ? { data: null }
+    : await admin.from("sites").select("id").eq("client_id", clientId).maybeSingle();
+  const site = siteByProject ?? siteByClient;
   if (!site) {
     const slug = `${String(project.company).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "site"}-${clientId.slice(0, 8)}`;
-    await admin.from("sites").insert({ client_id: clientId, name: project.company, slug, status: "a_preparer" });
+    await admin.from("sites").insert({ project_intake_id: projectId, client_id: clientId, name: project.company, slug, status: "a_preparer" });
+  } else {
+    await admin.from("sites").update({ project_intake_id: projectId, client_id: clientId }).eq("id", site.id);
   }
   await admin.from("profiles").update({ role: "client" }).eq("id", project.user_id);
   if (project.prospect_id) await admin.from("prospects").update({ status: "gagne" }).eq("id", project.prospect_id);

@@ -6,15 +6,19 @@ export async function POST(request: Request) {
   const current = await getAuthenticatedProfile();
   if (!current.configured) return NextResponse.json({ error: "Service indisponible." }, { status: 503 });
   if (!current.user) return NextResponse.json({ error: "Authentification requise." }, { status: 401 });
-  if (current.role !== "client") return NextResponse.json({ error: "Accès interdit." }, { status: 403 });
+  if (current.role !== "client" && current.role !== "prospect") return NextResponse.json({ error: "Accès interdit." }, { status: 403 });
   const admin = createAdminClient();
   if (!admin) return NextResponse.json({ error: "Service indisponible." }, { status: 503 });
   const body = await request.json().catch(() => null) as { updateId?: unknown } | null;
   const updateId = typeof body?.updateId === "string" ? body.updateId.trim() : "";
   if (!updateId || !/^[0-9a-f-]{36}$/i.test(updateId)) return NextResponse.json({ error: "Notification invalide." }, { status: 400 });
-  const { data: client } = await admin.from("clients").select("id").eq("user_id", current.user.id).maybeSingle();
-  if (!client) return NextResponse.json({ error: "Accès interdit." }, { status: 403 });
-  const { data: update, error } = await admin.from("client_updates").update({ read_at: new Date().toISOString() }).eq("id", updateId).eq("client_id", client.id).eq("visible_to_client", true).is("read_at", null).select("id").maybeSingle();
+  const { data: intake } = await admin.from("project_intakes").select("id, client_id").eq("user_id", current.user.id).maybeSingle();
+  const { data: client } = intake?.client_id ? await admin.from("clients").select("id").eq("id", intake.client_id).maybeSingle() : await admin.from("clients").select("id").eq("user_id", current.user.id).maybeSingle();
+  if (!intake && !client) return NextResponse.json({ error: "Accès interdit." }, { status: 403 });
+  const { data: candidate } = await admin.from("client_updates").select("id, project_intake_id, client_id").eq("id", updateId).eq("visible_to_client", true).maybeSingle();
+  const owns = candidate && ((intake && candidate.project_intake_id === intake.id) || (client && candidate.client_id === client.id));
+  if (!owns) return NextResponse.json({ error: "Notification introuvable." }, { status: 404 });
+  const { data: update, error } = await admin.from("client_updates").update({ read_at: new Date().toISOString() }).eq("id", updateId).eq("visible_to_client", true).is("read_at", null).select("id").maybeSingle();
   if (error) {
     console.error("client_updates_read_failed", error.code);
     return NextResponse.json({ error: "Impossible d'actualiser le suivi." }, { status: 500 });

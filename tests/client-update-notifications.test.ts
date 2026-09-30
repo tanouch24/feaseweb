@@ -19,7 +19,7 @@ describe("client update notifications", () => {
     const route = source("app/api/admin/client-updates/route.ts");
     const brevo = source("lib/brevo.ts");
     expect(route).toContain("requireApiAdmin");
-    expect(route).toContain('select("id, email, first_name, last_name")');
+    expect(route).toContain('select("id, email, first_name")');
     expect(route).not.toContain("recipient_email");
     expect(route).not.toContain("to:");
     expect(brevo).toContain("process.env.BREVO_API_KEY");

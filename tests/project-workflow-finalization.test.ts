@@ -29,7 +29,7 @@ describe("admin/user workflow finalization", () => {
 
   it("aggregates general updates and SEO actions without showing general updates twice", () => {
     const sections = source("components/client/ClientSpaceSections.tsx");
-    expect(sections).toContain("TRAVAIL RÉALISÉ PAR FEASEWEB");
+    expect(sections).toContain("ACTIVITÉ DE VOTRE SITE");
     expect(sections).toContain("seo:${action.id}");
     expect(sections).toContain("update:${update.id}");
     expect(sections).toContain('["information", "avancement"]');

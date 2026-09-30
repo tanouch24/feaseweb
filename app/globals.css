@@ -212,6 +212,38 @@ body {
   .prospect-subscription-action > div, .prospect-subscription-action button { width: 100%; }
 }
 
+/* V3 client app shell */
+.client-space-simple { padding: 0 24px 64px; }
+.client-app-header, .client-space-simple .client-space-section, .client-space-simple .client-alert { max-width: 1200px; margin-inline: auto; }
+.client-app-header { padding: 22px 0 22px; }
+.client-app-topline { display: flex; align-items: center; justify-content: space-between; min-height: 40px; }
+.client-app-topline .client-app-brand { display: flex; align-items: center; gap: 34px; }
+.client-app-brand nav { display: flex; gap: 22px; margin-left: 18px; }
+.client-app-brand nav a { color: #6f7975; font-size: 12px; text-decoration: none; }.client-app-brand nav a:hover { color: #1e4a43; }
+.client-app-topline .client-header-actions { margin-left: auto; }
+.client-app-greeting { padding: 32px 0 18px; }.client-app-greeting h1 { margin: 5px 0 3px; color: #17201d; font-family: var(--font-sans); font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: -.045em; }.client-app-greeting p:last-child { margin: 0; color: #6f7975; font-size: 14px; }
+.client-space-simple .client-header-link, .client-space-simple .client-header-actions .client-logout-button, .client-space-simple .client-notifications-header .client-notifications-toggle { min-height: 34px; border: 0; padding: 0 8px; background: transparent; color: #1e4a43; }
+.client-space-simple .client-notifications-header .client-notifications-toggle { gap: 5px; }
+.client-space-simple .client-notifications-header .client-notifications-toggle > svg { color: #1e4a43; }
+.client-notification-toggle-mark { width: 7px; }
+.client-project-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(260px, .8fr); gap: 14px; align-items: stretch; }
+.client-space-simple .client-main-site-card, .client-space-simple .client-next-action, .client-space-simple .client-dashboard-grid > div > .client-card, .client-space-simple .client-dashboard-grid > section { border: 1px solid #e1e6e2; border-radius: 10px; background: #fff; box-shadow: none; }
+.client-space-simple .client-main-site-card { min-height: 0; padding: 24px 26px; }.client-project-card-icon, .client-card-icon { display: grid; width: 34px; height: 34px; place-items: center; margin-bottom: 14px; border-radius: 9px; background: #eaf2ee; color: #1e4a43; }.client-project-card-icon svg, .client-card-icon svg { width: 18px; }
+.client-space-simple .client-main-site-card h2 { margin: 5px 0 12px; font-family: var(--font-sans); font-size: 23px; font-weight: 700; letter-spacing: -.03em; }.client-space-simple .client-main-site-card h3 { margin: 0 0 9px; color: #17201d; font-family: var(--font-sans); font-size: 18px; font-weight: 600; }.client-space-simple .client-main-site-card .client-site-url { margin-bottom: 14px; }
+.client-project-meta { display: flex; gap: 28px; margin-top: 22px; border-top: 1px solid #edf0ee; padding-top: 13px; color: #6f7975; font-size: 11px; }.client-project-meta strong { display: block; margin-top: 4px; color: #17201d; font-size: 12px; font-weight: 600; }
+.client-space-simple .client-next-action { display: flex; min-height: 100%; box-sizing: border-box; flex-direction: column; align-items: flex-start; padding: 24px; }.client-next-action h2 { margin: 9px 0 8px; color: #17201d; font-family: var(--font-sans); font-size: 20px; font-weight: 700; letter-spacing: -.03em; }.client-next-action p:not(.client-eyebrow) { margin: 0 0 20px; color: #6f7975; font-size: 13px; line-height: 1.5; }.client-next-action .client-button { margin-top: auto; }
+.client-space-simple .client-project-status-card { margin-top: 24px; padding: 0; }.client-space-simple .client-project-status-card > .client-eyebrow { margin-bottom: 0; }.client-space-simple .client-project-status-card .client-project-timeline { margin-top: 12px; }
+.client-space-simple .client-dashboard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 14px; }.client-space-simple .client-dashboard-grid > div { min-width: 0; }.client-space-simple .client-dashboard-grid > div > .client-card, .client-space-simple .client-dashboard-grid > section { padding: 20px; }.client-space-simple .client-dashboard-grid h2 { font-family: var(--font-sans); font-size: 18px; font-weight: 700; }.client-space-simple .client-dashboard-grid > section > svg { display: block; margin-bottom: 14px; color: #1e4a43; }
+.client-space-simple .client-seo-follow-up { margin-top: 22px; padding: 21px 0 4px; }.client-space-simple .client-seo-follow-up > svg { margin-bottom: 12px; color: #1e4a43; }.client-space-simple .client-seo-follow-up h2 { font-family: var(--font-sans); font-size: 19px; font-weight: 700; }
+.client-space-simple .client-contact-panel { margin-top: 22px; padding: 21px 0 4px; }.client-contact-panel > svg { margin-bottom: 12px; color: #1e4a43; }.client-contact-intro h2 { font-family: var(--font-sans); font-size: 19px; font-weight: 700; }.client-contact-actions { gap: 8px; }.client-contact-actions .client-request-trigger { padding: 0; }.client-contact-actions .client-request-trigger .client-button { min-height: 36px; }.client-contact-whatsapp { margin-left: 12px; }
+.client-request-drawer-backdrop { position: fixed; z-index: 120; inset: 0; display: flex; justify-content: flex-end; background: rgba(23,32,29,.24); }.client-request-drawer { width: min(440px, 100vw); height: 100%; overflow-y: auto; box-sizing: border-box; padding: 26px; background: white; box-shadow: -12px 0 30px rgba(23,32,29,.1); }.client-request-drawer .client-profile-close { float: right; }.client-request-drawer .client-request-form { clear: both; padding: 28px 0 0; background: transparent; }
+.client-notifications-header .client-notifications-panel { position: fixed; z-index: 130; top: 0; right: 0; width: min(410px, 100vw); height: 100vh; max-height: none; box-sizing: border-box; border: 0; border-left: 1px solid #e1e6e2; border-radius: 0; padding: 88px 26px 26px; background: #fff; box-shadow: -16px 0 40px rgba(23,32,29,.12); }.client-notifications-header .client-notification-list { gap: 0; }.client-notifications-header .client-notification { padding: 16px 0; }
+@media (max-width: 760px) {
+  .client-space-simple { padding: 0 16px 48px; }.client-app-header { padding: 14px 0 16px; }.client-app-brand nav { display: none; }.client-app-topline .client-app-brand { gap: 0; }.client-app-topline .client-header-actions { gap: 2px; }.client-space-simple .client-header-actions .client-logout-button { display: none; }.client-app-greeting { padding: 24px 0 12px; }.client-app-greeting h1 { font-size: 30px; }
+  .client-project-grid, .client-space-simple .client-dashboard-grid { grid-template-columns: 1fr; }.client-space-simple .client-main-site-card, .client-space-simple .client-next-action { padding: 20px; }.client-space-simple .client-next-action { min-height: 0; }.client-next-action .client-button { margin-top: 14px; }.client-project-meta { margin-top: 18px; }.client-space-simple .client-project-status-card { margin-top: 20px; }.client-space-simple .client-project-status-card .client-project-timeline { margin-top: 10px; }
+  .client-contact-actions { align-items: stretch; flex-direction: column; }.client-contact-actions .client-request-trigger .client-button { width: 100%; }.client-contact-whatsapp { margin: 6px 0 0; }.client-notifications-header .client-notifications-panel { width: 100vw; }.client-request-drawer { width: 100vw; padding: 22px 18px; }
+}
+
 /* V2 visual direction: compact agency workspace, not a marketing page. */
 .client-space-simple { padding-top: 28px; background: #f3f5f2; }
 .client-space-simple .client-header, .client-space-simple .client-alert, .client-space-simple .client-space-section { max-width: 1200px; }
@@ -429,4 +461,44 @@ body {
   .client-main-site-card h2 { font-size: 32px; }
   .client-action-required { padding: 18px; }
   .client-notifications-header .client-notifications-panel { position: fixed; top: 78px; right: 16px; left: 16px; width: auto; }
+}
+
+/* V3 final cascade: keep the application shell compact after legacy visual rules. */
+.client-space-simple { max-width: none; padding: 0 24px 56px; background: #f6f7f4; color: #17201d; }
+.client-app-header { max-width: 1200px; margin-inline: auto; padding: 18px 0 20px; }
+.client-app-topline { min-height: 38px; }
+.client-app-greeting { padding: 28px 0 18px; }
+.client-app-greeting h1 { margin: 4px 0 3px; font-family: var(--font-sans); font-size: clamp(28px, 3vw, 38px); font-weight: 700; letter-spacing: -.045em; }
+.client-app-greeting p:last-child { font-size: 14px; }
+.client-app-brand nav a { font-size: 12px; }
+.client-space-simple .client-main-site-card { min-height: 0; padding: 24px 26px; border: 1px solid #e1e6e2; border-radius: 10px; background: #fff; }
+.client-space-simple .client-main-site-card::after { display: none; }
+.client-space-simple .client-main-site-card h2 { margin: 5px 0 12px; font-family: var(--font-sans); font-size: 23px; font-weight: 700; letter-spacing: -.03em; }
+.client-space-simple .client-main-site-card h3 { font-family: var(--font-sans); font-size: 18px; font-weight: 600; }
+.client-space-simple .client-project-status-card { margin-top: 18px; padding: 18px 2px 10px; border: 0; background: transparent; }
+.client-space-simple .client-project-status-card .client-project-timeline { margin-top: 14px; }
+.client-space-simple .client-project-status-card .client-project-timeline-item { min-height: 62px; }
+.client-space-simple .client-next-action { border: 1px solid #e1e6e2; border-radius: 10px; background: #fff; }
+.client-space-simple .client-next-action h2 { font-family: var(--font-sans); font-size: 20px; font-weight: 700; }
+.client-space-simple .client-dashboard-grid { margin-top: 14px; gap: 14px; }
+.client-space-simple .client-dashboard-grid > div > .client-card, .client-space-simple .client-dashboard-grid > section { border: 1px solid #e1e6e2; border-radius: 10px; padding: 20px; box-shadow: none; }
+.client-space-simple .client-dashboard-grid h2, .client-space-simple .client-seo-follow-up h2, .client-space-simple .client-contact-panel h2 { font-family: var(--font-sans); }
+.client-space-simple .client-seo-follow-up { margin-top: 20px; padding: 20px 2px 6px; border: 0; border-top: 1px solid #e1e6e2; background: transparent; }
+.client-space-simple .client-contact-panel { margin-top: 20px; padding: 20px 2px 4px; border-top: 1px solid #e1e6e2; }
+.client-space-simple .client-button { border-radius: 6px; background: #1e4a43; color: #fff; }
+.client-space-simple .client-button.secondary { background: #fff; color: #1e4a43; }
+.client-notifications-header .client-notifications-panel { position: fixed; z-index: 130; top: 0; right: 0; width: min(410px, 100vw); height: 100vh; max-height: none; box-sizing: border-box; overflow-y: auto; border: 0; border-left: 1px solid #e1e6e2; border-radius: 0; padding: 88px 26px 26px; background: #fff; box-shadow: -16px 0 40px rgba(23,32,29,.12); }
+.client-notifications-header .client-notifications-panel .client-notification { padding: 16px 0; }
+
+@media (max-width: 760px) {
+  .client-space-simple { padding: 0 16px 48px; }
+  .client-app-header { padding: 14px 0 16px; }
+  .client-app-greeting { padding: 22px 0 12px; }
+  .client-app-greeting h1 { font-size: 30px; }
+  .client-space-simple .client-main-site-card, .client-space-simple .client-next-action { padding: 20px; }
+  .client-space-simple .client-main-site-card h2 { font-size: 22px; }
+  .client-space-simple .client-dashboard-grid { grid-template-columns: 1fr; }
+  .client-space-simple .client-dashboard-grid > div > .client-card, .client-space-simple .client-dashboard-grid > section { padding: 18px; }
+  .client-space-simple .client-contact-panel, .client-space-simple .client-seo-follow-up { padding-top: 18px; }
+  .client-notifications-header .client-notifications-panel { top: 0; right: 0; left: 0; width: 100vw; padding: 76px 18px 22px; }
 }

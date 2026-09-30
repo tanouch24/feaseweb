@@ -27,9 +27,10 @@ describe("client updates lifecycle safeguards", () => {
 
   it("marks updates read only through an authenticated client-scoped server route", () => {
     const route = source("app/api/client/updates/read/route.ts");
-    expect(route).toContain('current.role !== "client"');
+    expect(route).toContain('current.role !== "client" && current.role !== "prospect"');
     expect(route).toContain('eq("user_id", current.user.id)');
-    expect(route).toContain('eq("client_id", client.id)');
+    expect(route).toContain('candidate.project_intake_id === intake.id');
+    expect(route).toContain('candidate.client_id === client.id');
     expect(route).toContain('eq("id", updateId)');
     expect(route).toContain("updateId");
     expect(route).toContain('is("read_at", null)');

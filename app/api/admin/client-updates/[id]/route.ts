@@ -11,11 +11,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const parsed = clientUpdatePatchSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Mise à jour invalide." }, { status: 422 });
   const { id } = await params;
-  const { data: current } = await supabase.from("client_updates").select("id, client_id").eq("id", id).maybeSingle();
+  const { data: current } = await supabase.from("client_updates").select("id, client_id, project_intake_id").eq("id", id).maybeSingle();
   if (!current) return NextResponse.json({ error: "Mise à jour introuvable." }, { status: 404 });
   if (parsed.data.siteId) {
-    const { data: site } = await supabase.from("sites").select("id").eq("id", parsed.data.siteId).eq("client_id", current.client_id).maybeSingle();
-    if (!site) return NextResponse.json({ error: "Site invalide pour ce client." }, { status: 422 });
+    const { data: site } = await supabase.from("sites").select("id, client_id, project_intake_id").eq("id", parsed.data.siteId).maybeSingle();
+    if (!site || (site.client_id !== current.client_id && site.project_intake_id !== current.project_intake_id)) return NextResponse.json({ error: "Site invalide pour ce dossier." }, { status: 422 });
   }
   const { error } = await supabase.from("client_updates").update(parsed.data).eq("id", id);
   if (error) { console.error("client_update_update_failed", error.code); return NextResponse.json({ error: "Impossible de modifier la mise à jour." }, { status: 500 }); }

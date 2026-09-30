@@ -27,11 +27,13 @@ export const emailSchema = z.object({ email: z.string().trim().toLowerCase().ema
 export const noteSchema = z.object({ body: z.string().trim().min(1).max(5000) });
 const safeSiteValue = (max: number) => z.string().trim().max(max).refine((value) => !value.startsWith("//") && (!/^[a-z][a-z\d+.-]*:/i.test(value) || /^https:\/\//i.test(value) || /^http:\/\//i.test(value)), "URL de site invalide.");
 export const sitePatchSchema = z.object({ previewUrl: z.string().trim().url().optional(), productionUrl: safeSiteValue(2048).optional(), domain: safeSiteValue(253).optional(), repository: z.string().trim().max(500).optional(), hostingProvider: z.string().trim().max(120).optional(), status: z.enum(["a_preparer", "en_creation", "preview", "corrections", "valide", "mise_en_ligne", "actif", "suspendu", "archive"]).optional() }).strict();
+export const siteCreateSchema = z.object({ projectIntakeId: z.string().uuid() }).strict();
 export const statusSchema = z.object({ status: z.string().min(1).max(40) });
 export const prospectStatusSchema = z.object({ status: z.enum(["nouveau", "a_contacter", "contacte", "qualifie", "preview_en_cours", "preview_envoyee", "gagne", "perdu"]) });
 export const requestStatusSchema = z.object({ status: z.enum(["recue", "en_cours", "besoin_information", "terminee", "hors_perimetre"]) });
 const clientUpdateFields = {
-  clientId: z.string().uuid(),
+  clientId: z.string().uuid().optional(),
+  projectIntakeId: z.string().uuid().optional(),
   siteId: z.string().uuid().nullable().optional(),
   updateType: z.enum(["information", "avancement", "action_requise", "apercu_disponible", "mise_en_ligne"]),
   actionType: z.enum(["voir_apercu", "completer_informations", "voir_projet"]).nullable().optional(),
@@ -41,9 +43,9 @@ const clientUpdateFields = {
 };
 const legacyClientUpdateSchema = z.object({
   clientId: z.string().uuid(), siteId: z.string().uuid().nullable().optional(), category: z.enum(["seo", "contenu", "maintenance", "site", "securite", "autre"]), title: z.string().trim().min(1).max(180), description: z.string().trim().min(1).max(5000), status: z.enum(["prevu", "en_cours", "termine"]), visibleToClient: z.boolean(), activityDate: z.string().date(),
-}).transform((value) => ({ client_id: value.clientId, site_id: value.siteId ?? null, category: value.category, title: value.title, description: value.description, status: value.status, visible_to_client: value.visibleToClient, activity_date: value.activityDate }));
-export const clientUpdateSchema = z.union([z.object(clientUpdateFields).transform((value) => ({
-  client_id: value.clientId, site_id: value.siteId ?? null, update_type: value.updateType, action_type: value.actionType ?? null, title: value.title, description: value.message, category: "site" as const, status: "termine" as const, visible_to_client: true, activity_date: value.activityDate ?? new Date().toISOString().slice(0, 10),
+}).transform((value) => ({ client_id: value.clientId, project_intake_id: null, site_id: value.siteId ?? null, category: value.category, title: value.title, description: value.description, status: value.status, visible_to_client: value.visibleToClient, activity_date: value.activityDate }));
+export const clientUpdateSchema = z.union([z.object(clientUpdateFields).superRefine((value, context) => { if (!value.clientId && !value.projectIntakeId) context.addIssue({ code: "custom", path: ["projectIntakeId"], message: "Le dossier est requis." }); }).transform((value) => ({
+  client_id: value.clientId ?? null, project_intake_id: value.projectIntakeId ?? null, site_id: value.siteId ?? null, update_type: value.updateType, action_type: value.actionType ?? null, title: value.title, description: value.message, category: "site" as const, status: "termine" as const, visible_to_client: true, activity_date: value.activityDate ?? new Date().toISOString().slice(0, 10),
 })), legacyClientUpdateSchema]);
 const modernClientUpdatePatchSchema = z.object({
   siteId: z.string().uuid().nullable().optional(), updateType: clientUpdateFields.updateType.optional(), actionType: clientUpdateFields.actionType.optional(), title: clientUpdateFields.title.optional(),

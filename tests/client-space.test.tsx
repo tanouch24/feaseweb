@@ -31,7 +31,7 @@ describe("ClientSpaceSections", () => {
     expect(screen.getByText("Envoyer un message à FeaseWeb")).toBeInTheDocument();
     expect(screen.getAllByText("Structure en préparation").length).toBeGreaterThan(0);
     expect(screen.getByText("Title modifié")).toBeInTheDocument();
-    expect(screen.getByText("TRAVAIL RÉALISÉ PAR FEASEWEB")).toBeInTheDocument();
+    expect(screen.getByText("ACTIVITÉ DE VOTRE SITE")).toBeInTheDocument();
     expect(screen.getByText(/49 €/)).toBeInTheDocument();
     expect(screen.getAllByText("Ajouter une page").length).toBe(1);
   });
@@ -42,7 +42,7 @@ describe("ClientSpaceSections", () => {
     expect(screen.queryByText("Clics")).not.toBeInTheDocument();
     expect(screen.queryByText("Impressions")).not.toBeInTheDocument();
     expect(screen.queryByText("Position moyenne")).not.toBeInTheDocument();
-    expect(screen.getByText("Les actions réalisées par FeaseWeb apparaîtront ici.")).toBeInTheDocument();
+    expect(screen.getByText(/Aucune intervention pour le moment/)).toBeInTheDocument();
   });
 
   it("shows a safe site link when a domain exists, including during construction", () => {
