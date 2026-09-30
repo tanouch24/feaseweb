@@ -60,4 +60,18 @@ describe("final client UX safeguards", () => {
     expect(form).toContain("Envoyer un message à FeaseWeb");
     expect(form).toContain("/api/client/requests");
   });
+
+  it("keeps the dashboard composition compact and moves profile out of the main flow", () => {
+    const sections = source("components/client/ClientSpaceSections.tsx");
+    const page = source("app/espace-client/page.tsx");
+    const profile = source("components/client/ClientProfileCard.tsx");
+    const styles = source("app/globals.css");
+    expect(sections).toContain("client-contact-panel");
+    expect(sections).not.toContain("client-whatsapp-card");
+    expect(page).not.toContain("<ClientProfileCard />");
+    expect(profile).toContain("client-profile-drawer");
+    expect(profile).toContain("client-profile-form");
+    expect(styles).toContain(".client-contact-panel");
+    expect(styles).toContain(".client-profile-drawer");
+  });
 });
