@@ -6,6 +6,7 @@ import { appointmentInputSchema, clientAppointmentInputSchema, mapProjectAppoint
 import { isOnboardingComplete, mapProjectIntake, onboardingProjectSelect } from "@/lib/onboarding";
 import { sendMetaConversionEvent } from "@/lib/meta-conversions";
 import { isBookableAppointment } from "@/lib/appointment-availability";
+import { authenticatedRateLimitKey, checkRateLimit, rateLimitResponse, rateLimitUnavailableResponse } from "@/lib/rate-limit";
 
 async function getBookingContext() {
   const current = await getAuthenticatedProfile();
@@ -54,6 +55,9 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const context = await getBookingContext();
   if ("response" in context) return context.response;
+  const limit = await checkRateLimit({ category: "appointment", key: authenticatedRateLimitKey(context.current.user.id), limit: 10, windowSeconds: 3600 });
+  if (limit.status === "limited") return rateLimitResponse(limit.retryAfter);
+  if (limit.status === "unavailable") return rateLimitUnavailableResponse();
   const project = mapProjectIntake(context.intake);
   if (!project.completedAt || !isOnboardingComplete(project)) return NextResponse.json({ error: "Terminez votre configuration avant de planifier un appel." }, { status: 409 });
   const parsed = (context.current.role === "client" ? clientAppointmentInputSchema : appointmentInputSchema).safeParse(await request.json().catch(() => null));
@@ -70,6 +74,9 @@ export async function POST(request: Request) {
 export async function DELETE() {
   const context = await getBookingContext();
   if ("response" in context) return context.response;
+  const limit = await checkRateLimit({ category: "appointment", key: authenticatedRateLimitKey(context.current.user.id), limit: 10, windowSeconds: 3600 });
+  if (limit.status === "limited") return rateLimitResponse(limit.retryAfter);
+  if (limit.status === "unavailable") return rateLimitUnavailableResponse();
   const { data, error } = await context.admin.from("project_appointments").update({ appointment_status: "cancelled" }).eq("project_intake_id", context.intake.id).eq("appointment_status", "scheduled").select("id, project_intake_id, appointment_status, appointment_date, appointment_time, phone, note").maybeSingle();
   if (error) return NextResponse.json({ error: "Impossible d'annuler votre rendez-vous." }, { status: 500 });
   return NextResponse.json({ appointment: data ? mapProjectAppointment(data) : null });

@@ -2,10 +2,14 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthenticatedProfile } from "@/lib/authz";
 import { supportMessageSchema } from "@/lib/validation";
+import { authenticatedRateLimitKey, checkRateLimit, rateLimitResponse, rateLimitUnavailableResponse } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   const current = await getAuthenticatedProfile();
   if (!current.user || (current.role !== "prospect" && current.role !== "client")) return NextResponse.json({ error: "Authentification requise." }, { status: 401 });
+  const limit = await checkRateLimit({ category: "support", key: authenticatedRateLimitKey(current.user.id), limit: 10, windowSeconds: 3600 });
+  if (limit.status === "limited") return rateLimitResponse(limit.retryAfter);
+  if (limit.status === "unavailable") return rateLimitUnavailableResponse();
   const parsed = supportMessageSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Votre message est invalide." }, { status: 422 });
   const supabase = await createClient();

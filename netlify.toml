@@ -9,3 +9,6 @@
 
 [build.environment]
   SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_APP_URL,NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,NEXT_PUBLIC_SUPABASE_URL"
+
+[functions."purge-rate-limit-buckets"]
+  schedule = "@hourly"

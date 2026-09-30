@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe/server";
 import { getSafeAppUrl } from "@/lib/stripe/config";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { authenticatedRateLimitKey, checkRateLimit, rateLimitResponse, rateLimitUnavailableResponse } from "@/lib/rate-limit";
 
 export async function POST() {
   const stripe = getStripe();
@@ -16,6 +17,9 @@ export async function POST() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Authentification requise." }, { status: 401 });
+  const limit = await checkRateLimit({ category: "portal", key: authenticatedRateLimitKey(user.id), limit: 10, windowSeconds: 900 });
+  if (limit.status === "limited") return rateLimitResponse(limit.retryAfter);
+  if (limit.status === "unavailable") return rateLimitUnavailableResponse();
 
   const { data: client } = await supabase.from("clients").select("id").eq("user_id", user.id).maybeSingle();
   if (!client) return NextResponse.json({ error: "Aucun client FeaseWeb associé à ce compte." }, { status: 404 });

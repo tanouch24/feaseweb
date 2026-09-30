@@ -3,6 +3,7 @@ import { requireClient } from "@/lib/authz";
 import { createClient } from "@/lib/supabase/server";
 import { clientRequestSchema } from "@/lib/validation";
 import { sendClientRequestEmail } from "@/lib/brevo";
+import { authenticatedRateLimitKey, checkRateLimit, rateLimitResponse, rateLimitUnavailableResponse } from "@/lib/rate-limit";
 
 function monthWindow() {
   const now = new Date();
@@ -13,6 +14,9 @@ function monthWindow() {
 
 export async function POST(request: Request) {
   const current = await requireClient();
+  const limit = await checkRateLimit({ category: "client-request", key: authenticatedRateLimitKey(current.user.id), limit: 3, windowSeconds: 3600 });
+  if (limit.status === "limited") return rateLimitResponse(limit.retryAfter);
+  if (limit.status === "unavailable") return rateLimitUnavailableResponse();
   const supabase = await createClient();
   if (!supabase) return NextResponse.json({ error: "Supabase n'est pas configuré." }, { status: 503 });
   const parsed = clientRequestSchema.safeParse(await request.json().catch(() => null));

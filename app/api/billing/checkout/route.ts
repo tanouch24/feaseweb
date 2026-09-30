@@ -6,6 +6,7 @@ import { getSafeAppUrl, stripePriceId } from "@/lib/stripe/config";
 import { ensureStripeCustomer, getActiveOrPendingSubscription } from "@/lib/stripe/customer";
 import { isOnboardingComplete, mapProjectIntake, onboardingProjectSelect } from "@/lib/onboarding";
 import { sendMetaConversionEvent } from "@/lib/meta-conversions";
+import { authenticatedRateLimitKey, checkRateLimit, rateLimitResponse, rateLimitUnavailableResponse } from "@/lib/rate-limit";
 
 /**
  * Creates a Stripe Checkout Session for the single FeaseWeb subscription
@@ -21,6 +22,9 @@ export async function POST() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Authentification requise." }, { status: 401 });
+  const limit = await checkRateLimit({ category: "checkout", key: authenticatedRateLimitKey(user.id), limit: 5, windowSeconds: 900 });
+  if (limit.status === "limited") return rateLimitResponse(limit.retryAfter);
+  if (limit.status === "unavailable") return rateLimitUnavailableResponse();
 
   const { data: client } = await supabase
     .from("clients")

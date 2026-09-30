@@ -33,6 +33,13 @@ vi.mock("@/lib/stripe/config", () => ({
   getSafeAppUrl: () => "http://localhost:3000",
 }));
 
+vi.mock("@/lib/rate-limit", () => ({
+  authenticatedRateLimitKey: (userId: string) => `user:${userId}`,
+  checkRateLimit: vi.fn().mockResolvedValue({ status: "allowed", remaining: 9, retryAfter: 0 }),
+  rateLimitResponse: vi.fn(),
+  rateLimitUnavailableResponse: vi.fn(),
+}));
+
 import { POST } from "@/app/api/billing/portal/route";
 
 describe("POST /api/billing/portal", () => {

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSafeAppUrl } from "@/lib/stripe/config";
 import { sendMetaConversionEvent } from "@/lib/meta-conversions";
+import { checkRateLimit, getRequestIp, rateLimitResponse, rateLimitUnavailableResponse } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -14,6 +15,9 @@ export async function POST(request: Request) {
     const message = field === "privacyConsent" ? "Vous devez accepter l'utilisation de vos informations pour créer votre espace." : field === "phone" ? "Veuillez saisir un numéro de téléphone valide." : field === "confirmation" ? "Les deux mots de passe doivent correspondre." : "Vérifiez les informations saisies.";
     return NextResponse.json({ error: message }, { status: 422 });
   }
+  const limit = await checkRateLimit({ category: "account", key: getRequestIp(request), limit: 5, windowSeconds: 3600 });
+  if (limit.status === "limited") return rateLimitResponse(limit.retryAfter);
+  if (limit.status === "unavailable") return rateLimitUnavailableResponse();
   const { data: existing } = await supabase.auth.getUser();
   if (existing.user) return NextResponse.json({ error: "Un compte est déjà connecté." }, { status: 409 });
   const appUrl = getSafeAppUrl();

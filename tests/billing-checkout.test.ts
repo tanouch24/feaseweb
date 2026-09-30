@@ -52,6 +52,13 @@ vi.mock("@/lib/stripe/customer", () => ({
   getActiveOrPendingSubscription: getActiveOrPendingSubscriptionMock,
 }));
 
+vi.mock("@/lib/rate-limit", () => ({
+  authenticatedRateLimitKey: (userId: string) => `user:${userId}`,
+  checkRateLimit: vi.fn().mockResolvedValue({ status: "allowed", remaining: 4, retryAfter: 0 }),
+  rateLimitResponse: vi.fn(),
+  rateLimitUnavailableResponse: vi.fn(),
+}));
+
 import { POST } from "@/app/api/billing/checkout/route";
 
 describe("POST /api/billing/checkout", () => {
