@@ -1,14 +1,26 @@
 "use client";
 /* eslint-disable react/no-unescaped-entities */
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
-export function ClientRequestForm({ compact = false, supportOnly = false, label }: { compact?: boolean; supportOnly?: boolean; label?: string }) {
+export function ClientRequestForm({ compact = false, supportOnly = false, label, openHash }: { compact?: boolean; supportOnly?: boolean; label?: string; openHash?: string }) {
   const [form, setForm] = useState({ title: "", category: "Modification", message: "" });
   const [state, setState] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [expanded, setExpanded] = useState(false);
   const heading = label ?? (supportOnly ? "Envoyer un message à FeaseWeb" : "Faire une demande de modification");
+  useEffect(() => {
+    if (!openHash) return;
+    const openFromHash = () => {
+      if (window.location.hash === `#${openHash}`) {
+        setExpanded(true);
+        requestAnimationFrame(() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+      }
+    };
+    openFromHash();
+    window.addEventListener("hashchange", openFromHash);
+    return () => window.removeEventListener("hashchange", openFromHash);
+  }, [openHash]);
   const submit = async (event: FormEvent) => {
     event.preventDefault(); setState("sending"); setErrorMessage("");
     const response = await fetch(supportOnly ? "/api/onboarding/support" : "/api/client/requests", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(supportOnly ? { message: form.message } : form) }).catch(() => null);

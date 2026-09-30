@@ -113,4 +113,25 @@ describe("dashboard synchronization regressions", () => {
     expect(css).toContain("client-dashboard-grid > div > .client-card, .client-space-simple .client-dashboard-grid > section { height: auto");
     expect(css).toContain("client-project-grid { align-items: start; }");
   });
+
+  it("aggregates preclient support messages into admin requests by intake", () => {
+    const mapper = source("lib/backoffice-mappers.ts");
+    const requests = source("components/admin/RequestsPageV6.tsx");
+    expect(mapper).toContain('id: `support:${intake.id}`');
+    expect(mapper).toContain("projectIntakeId: intake.id");
+    expect(mapper).toContain("const requests = [...modificationRequests, ...supportMessages]");
+    expect(requests).toContain('href={`/admin/dossiers/${dossierId}`}');
+    expect(requests).toContain('request.id.startsWith("support:")');
+  });
+
+  it("maps required actions to working client actions", () => {
+    const sections = source("components/client/ClientSpaceSections.tsx");
+    const form = source("components/client/ClientRequestForm.tsx");
+    expect(sections).toContain('kind: "payment"');
+    expect(sections).toContain("StartSubscriptionButton label={item.cta}");
+    expect(sections).toContain('href: "#rendez-vous"');
+    expect(sections).toContain('href: "#message-client"');
+    expect(form).toContain('window.location.hash === `#${openHash}`');
+    expect(sections).not.toContain('href: "#notifications", cta: "Répondre"');
+  });
 });

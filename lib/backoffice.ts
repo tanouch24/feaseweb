@@ -71,7 +71,7 @@ export type Payment = {
   status: PaymentStatus; invoice: string; period: string; provider: "stripe" | "none"; externalReference?: string;
 };
 export type ModificationRequest = {
-  id: string; clientId: string; siteId: string; createdAt: string; category: string;
+  id: string; clientId: string; projectIntakeId?: string; siteId: string; createdAt: string; category: string;
   title: string; message: string; attachments: string[]; priority: "basse" | "normale" | "haute";
   status: RequestStatus; internalReply: string; resolvedAt?: string;
 };
