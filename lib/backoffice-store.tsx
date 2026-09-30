@@ -19,6 +19,7 @@ type Store = {
   scheduleProspectAppointment: (id: string, date: string, time: string) => Promise<void>;
   updateProspectReview: (id: string, action: "complete_appointment" | "cancel_appointment" | "approve" | "needs_information" | "decline", note?: string) => Promise<void>;
   setRequestStatus: (id: string, status: ModificationRequest["status"]) => Promise<void>;
+  markProjectMessageRead: (id: string) => Promise<void>;
   addSeoAction: (siteId: string, action: string, description: string, date?: string) => Promise<void>;
   createClientUpdate: (input: { clientId?: string; projectIntakeId?: string; siteId?: string; updateType: ClientUpdate["updateType"]; actionType?: ClientUpdate["actionType"]; title: string; message: string; activityDate?: string }) => Promise<{ emailSent: boolean; warning?: string }>;
   updateClientUpdate: (id: string, input: { siteId?: string | null; updateType?: ClientUpdate["updateType"]; actionType?: ClientUpdate["actionType"] | null; title?: string; message?: string }) => Promise<void>;
@@ -34,7 +35,7 @@ async function api(path: string, init?: RequestInit) {
 }
 
 export function BackofficeProvider({ children }: { children: React.ReactNode }) {
-  const [data, setData] = useState<BackofficeData>({ prospects: [], clients: [], sites: [], subscriptions: [], payments: [], requests: [], clientUpdates: [], projectIntakes: [], seoActions: [], seoMetrics: [], domains: [], activity: [] });
+  const [data, setData] = useState<BackofficeData>({ prospects: [], clients: [], sites: [], subscriptions: [], payments: [], requests: [], projectMessages: [], clientUpdates: [], projectIntakes: [], seoActions: [], seoMetrics: [], domains: [], activity: [] });
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const refresh = async () => { try { const result = await api("/api/admin/bootstrap", { headers: {} }); setData(result.data); setError(null); } catch (caught) { setError(caught instanceof Error ? caught.message : "Impossible de charger les données."); } finally { setReady(true); } };
@@ -57,6 +58,7 @@ export function BackofficeProvider({ children }: { children: React.ReactNode }) 
     scheduleProspectAppointment: async (id, date, time) => { await api(`/api/admin/prospects/${id}/review`, { method: "PATCH", body: JSON.stringify({ action: "schedule_appointment", date, time }) }); await refresh(); },
     updateProspectReview: async (id, action, note) => { await api(`/api/admin/prospects/${id}/review`, { method: "PATCH", body: JSON.stringify({ action, note: note ?? null }) }); await refresh(); },
     setRequestStatus: (id, status) => mutate(`/api/admin/requests/${id}`, { status }),
+    markProjectMessageRead: async (id) => { await api(`/api/admin/project-messages/${id}/read`, { method: "POST", body: JSON.stringify({}) }); await refresh(); },
     addSeoAction: async (siteId, action, description, date) => { await api("/api/admin/seo/actions", { method: "POST", body: JSON.stringify({ siteId, action, description, date }) }); await refresh(); },
     createClientUpdate: async (input) => { const idempotencyKey = crypto.randomUUID(); const result = await api("/api/admin/client-updates", { method: "POST", headers: { "Idempotency-Key": idempotencyKey }, body: JSON.stringify(input) }); await refresh(); return { emailSent: Boolean(result?.emailSent), warning: typeof result?.warning === "string" ? result.warning : undefined }; },
     updateClientUpdate: async (id, input) => { await api(`/api/admin/client-updates/${id}`, { method: "PATCH", body: JSON.stringify(input) }); await refresh(); },

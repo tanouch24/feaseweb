@@ -119,7 +119,7 @@ describe("dashboard synchronization regressions", () => {
     const requests = source("components/admin/RequestsPageV6.tsx");
     expect(mapper).toContain('id: `support:${intake.id}`');
     expect(mapper).toContain("projectIntakeId: intake.id");
-    expect(mapper).toContain("const requests = [...modificationRequests, ...supportMessages]");
+    expect(mapper).toContain("const requests = [...modificationRequests, ...messageRequests, ...supportMessages]");
     expect(requests).toContain('href={`/admin/dossiers/${dossierId}`}');
     expect(requests).toContain('request.id.startsWith("support:")');
   });
@@ -133,5 +133,36 @@ describe("dashboard synchronization regressions", () => {
     expect(sections).toContain('href: "#message-client"');
     expect(form).toContain('window.location.hash === `#${openHash}`');
     expect(sections).not.toContain('href: "#notifications", cta: "Répondre"');
+  });
+
+  it("keeps a single payment CTA when payment is the next action", () => {
+    const sections = source("components/client/ClientSpaceSections.tsx");
+    expect(sections).toContain('nextAction?.kind === "payment"');
+    expect(sections).toContain("Paiement à effectuer");
+    expect(sections).toContain('StartSubscriptionButton label={item.cta}');
+  });
+
+  it("stores client messages as an intake-first durable history", () => {
+    const migration = source("supabase/migrations/20260930130000_project_messages.sql");
+    const route = source("app/api/onboarding/support/route.ts");
+    const bootstrap = source("app/api/admin/bootstrap/route.ts");
+    expect(migration).toContain("create table if not exists public.project_messages");
+    expect(migration).toContain("project_messages_legacy_source_idx");
+    expect(migration).toContain("project_messages_owner_insert");
+    expect(migration).toContain("project_messages_owner_select");
+    expect(route).toContain('from("project_messages").insert');
+    expect(route).toContain('project_intake_id: intake.id');
+    expect(bootstrap).toContain('"project_messages"');
+  });
+
+  it("exposes unread project messages in admin and marks them read explicitly", () => {
+    const mapper = source("lib/backoffice-mappers.ts");
+    const shell = source("components/admin/AdminApp.tsx");
+    const requests = source("components/admin/RequestsPageV6.tsx");
+    const readRoute = source("app/api/admin/project-messages/[id]/read/route.ts");
+    expect(mapper).toContain('source: "project_message"');
+    expect(shell).toContain("unreadRequests");
+    expect(requests).toContain("markProjectMessageRead");
+    expect(readRoute).toContain('update({ read_at: new Date().toISOString() })');
   });
 });

@@ -21,9 +21,12 @@ describe("admin/user workflow finalization", () => {
     const support = source("app/api/onboarding/support/route.ts");
     const requests = source("app/api/client/requests/route.ts");
     const dossier = source("components/admin/DossierDetail.tsx");
+    const migration = source("supabase/migrations/20260930130000_project_messages.sql");
     expect(support).toContain("support_message");
+    expect(support).toContain('from("project_messages").insert');
     expect(requests).toContain("modification_requests");
-    expect(dossier).toContain("project.supportMessage");
+    expect(migration).toContain("support_message");
+    expect(dossier).toContain("data.requests.filter");
     expect(dossier).toContain("MESSAGE DU CLIENT");
   });
 
