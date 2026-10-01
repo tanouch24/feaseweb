@@ -52,6 +52,26 @@ export default function MaintenanceSiteInternetPage() {
             ],
           },
           {
+            title: "Domaine, mise en ligne et HTTPS",
+            body: "FeaseWeb peut raccorder un nom de domaine existant, aider à sa configuration technique et mettre en place les réglages nécessaires à la mise en ligne. Le domaine principal, les redirections utiles et le HTTPS sont vérifiés selon le périmètre du projet.",
+            points: [
+              "Raccordement du domaine et configuration technique nécessaire",
+              "Domaine principal et redirections lorsque cela est utile",
+              "Mise en production et certificat HTTPS",
+              "Le titulaire du domaine dépend du dossier et des documents applicables",
+            ],
+          },
+          {
+            title: "Que suit la maintenance au quotidien ?",
+            body: "Le suivi porte sur le fonctionnement général du site et les problèmes visibles qui peuvent gêner les visiteurs. Lorsqu’un problème est détecté, FeaseWeb l’examine et réalise les corrections courantes prévues par le service.",
+            points: [
+              "Contrôle des pages et liens importants",
+              "Repérage des erreurs techniques visibles",
+              "Mises à jour nécessaires dans le périmètre prévu",
+              "Petites corrections et ajustements de contenu",
+            ],
+          },
+          {
             title: "Création, maintenance, gestion et SEO : quelle différence ?",
             body: "La création ou la refonte construit la première version du site. La maintenance aide ensuite à le garder accessible, sûr et à jour. La gestion désigne l’accompagnement continu : vous transmettez vos besoins et FeaseWeb s’occupe des opérations prévues. Le SEO travaille les fondations qui aident les moteurs à comprendre le site, sans garantir un résultat de classement.",
             points: [

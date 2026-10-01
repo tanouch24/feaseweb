@@ -89,7 +89,8 @@ export function SEOSection({ headingLevel = "h2", heading = "Un beau site ne suf
           </section>
           <section>
             <h2 className="font-serif text-3xl leading-tight text-ink md:text-4xl">Comment FeaseWeb suit la visibilité</h2>
-            <p className="mt-5 max-w-3xl leading-relaxed text-ink-soft">Le suivi consiste à observer les pages, les requêtes et les signaux disponibles pour décider des améliorations utiles. Les outils et données réellement accessibles peuvent varier selon le projet. FeaseWeb ne présente pas ici un accès Google Search Console client qui n’est pas encore disponible dans le workflow concerné.</p>
+            <p className="mt-5 max-w-3xl leading-relaxed text-ink-soft">Lorsque les données Google Search Console sont accessibles, FeaseWeb peut suivre les impressions, les clics, le CTR, la position moyenne, les requêtes, les pages visibles et l’indexation. Le sitemap et les erreurs techniques pertinentes peuvent également être contrôlés selon les outils disponibles sur le projet.</p>
+            <p className="mt-4 max-w-3xl leading-relaxed text-ink-soft">Ces données servent à repérer les pages à améliorer et les requêtes qui commencent à générer de la visibilité. Elles ne garantissent ni une position, ni un trafic, ni un nombre de prospects ou de ventes.</p>
           </section>
           <section>
             <h2 className="font-serif text-3xl leading-tight text-ink md:text-4xl">Questions fréquentes</h2>

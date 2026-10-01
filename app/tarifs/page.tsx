@@ -39,7 +39,20 @@ export default function TarifsPage() {
             <div className="rounded-md border border-line bg-white p-6">
               <h3 className="font-serif text-2xl text-ink">Ce qui est inclus</h3>
               <ul className="mt-5 grid gap-3 text-ink-soft">
-                {["Création ou refonte sans frais de création", "Hébergement et certificat HTTPS", "Affichage responsive sur mobile", "Formulaire et moyens de contact", "Maintenance, sécurité de base et sauvegardes", "Référencement naturel inclus", "Petites modifications raisonnables", "Support dans le cadre du service géré"].map((item) => (
+                {[
+                  "Création ou refonte sans frais de création",
+                  "Mise en ligne et affichage responsive sur mobile, tablette et ordinateur",
+                  "Formulaires et moyens de contact prévus dans le périmètre",
+                  "Raccordement d’un nom de domaine existant et aide à sa configuration technique, selon le dossier",
+                  "Domaine principal et redirections utiles lorsque nécessaires",
+                  "Hébergement et certificat HTTPS",
+                  "Maintenance, sécurité de base et sauvegardes",
+                  "Référencement naturel : structure, métadonnées, sitemap, robots et maillage interne",
+                  "Indexation et SEO local lorsque pertinents",
+                  "Suivi des principaux signaux de visibilité disponibles",
+                  "Petites modifications raisonnables",
+                  "Support dans le cadre du service géré",
+                ].map((item) => (
                   <li key={item} className="border-b border-line py-2"><span className="mr-3 text-brand">✓</span>{item}</li>
                 ))}
               </ul>
@@ -50,6 +63,8 @@ export default function TarifsPage() {
                 <li>Le périmètre est clarifié avant le démarrage et tous les projets ne sont pas acceptés automatiquement.</li>
                 <li>Les demandes importantes ou hors périmètre doivent être précisées avant réalisation.</li>
                 <li>Le SEO inclus ne garantit ni position, ni trafic, ni leads, ni ventes.</li>
+                <li>Le développement spécifique important, les fonctionnalités complexes, les campagnes publicitaires et la production illimitée de contenus ne sont pas inclus automatiquement.</li>
+                <li>La prospection commerciale, la veille de marchés publics et l’accompagnement administratif d’appels d’offres ne font pas partie de cette formule.</li>
                 <li>Les règles de résiliation et de propriété doivent être vérifiées dans les documents contractuels applicables.</li>
               </ul>
             </div>
