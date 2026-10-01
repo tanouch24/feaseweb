@@ -63,12 +63,13 @@ describe("SEO foundations", () => {
   it("publishes only useful public URLs in the sitemap", () => {
     const urls = sitemap().map((entry) => entry.url);
 
-    expect(urls).toHaveLength(23);
+    expect(urls).toHaveLength(25);
     expect(urls.every((url) => url.startsWith("https://feaseweb.fr/"))).toBe(true);
     expect(urls).not.toContain("https://feaseweb.fr/creer-mon-site");
     expect(urls).not.toContain("https://feaseweb.fr/refaire-mon-site");
     expect(urls).toContain("https://feaseweb.fr/site-internet-artisan");
     expect(urls).toContain("https://feaseweb.fr/maintenance-site-internet");
+    expect(urls).toContain("https://feaseweb.fr/checklist-site-internet-artisan");
     expect(urls.some((url) => url.includes("/admin"))).toBe(false);
     expect(urls.some((url) => url.includes("/api"))).toBe(false);
     expect(urls.some((url) => url.includes("fease.fr"))).toBe(false);

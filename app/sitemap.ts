@@ -16,6 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/seo", priority: 0.6, changeFrequency: "monthly" as const },
     { path: "/faq", priority: 0.6, changeFrequency: "monthly" as const },
     { path: "/blog", priority: 0.7, changeFrequency: "weekly" as const },
+    { path: "/checklist-site-internet-artisan", priority: 0.7, changeFrequency: "monthly" as const },
     { path: "/creation-site-internet", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/refonte-site-internet", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/site-internet-artisan", priority: 0.8, changeFrequency: "monthly" as const },

@@ -48,6 +48,15 @@ describe("blog data", () => {
     expect(sitemap().filter((entry) => entry.url.endsWith(`/blog/${slug}`))).toHaveLength(1);
     expect((await generateMetadata({ params: Promise.resolve({ slug }) })).alternates?.canonical).toBe(`/blog/${slug}`);
   });
+
+  it("includes the second P1 article after editorial validation", () => {
+    const slug = "refaire-son-site-internet-quand-et-pourquoi";
+
+    expect(getAllSlugs()).toContain(slug);
+    expect(getAllPosts().some((post) => post.slug === slug)).toBe(true);
+    expect(getPostBySlug(slug)).toMatchObject({ status: "published", targetPage: "/refonte-site-internet" });
+    expect(sitemap().filter((entry) => entry.url.endsWith(`/blog/${slug}`))).toHaveLength(1);
+  });
 });
 
 describe("BlogPage", () => {
