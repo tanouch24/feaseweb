@@ -7,6 +7,7 @@ type PageMetadataOptions = {
   path: string;
   type?: "website" | "article";
   publishedTime?: string;
+  modifiedTime?: string;
 };
 
 export function pageMetadata({
@@ -15,6 +16,7 @@ export function pageMetadata({
   path,
   type = "website",
   publishedTime,
+  modifiedTime,
 }: PageMetadataOptions): Metadata {
   const url = new URL(path, siteUrl).toString();
 
@@ -29,6 +31,7 @@ export function pageMetadata({
       description,
       url,
       ...(publishedTime ? { publishedTime } : {}),
+      ...(modifiedTime ? { modifiedTime } : {}),
     },
     twitter: {
       card: "summary_large_image",

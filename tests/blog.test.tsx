@@ -1,8 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { getAllPosts, getAllSlugs, getPostBySlug } from "@/lib/blog";
+import { getAllPosts, getAllSlugs, getPostBySlug, getRelatedPosts } from "@/lib/blog";
 import { generateMetadata } from "@/app/blog/[slug]/page";
 import BlogPage from "@/app/blog/page";
+import sitemap from "@/app/sitemap";
 
 describe("blog data", () => {
   it("lists every post with the required frontmatter fields", () => {
@@ -13,7 +14,11 @@ describe("blog data", () => {
       expect(post.description).toBeTruthy();
       expect(post.excerpt).toBeTruthy();
       expect(post.date).toBeTruthy();
+      expect(post.publishedAt).toBe(post.date);
       expect(post.category).toBeTruthy();
+      expect(post.author).toBe("FeaseWeb");
+      expect(post.status).toBe("published");
+      expect(post.targetPage).toMatch(/^\//);
     }
   });
 
@@ -26,6 +31,22 @@ describe("blog data", () => {
 
   it("returns null for an unknown slug instead of throwing", () => {
     expect(getPostBySlug("ce-slug-n-existe-pas")).toBeNull();
+  });
+
+  it("provides related published posts without including the current article", () => {
+    const [slug] = getAllSlugs();
+    const related = getRelatedPosts(slug);
+    expect(related.every((post) => post.slug !== slug && post.status === "published")).toBe(true);
+    expect(related.length).toBeLessThanOrEqual(3);
+  });
+
+  it("includes the first P1 article after editorial validation", async () => {
+    const slug = "prix-site-internet-petite-entreprise";
+    expect(getAllSlugs()).toContain(slug);
+    expect(getAllPosts().some((post) => post.slug === slug)).toBe(true);
+    expect(getPostBySlug(slug)).toMatchObject({ status: "published", targetPage: "/tarifs" });
+    expect(sitemap().filter((entry) => entry.url.endsWith(`/blog/${slug}`))).toHaveLength(1);
+    expect((await generateMetadata({ params: Promise.resolve({ slug }) })).alternates?.canonical).toBe(`/blog/${slug}`);
   });
 });
 
