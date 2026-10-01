@@ -70,6 +70,7 @@ export default function SiteInternetArtisanPage() {
           { label: "Voir l’offre et le tarif", href: "/tarifs" },
           { label: "Découvrir la création de site", href: "/creation-site-internet" },
           { label: "Comprendre le référencement inclus", href: "/seo" },
+          { label: "Utiliser la checklist pour préparer votre site", href: "/checklist-site-internet-artisan" },
         ]}
       />
       <FinalCTA />

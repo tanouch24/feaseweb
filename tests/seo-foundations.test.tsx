@@ -148,6 +148,11 @@ describe("SEO foundations", () => {
     expect(html).not.toContain('"@type":"Review"');
   });
 
+  it("links the artisan money page to its checklist resource", () => {
+    const { container } = render(<SiteInternetArtisanPage />);
+    expect(container.querySelector('a[href="/checklist-site-internet-artisan"]')).toBeTruthy();
+  });
+
   it("keeps the examples page explicit about demonstrations", () => {
     const { container } = render(<ExemplesPage />);
 
