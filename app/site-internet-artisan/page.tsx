@@ -4,9 +4,9 @@ import { ManagedServiceLanding } from "@/components/home/ManagedServiceLanding";
 import { pageMetadata } from "@/lib/seo-metadata";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Site internet pour artisan : création gérée | FeaseWeb",
+  title: "Site internet pour artisan : création et gestion | FeaseWeb",
   description:
-    "FeaseWeb crée et gère le site internet de votre activité artisanale : prestations, zone d’intervention, contact, mobile, maintenance et SEO inclus.",
+    "Création d’un site internet pour artisan avec prestations, zone d’intervention, téléphone, demande de devis, affichage mobile, maintenance et SEO inclus.",
   path: "/site-internet-artisan",
 });
 
@@ -35,11 +35,25 @@ export default function SiteInternetArtisanPage() {
           },
           {
             title: "Des bases solides pour votre visibilité locale",
-            body: "Le site présente clairement votre métier et votre secteur d’intervention afin d’aider les visiteurs et les moteurs de recherche à comprendre votre activité. FeaseWeb travaille ces fondations sans promettre une position précise sur Google.",
+            body: "Le site présente clairement votre métier et votre secteur d’intervention afin d’aider les visiteurs et les moteurs de recherche à comprendre votre activité. Cela peut compléter une fiche Google Business Profile cohérente, lorsque cet outil est pertinent pour votre activité. FeaseWeb travaille ces fondations sans promettre une position précise sur Google.",
             points: [
               "Structure adaptée à une petite entreprise locale",
               "Contenu organisé autour de vos services réels",
+              "Informations cohérentes avec votre présence locale",
               "Référencement naturel inclus dans l’abonnement",
+            ],
+          },
+          {
+            title: "Que doit contenir un bon site internet d’artisan ?",
+            body: "Un bon site répond rapidement aux questions d’un client potentiel. Il montre votre métier, vos prestations et votre zone d’intervention, puis facilite le contact depuis un téléphone.",
+            points: [
+              "Un numéro de téléphone visible et utilisable sur mobile",
+              "Une demande de devis ou un formulaire simple",
+              "Des prestations décrites avec des mots compréhensibles",
+              "Une zone d’intervention précise",
+              "Des photos réelles de vos réalisations, si vous en disposez",
+              "Des avis uniquement s’ils sont authentiques et vérifiables",
+              "Des informations cohérentes avec votre fiche Google Business Profile",
             ],
           },
           {

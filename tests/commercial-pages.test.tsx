@@ -9,14 +9,14 @@ import NotFound from "@/app/not-found";
 describe("commercial routes", () => {
   it("explains managed creation with the single offer", () => {
     render(<CreationSiteInternetPage />);
-    expect(screen.getByRole("heading", { name: /site professionnel pour votre activité/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /création de site internet professionnel pour votre entreprise/i })).toBeInTheDocument();
     expect(screen.getAllByText(/49 €/).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: "Créer mon site" })[0]).toHaveAttribute("href", "/creer-mon-site");
   });
 
   it("keeps redesign messaging distinct from creation", () => {
     render(<RefonteSiteInternetPage />);
-    expect(screen.getByRole("heading", { name: /Votre site a vieilli/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Refonte de site internet professionnel pour repartir sur de bonnes bases/i })).toBeInTheDocument();
     expect(screen.getByText(/adresse de votre site actuel/i)).toBeInTheDocument();
   });
 

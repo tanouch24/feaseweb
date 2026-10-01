@@ -4,9 +4,9 @@ import { ManagedServiceLanding } from "@/components/home/ManagedServiceLanding";
 import { pageMetadata } from "@/lib/seo-metadata";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Maintenance de site internet gérée | FeaseWeb",
+  title: "Maintenance de site internet et site géré | FeaseWeb",
   description:
-    "FeaseWeb s’occupe de la maintenance de votre site internet : hébergement, SSL, sécurité, sauvegardes, corrections et petites modifications inclus.",
+    "Maintenance de site internet et gestion de site pour artisans, TPE et petites entreprises : hébergement, HTTPS, mises à jour, sauvegardes et petites modifications.",
   path: "/maintenance-site-internet",
 });
 
@@ -49,6 +49,17 @@ export default function MaintenanceSiteInternetPage() {
               "Vous restez accompagné après la création ou la refonte",
               "Le site peut évoluer avec votre entreprise",
               "La maintenance reste liée à un service géré, pas à un outil DIY",
+            ],
+          },
+          {
+            title: "Création, maintenance, gestion et SEO : quelle différence ?",
+            body: "La création ou la refonte construit la première version du site. La maintenance aide ensuite à le garder accessible, sûr et à jour. La gestion désigne l’accompagnement continu : vous transmettez vos besoins et FeaseWeb s’occupe des opérations prévues. Le SEO travaille les fondations qui aident les moteurs à comprendre le site, sans garantir un résultat de classement.",
+            points: [
+              "Création : structure, design, contenus et mise en ligne",
+              "Maintenance : hébergement, mises à jour, sauvegardes et corrections",
+              "Gestion : demandes, petites évolutions et suivi du site",
+              "SEO : structure, contenus et éléments techniques utiles à la visibilité",
+              "Pas de promesse de surveillance 24 h/24 et 7 j/7",
             ],
           },
         ]}

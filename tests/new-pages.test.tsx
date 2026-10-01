@@ -35,11 +35,12 @@ describe("FAQPage", () => {
 });
 
 describe("SEOPage", () => {
-  it("never promises a guaranteed ranking", () => {
+  it("states clearly that SEO includes no ranking guarantee", () => {
     render(<SEOPage />);
-    expect(
-      screen.queryByText(/première position|garanti/i)
-    ).not.toBeInTheDocument();
+    const disclaimer = screen.getByText(
+      /SEO inclus signifie.*première position garantie.*ventes garanties/i
+    );
+    expect(disclaimer).toHaveTextContent(/ne signifie pas/i);
   });
 });
 

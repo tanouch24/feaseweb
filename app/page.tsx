@@ -17,7 +17,7 @@ import { pageMetadata } from "@/lib/seo-metadata";
 export const metadata = pageMetadata({
   title: "Création de site internet pour TPE et artisans | FeaseWeb",
   description:
-    "FeaseWeb crée, héberge et maintient votre site internet professionnel. Création ou refonte sans frais, puis 49 €/mois avec SEO inclus.",
+    "FeaseWeb crée ou refait le site internet des artisans, TPE et petites entreprises. 0 € de création, puis 49 €/mois avec hébergement, maintenance et SEO inclus.",
   path: "/",
 });
 

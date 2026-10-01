@@ -24,8 +24,9 @@ export function Hero() {
             className="animate-rise mt-6 max-w-md break-words text-lg text-ink-soft"
             style={{ animationDelay: "150ms" }}
           >
-            On le crée. On le met en ligne. On le maintient. Vous vous
-            concentrez sur votre métier.
+            FeaseWeb crée ou refait le site internet des artisans, TPE et
+            petites entreprises. On le met en ligne, on le maintient et vous
+            vous concentrez sur votre métier.
           </p>
           <div className="animate-rise mt-8" style={{ animationDelay: "230ms" }}>
             <PriceBadge />
