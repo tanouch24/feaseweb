@@ -5,6 +5,8 @@ import { siteUrl } from "@/lib/site-config";
 
 const SITE_URL = siteUrl;
 
+export const dynamic = "force-dynamic";
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes = [
     { path: "/", priority: 1, changeFrequency: "weekly" as const },
