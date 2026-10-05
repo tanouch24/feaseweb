@@ -9,7 +9,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "seo:check": "node scripts/seo-health-check.mjs"
+    "seo:check": "node scripts/seo-health-check.mjs",
+    "seo:indexnow": "node scripts/indexnow-submit.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
