@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { KineticWords } from "@/components/home/KineticWords";
 import { OfferSection } from "@/components/home/OfferSection";
 import { ServiceEditorialGrid } from "@/components/home/ServiceEditorialGrid";
@@ -93,6 +94,21 @@ export default function TarifsPage() {
         </div>
       </section>
       <RelatedLinks links={[{ label: "Site internet pour artisan", href: "/site-internet-artisan" }, { label: "Maintenance du site internet", href: "/maintenance-site-internet" }]} />
+      <section className="border-t border-line py-14">
+        <div className="mx-auto max-w-6xl px-6">
+          <p className="max-w-3xl text-ink-soft">
+            Pour comprendre les critères qui font varier le prix d’un site internet, consultez le
+            <Link className="ml-1 font-medium text-brand-dark underline underline-offset-2" href="/blog/prix-site-internet-petite-entreprise">
+              guide sur le prix d’un site pour une petite entreprise
+            </Link>
+            . Pour démarrer un projet, découvrez aussi la
+            <Link className="ml-1 font-medium text-brand-dark underline underline-offset-2" href="/creation-site-internet">
+              création de site internet
+            </Link>
+            .
+          </p>
+        </div>
+      </section>
       <FinalCTA />
     </main>
   );

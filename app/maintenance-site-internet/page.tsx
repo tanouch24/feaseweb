@@ -72,6 +72,17 @@ export default function MaintenanceSiteInternetPage() {
             ],
           },
           {
+            title: "Questions fréquentes sur la maintenance",
+            body: "La maintenance de site internet correspond à un service géré, avec un périmètre clair. Elle ne signifie pas que toute demande ou toute intervention spécifique est automatiquement comprise.",
+            points: [
+              "Que comprend la maintenance ? L’hébergement, le HTTPS, la sécurité, le suivi des sauvegardes prévu par la formule, les corrections courantes et les petites modifications prévues par le périmètre annoncé.",
+              "Que se passe-t-il en cas de problème ? FeaseWeb examine le problème et intervient dans le périmètre du service, sans promettre une disponibilité 24 h/24 et 7 j/7.",
+              "Les modifications sont-elles incluses ? Les petites modifications raisonnables le sont ; un besoin important ou spécifique doit être clarifié avant réalisation.",
+              "Le domaine est-il géré ? Le raccordement et les réglages nécessaires peuvent être accompagnés selon le dossier ; le titulaire du domaine dépend des documents applicables.",
+              "Peut-on reprendre un site existant ? La demande est étudiée selon l’état du site, les accès disponibles et le périmètre technique.",
+            ],
+          },
+          {
             title: "Création, maintenance, gestion et SEO : quelle différence ?",
             body: "La création ou la refonte construit la première version du site. La maintenance aide ensuite à le garder accessible, sûr et à jour. La gestion désigne l’accompagnement continu : vous transmettez vos besoins et FeaseWeb s’occupe des opérations prévues. Le SEO travaille les fondations qui aident les moteurs à comprendre le site, sans garantir un résultat de classement.",
             points: [

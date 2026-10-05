@@ -45,7 +45,7 @@ export default function SiteInternetArtisanPage() {
           },
           {
             title: "Que doit contenir un bon site internet d’artisan ?",
-            body: "Un bon site répond rapidement aux questions d’un client potentiel. Il montre votre métier, vos prestations et votre zone d’intervention, puis facilite le contact depuis un téléphone.",
+            body: "Un bon site répond rapidement aux questions d’un client potentiel. Il montre votre métier, vos prestations et votre zone d’intervention, puis facilite le contact depuis un téléphone. Cette base doit rester claire et exacte quand l’activité évolue.",
             points: [
               "Un numéro de téléphone visible et utilisable sur mobile",
               "Une demande de devis ou un formulaire simple",
@@ -63,6 +63,16 @@ export default function SiteInternetArtisanPage() {
               "0 € de frais de création selon l’offre actuelle",
               "49 €/mois avec hébergement, SSL et maintenance inclus",
               "Accompagnement après la mise en ligne",
+            ],
+          },
+          {
+            title: "Créer un site ne suffit pas : il faut le maintenir",
+            body: "Une adresse, une prestation, une photo ou une zone d’intervention peuvent changer. Un site internet d’artisan doit rester à jour, accessible sur mobile et cohérent avec les informations utilisées localement.",
+            points: [
+              "Informations de contact et horaires à actualiser",
+              "Prestations et zone d’intervention à maintenir cohérentes",
+              "Suivi technique et petites modifications dans la durée",
+              "Fondations SEO et maillage à conserver lisibles",
             ],
           },
         ]}

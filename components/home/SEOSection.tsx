@@ -88,7 +88,7 @@ export function SEOSection({ headingLevel = "h2", heading = "Un beau site ne suf
             <p className="mt-5 max-w-3xl leading-relaxed text-ink-soft">Les résultats peuvent évoluer selon le secteur, la concurrence, l’historique du domaine, la qualité des pages et les recherches locales. FeaseWeb peut améliorer progressivement les contenus et les fondations du site ; aucun calendrier ni résultat précis ne peut être promis à l’avance.</p>
           </section>
           <section>
-            <h2 className="font-serif text-3xl leading-tight text-ink md:text-4xl">Comment FeaseWeb suit la visibilité</h2>
+            <h2 className="font-serif text-3xl leading-tight text-ink md:text-4xl">Ce que FeaseWeb suit</h2>
             <p className="mt-5 max-w-3xl leading-relaxed text-ink-soft">Lorsque les données Google Search Console sont accessibles, FeaseWeb peut suivre les impressions, les clics, le CTR, la position moyenne, les requêtes, les pages visibles et l’indexation. Le sitemap et les erreurs techniques pertinentes peuvent également être contrôlés selon les outils disponibles sur le projet.</p>
             <p className="mt-4 max-w-3xl leading-relaxed text-ink-soft">Ces données servent à repérer les pages à améliorer et les requêtes qui commencent à générer de la visibilité. Elles ne garantissent ni une position, ni un trafic, ni un nombre de prospects ou de ventes.</p>
           </section>
