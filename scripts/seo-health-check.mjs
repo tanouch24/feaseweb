@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-const DEFAULT_BASE_URL = "http://127.0.0.1:3000";
+const EXPECTED_PRODUCTION_HOST = "feaseweb.fr";
+const EXPECTED_SITEMAP_COUNT = 25;
 const PRIVATE_PATH = /^\/(?:admin|api|auth)(?:\/|$)/;
 const OLD_CONTENT = /fease\.fr|(?:39|78)\s*€(?:\s*\/\s*mois)?|(?:SEO|option)\s+en\s+option|\+39/i;
 
@@ -65,15 +66,86 @@ async function fetchPage(url, options = {}) {
   return { response, html: await response.text() };
 }
 
+function normalizeBaseUrl(value) {
+  const raw = value.trim();
+  if (!raw) throw new Error("MISSING_TARGET_SITE: set SEO_BASE_URL or pass --base-url=<url>");
+
+  let parsed;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    throw new Error(`INVALID_TARGET_URL: ${raw}`);
+  }
+  if (!["http:", "https:"].includes(parsed.protocol)) {
+    throw new Error(`INVALID_TARGET_URL: only http:// and https:// are supported (${raw})`);
+  }
+  if (parsed.username || parsed.password) throw new Error("INVALID_TARGET_URL: credentials are not allowed");
+  return parsed.origin.replace(/\/$/, "");
+}
+
+function sitemapLocations(html, baseUrl) {
+  return [...html.matchAll(/<loc>([^<]+)<\/loc>/gi)].map((match) => new URL(match[1].trim(), baseUrl));
+}
+
+function hasFeaseWebBrand(html) {
+  return /feaseweb/i.test(html) && /<title\b[^>]*>[^<]*feaseweb/i.test(html);
+}
+
+function targetSignals(baseUrl, homepageHtml, locations = []) {
+  const target = new URL(baseUrl);
+  const homepagePage = parsePage(homepageHtml, baseUrl, baseUrl);
+  let canonicalHost = "";
+  try {
+    canonicalHost = homepagePage.canonical ? new URL(homepagePage.canonical, baseUrl).hostname : "";
+  } catch {
+    canonicalHost = "";
+  }
+  return {
+    productionDomain: target.hostname === EXPECTED_PRODUCTION_HOST,
+    brand: hasFeaseWebBrand(homepageHtml),
+    canonical: canonicalHost === EXPECTED_PRODUCTION_HOST,
+    expectedSitemap: locations.length === EXPECTED_SITEMAP_COUNT,
+    sitemapDomain: locations.length > 0 && locations.every((location) => location.hostname === EXPECTED_PRODUCTION_HOST),
+  };
+}
+
+function wrongTargetError(signals) {
+  return new Error(`WRONG_TARGET_SITE: target does not match FeaseWeb (signals: ${Object.entries(signals).filter(([, value]) => value).map(([key]) => key).join(", ") || "none"})`);
+}
+
+function validateHomepageTarget(baseUrl, homepageHtml) {
+  const signals = targetSignals(baseUrl, homepageHtml);
+  if (!signals.productionDomain && !(signals.brand && signals.canonical)) {
+    throw wrongTargetError(signals);
+  }
+}
+
+function validateTarget(baseUrl, homepageHtml, locations) {
+  const signals = targetSignals(baseUrl, homepageHtml, locations);
+  const identitySignals = [signals.brand, signals.canonical, signals.expectedSitemap || signals.sitemapDomain].filter(Boolean).length;
+  const isValid = signals.productionDomain ? identitySignals >= 2 : signals.brand && signals.canonical && identitySignals >= 2;
+  if (!isValid) {
+    throw wrongTargetError(signals);
+  }
+}
+
 async function main() {
-  const baseUrl = argument("base-url", process.env.BASE_URL ?? DEFAULT_BASE_URL).replace(/\/$/, "");
+  const requestedBaseUrl = argument("base-url", process.env.SEO_BASE_URL ?? process.env.BASE_URL ?? "");
+  process.stdout.write(`SEO TARGET: ${requestedBaseUrl.trim() || "<missing>"}\n`);
+  const baseUrl = normalizeBaseUrl(requestedBaseUrl);
+  const homepageResult = await fetchPage(baseUrl);
+  if (!homepageResult.response.ok) throw new Error(`TARGET_FETCH_FAILED: homepage ${homepageResult.response.status}: ${baseUrl}`);
+  validateHomepageTarget(baseUrl, homepageResult.html);
+
   const sitemapUrl = `${baseUrl}/sitemap.xml`;
   const sitemapResult = await fetchPage(sitemapUrl);
   if (!sitemapResult.response.ok) throw new Error(`Sitemap ${sitemapResult.response.status}: ${sitemapUrl}`);
 
-  const sitemapLocations = [...sitemapResult.html.matchAll(/<loc>([^<]+)<\/loc>/gi)].map((match) => match[1].trim());
-  const urls = sitemapLocations.map((location) => `${baseUrl}${new URL(location).pathname}`);
-  const canonicalOrigin = sitemapLocations[0] ? new URL(sitemapLocations[0]).origin : baseUrl;
+  const sitemapLocationUrls = sitemapLocations(sitemapResult.html, baseUrl);
+  validateTarget(baseUrl, homepageResult.html, sitemapLocationUrls);
+
+  const urls = sitemapLocationUrls.map((location) => `${baseUrl}${location.pathname}`);
+  const canonicalOrigin = sitemapLocationUrls[0] ? sitemapLocationUrls[0].origin : baseUrl;
   const normalized = urls.map((url) => url.replace(/\/$/, ""));
   const duplicateUrls = normalized.filter((url, index) => normalized.indexOf(url) !== index);
   const pages = [];
