@@ -9,6 +9,7 @@ import BlogPage from "@/app/blog/page";
 import HomePage from "@/app/page";
 import SiteInternetArtisanPage from "@/app/site-internet-artisan/page";
 import MaintenanceSiteInternetPage from "@/app/maintenance-site-internet/page";
+import CostCalculatorPage from "@/app/calculateur-cout-site-internet/page";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { metadata as homeMetadata } from "@/app/page";
 import { metadata as commentMetadata } from "@/app/comment-ca-marche/page";
@@ -23,6 +24,7 @@ import { metadata as aboutMetadata } from "@/app/a-propos/page";
 import { metadata as contactMetadata } from "@/app/contact/page";
 import { metadata as artisanMetadata } from "@/app/site-internet-artisan/page";
 import { metadata as maintenanceMetadata } from "@/app/maintenance-site-internet/page";
+import { metadata as calculatorMetadata } from "@/app/calculateur-cout-site-internet/page";
 import { metadata as creerMetadata } from "@/app/creer-mon-site/page";
 import { metadata as refaireMetadata } from "@/app/refaire-mon-site/page";
 import { metadata as legalMetadata } from "@/app/mentions-legales/page";
@@ -63,12 +65,13 @@ describe("SEO foundations", () => {
   it("publishes only useful public URLs in the sitemap", () => {
     const urls = sitemap().map((entry) => entry.url);
 
-    expect(urls).toHaveLength(33);
+    expect(urls).toHaveLength(34);
     expect(urls.every((url) => url.startsWith("https://feaseweb.fr/"))).toBe(true);
     expect(urls).not.toContain("https://feaseweb.fr/creer-mon-site");
     expect(urls).not.toContain("https://feaseweb.fr/refaire-mon-site");
     expect(urls).toContain("https://feaseweb.fr/site-internet-artisan");
     expect(urls).toContain("https://feaseweb.fr/maintenance-site-internet");
+    expect(urls).toContain("https://feaseweb.fr/calculateur-cout-site-internet");
     expect(urls).toContain("https://feaseweb.fr/checklist-site-internet-artisan");
     expect(urls.some((url) => url.includes("/admin"))).toBe(false);
     expect(urls.some((url) => url.includes("/api"))).toBe(false);
@@ -96,6 +99,7 @@ describe("SEO foundations", () => {
     ["blog", BlogPage],
     ["site internet artisan", SiteInternetArtisanPage],
     ["maintenance de site internet", MaintenanceSiteInternetPage],
+    ["calculateur coût site internet", CostCalculatorPage],
   ])("renders exactly one H1 on %s", (_name, Page) => {
     const { container } = render(<Page />);
     expect(container.querySelectorAll("h1")).toHaveLength(1);
@@ -122,6 +126,7 @@ describe("SEO foundations", () => {
       contactMetadata,
       artisanMetadata,
       maintenanceMetadata,
+      calculatorMetadata,
     ];
     const titles = metadata.map((entry) => entry.title);
     const descriptions = metadata.map((entry) => entry.description);

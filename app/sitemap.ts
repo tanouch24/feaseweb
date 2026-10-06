@@ -21,6 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/refonte-site-internet", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/site-internet-artisan", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/maintenance-site-internet", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/calculateur-cout-site-internet", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/a-propos", priority: 0.3, changeFrequency: "yearly" as const },
     { path: "/contact", priority: 0.5, changeFrequency: "yearly" as const },
   ].map((route) => ({
