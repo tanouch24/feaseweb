@@ -63,7 +63,7 @@ describe("SEO foundations", () => {
   it("publishes only useful public URLs in the sitemap", () => {
     const urls = sitemap().map((entry) => entry.url);
 
-    expect(urls).toHaveLength(28);
+    expect(urls).toHaveLength(33);
     expect(urls.every((url) => url.startsWith("https://feaseweb.fr/"))).toBe(true);
     expect(urls).not.toContain("https://feaseweb.fr/creer-mon-site");
     expect(urls).not.toContain("https://feaseweb.fr/refaire-mon-site");
