@@ -88,6 +88,7 @@ describe("server conversion boundary", () => {
     expect(source).toContain("isDevelopment ? \" 'unsafe-eval'\" : \"\"");
     expect(source).toContain("https://www.googletagmanager.com");
     expect(source).toContain("https://analytics.google.com");
+    expect(source).toContain("https://region1.google-analytics.com");
     expect(source).toContain("https://connect.facebook.net");
   });
 });
