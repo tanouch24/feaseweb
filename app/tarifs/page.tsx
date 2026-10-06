@@ -105,6 +105,10 @@ export default function TarifsPage() {
             <Link className="ml-1 font-medium text-brand-dark underline underline-offset-2" href="/creation-site-internet">
               création de site internet
             </Link>
+            . Pour projeter ces dépenses sur plusieurs années, utilisez aussi le
+            <Link className="ml-1 font-medium text-brand-dark underline underline-offset-2" href="/calculateur-cout-site-internet">
+              calculateur de coût sur 3 ans
+            </Link>
             .
           </p>
         </div>
