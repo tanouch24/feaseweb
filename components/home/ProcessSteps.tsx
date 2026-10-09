@@ -33,7 +33,7 @@ function QuestionnaireVisual() {
   return (
     <MockupFrame>
       <div className="rounded-md border border-line bg-white p-6 shadow-sm">
-        <p className="text-xs font-medium uppercase tracking-wide text-ink-soft">
+        <p className="text-sm font-medium text-ink-soft">
           Parlez-nous de votre activité
         </p>
         <div className="mt-4 space-y-3">

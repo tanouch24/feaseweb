@@ -98,7 +98,7 @@ export default function ChecklistSiteInternetArtisanPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
       />
       <header className="mt-8 max-w-3xl">
-        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-dark">Ressource pratique</p>
+        <p className="text-[15px] font-semibold text-brand-dark">Ressource pratique</p>
         <h1 className="mt-3 font-serif text-4xl leading-tight text-ink md:text-5xl">
           Checklist site internet pour artisan
         </h1>

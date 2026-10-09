@@ -83,7 +83,7 @@ export default async function BlogPostPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="flex items-center gap-3 text-xs text-ink-soft">
-        <span className="rounded-sm bg-bg-alt px-2 py-1 uppercase tracking-wide">
+        <span className="rounded-sm bg-bg-alt px-2 py-1">
           {post.category}
         </span>
         <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
@@ -105,7 +105,7 @@ export default async function BlogPostPage({
       </div>
       {post.targetPage && (
         <aside className="mt-12 rounded-lg border border-line bg-bg-alt p-6">
-          <p className="text-sm font-semibold uppercase tracking-wide text-brand-dark">Pour aller plus loin</p>
+          <p className="text-[15px] font-semibold text-brand-dark">Pour aller plus loin</p>
           <Link href={post.targetPage} className="mt-2 inline-block font-serif text-2xl text-ink underline underline-offset-4">
             {post.targetLabel ?? "Découvrir l’offre FeaseWeb"}
           </Link>

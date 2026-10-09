@@ -15,7 +15,7 @@ export default function AProposPage() {
     <main>
       <section className="bg-bg-alt py-20 md:py-28">
         <div className="mx-auto max-w-4xl px-6">
-          <p className="text-xs font-medium uppercase tracking-widest text-brand-dark">À propos</p>
+          <p className="text-sm font-medium text-brand-dark">À propos</p>
           <h1 className="mt-4 max-w-3xl font-serif text-4xl leading-tight text-ink md:text-6xl">Un site internet utile, sans une nouvelle tâche à gérer.</h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-soft">FeaseWeb est un service français pensé pour les artisans, commerçants, indépendants, professions libérales et petites entreprises qui veulent une présence en ligne sérieuse sans apprendre à construire un site.</p>
         </div>

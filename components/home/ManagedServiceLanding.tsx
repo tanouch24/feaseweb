@@ -29,7 +29,7 @@ export function ManagedServiceLanding({
       <section className="bg-bg-alt py-20 md:py-28">
         <div className="mx-auto grid min-w-0 w-full max-w-6xl gap-12 px-6 md:grid-cols-[1.15fr_.85fr] md:items-end">
           <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-widest text-brand-dark">
+            <p className="text-sm font-medium text-brand-dark">
               {eyebrow}
             </p>
             <h1 className="mt-4 max-w-3xl break-words font-serif text-4xl leading-tight text-ink md:text-6xl">
@@ -46,7 +46,7 @@ export function ManagedServiceLanding({
             </div>
           </div>
           <aside className="min-w-0 border-l-2 border-brand bg-white p-7">
-            <p className="text-xs font-medium uppercase tracking-widest text-ink-soft">
+            <p className="text-sm font-medium text-ink-soft">
               Une seule formule
             </p>
             <p className="mt-4 font-serif text-5xl text-brand-dark">49 €</p>
@@ -60,7 +60,7 @@ export function ManagedServiceLanding({
 
       <section className="py-20 md:py-24">
         <div className="mx-auto max-w-6xl px-6">
-          <p className="text-xs font-medium uppercase tracking-widest text-brand-dark">
+          <p className="text-sm font-medium text-brand-dark">
             Ce que vos visiteurs doivent comprendre
           </p>
           <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

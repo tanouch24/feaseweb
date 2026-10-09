@@ -26,7 +26,7 @@ export function CabinetHorizonSite({
         }`}
       >
         <span
-          className={`font-serif tracking-wide text-[#1a2338] ${
+          className={`font-editorial tracking-wide text-[#1a2338] ${
             isDetail ? "text-lg" : "text-sm"
           }`}
         >
@@ -48,7 +48,7 @@ export function CabinetHorizonSite({
       >
         <div>
           <p
-            className={`font-serif leading-tight text-[#1a2338] ${
+            className={`font-editorial leading-tight text-[#1a2338] ${
               isDetail ? "text-3xl" : "text-lg"
             }`}
           >
@@ -84,7 +84,7 @@ export function CabinetHorizonSite({
         {method.map((item) => (
           <div key={item.step} className={isDetail ? "border-l border-[#e4e1d8] pl-4" : ""}>
             <p
-              className={`font-serif text-[#8a7a4f] ${isDetail ? "text-xl" : "text-xs"}`}
+              className={`font-editorial text-[#8a7a4f] ${isDetail ? "text-xl" : "text-xs"}`}
             >
               {item.step}
             </p>

@@ -45,7 +45,7 @@ export function ModificationFlow() {
 
         <div className="mt-10 grid gap-6 md:grid-cols-2 md:items-start">
           <div className="rounded-md border border-line bg-white p-5">
-            <p className="text-xs uppercase tracking-wide text-ink-soft">
+            <p className="text-sm text-ink-soft">
               Votre demande
             </p>
             <p className="mt-2 text-ink">
@@ -73,7 +73,7 @@ export function ModificationFlow() {
           </div>
 
           <div className="rounded-md border border-line bg-white p-5">
-            <p className="text-xs uppercase tracking-wide text-ink-soft">
+            <p className="text-sm text-ink-soft">
               Aperçu du site
             </p>
             <p className="mt-2 font-serif text-lg text-ink">Horaires</p>

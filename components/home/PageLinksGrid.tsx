@@ -61,28 +61,29 @@ const links = [
 
 export function PageLinksGrid() {
   return (
-    <section className="py-20 md:py-28">
+    <section className="py-20 md:py-24">
       <div className="mx-auto max-w-6xl px-6">
-        <SectionHeading title="Tout ce qu'il faut savoir sur FeaseWeb." />
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <SectionHeading title="Pour aller plus loin" />
+        <ul className="mt-10 grid border-t border-line sm:grid-cols-2 sm:gap-x-12 lg:grid-cols-3">
           {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="group block rounded-lg border border-line bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-            >
-              <link.Icon className="h-6 w-6 text-brand" />
-              <p className="mt-4 font-serif text-lg text-ink">{link.title}</p>
-              <p className="mt-2 text-sm text-ink-soft">{link.body}</p>
-              <p className="mt-4 flex items-center gap-1.5 text-sm font-medium text-brand-dark">
-                Voir
-                <span className="transition-transform duration-300 group-hover:translate-x-1">
-                  →
+            <li key={link.href} className="border-b border-line">
+              <Link
+                href={link.href}
+                className="group flex h-full items-start gap-4 py-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              >
+                <link.Icon className="mt-1 h-5 w-5 flex-shrink-0 text-accent" />
+                <span>
+                  <span className="block text-[17px] font-semibold text-ink underline decoration-transparent underline-offset-4 transition-colors group-hover:decoration-brand">
+                    {link.title}
+                  </span>
+                  <span className="mt-1 block text-sm leading-relaxed text-ink-soft">
+                    {link.body}
+                  </span>
                 </span>
-              </p>
-            </Link>
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   );

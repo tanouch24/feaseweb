@@ -20,7 +20,7 @@ export default async function CreerMonSitePage({ searchParams }: { searchParams:
   const params = await searchParams;
   const current = await getAuthenticatedProfile();
   if (current.role === "admin") redirect("/admin");
-  if (!current.user) return <main className="mx-auto max-w-2xl px-6 py-16 md:py-24"><p className="text-xs font-medium uppercase tracking-widest text-brand-dark">Votre projet FeaseWeb</p><h1 className="mt-3 font-serif text-3xl text-ink md:text-4xl">Créez votre espace FeaseWeb</h1><p className="mt-4 text-ink-soft">Configurez votre projet en quelques minutes. Nous nous occupons ensuite de la création de votre site.</p><div className="mt-10"><AccountCreationForm initialError={params.error === "invalid_link" ? "Ce lien de confirmation est invalide ou a expiré." : ""} /></div></main>;
+  if (!current.user) return <main className="mx-auto max-w-2xl px-6 py-16 md:py-24"><p className="text-sm font-medium text-brand-dark">Votre projet FeaseWeb</p><h1 className="mt-3 font-serif text-3xl text-ink md:text-4xl">Créez votre espace FeaseWeb</h1><p className="mt-4 text-ink-soft">Configurez votre projet en quelques minutes. Nous nous occupons ensuite de la création de votre site.</p><div className="mt-10"><AccountCreationForm initialError={params.error === "invalid_link" ? "Ce lien de confirmation est invalide ou a expiré." : ""} /></div></main>;
   const supabase = await createClient();
   const { data: project } = supabase ? await supabase.from("project_intakes").select(onboardingProjectSelect).eq("user_id", current.user.id).maybeSingle() : { data: null };
   if (!project) redirect("/espace-client");

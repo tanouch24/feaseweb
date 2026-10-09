@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { TrackingConsent } from "@/components/analytics/TrackingConsent";
@@ -8,6 +9,13 @@ import { getAuthenticatedProfile } from "@/lib/authz";
 import "./globals.css";
 
 const SITE_URL = siteUrl;
+
+const bricolage = localFont({
+  src: "./fonts/BricolageGrotesque-Variable.woff2",
+  variable: "--font-bricolage",
+  weight: "200 800",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -32,7 +40,7 @@ export default async function RootLayout({
 }) {
   const current = await getAuthenticatedProfile();
   return (
-    <html lang="fr">
+    <html lang="fr" className={bricolage.variable}>
       <body className="min-h-screen font-sans antialiased">
         <script
           type="application/ld+json"

@@ -64,7 +64,7 @@ export function OfferSection({ headingLevel = "h2", heading = "Et on s'occupe du
         <SectionHeading title={heading} level={headingLevel} />
 
         <div className="mt-10 flex flex-col items-center">
-          <p className="text-xs uppercase tracking-widest text-ink-soft">
+          <p className="text-sm text-ink-soft">
             Création ou refonte
           </p>
           <p
@@ -76,7 +76,7 @@ export function OfferSection({ headingLevel = "h2", heading = "Et on s'occupe du
           </p>
           <p className="mt-4 text-sm font-medium text-ink-soft">ensuite</p>
           <p
-            className={`mt-2 font-serif text-7xl text-brand-dark transition-all duration-700 ease-out md:text-8xl ${
+            className={`mt-2 font-serif text-7xl text-brand transition-all duration-700 ease-out md:text-8xl ${
               inView ? "scale-100 opacity-100" : "scale-90 opacity-0"
             }`}
             style={{ transitionDelay: "150ms" }}
@@ -84,8 +84,8 @@ export function OfferSection({ headingLevel = "h2", heading = "Et on s'occupe du
             49 €
           </p>
           <p className="text-lg text-ink-soft">/ mois</p>
-          <p className="mt-4 text-xs font-medium uppercase tracking-widest text-brand-dark">
-            Tout compris
+          <p className="mt-4 rounded-full bg-accent/15 px-3 py-1 text-sm font-medium text-ink">
+            Tout compris, sans option payante
           </p>
         </div>
 

@@ -1,18 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #fbfaf7;
-  --color-bg-alt: #f3f1ec;
-  --color-ink: #14171a;
-  --color-ink-soft: #4a5057;
+  /* Pierre claire plutôt que crème : fond minéral, vert atelier, laiton. */
+  --color-bg: #f4f5f2;
+  --color-bg-alt: #e9ece7;
+  --color-ink: #172521;
+  --color-ink-soft: #4d5a55;
   --color-brand: #1e4a43;
   --color-brand-dark: #12332e;
-  --color-accent: #c98a3e;
-  --color-line: #e4e1d8;
+  --color-night: #0f2a26;
+  --color-accent: #c7964a;
+  --color-accent-soft: #e6c48c;
+  --color-line: #d9ded8;
 
-  /* System fallbacks keep production builds independent from remote font downloads. */
-  --font-serif: Georgia, "Times New Roman", serif;
-  --font-sans: "Avenir Next", Avenir, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* Bricolage Grotesque est embarquée (app/fonts) : même rendu sur Android, Windows et Mac. */
+  --font-display: var(--font-bricolage), "Avenir Next", Helvetica, Arial, sans-serif;
+  --font-serif: var(--font-display);
+  --font-sans: var(--font-bricolage), "Avenir Next", Helvetica, Arial, sans-serif;
+  /* Réservé aux sites de démonstration clients, pour qu'ils ne ressemblent pas à FeaseWeb. */
+  --font-editorial: Georgia, "Times New Roman", serif;
 
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -41,6 +47,20 @@ body {
   background-color: var(--color-bg);
   color: var(--color-ink);
   overflow-x: hidden;
+  font-optical-sizing: auto;
+}
+
+@layer base {
+  h1, h2, h3, .font-serif {
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+}
+
+::selection {
+  background: var(--color-accent-soft);
+  color: var(--color-night);
 }
 
 @keyframes rise-in {
@@ -145,7 +165,7 @@ body {
   animation: scale-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.mini-preview { min-height: 190px; padding: 14px; overflow: hidden; }.mini-nav { display:flex; align-items:center; gap:5px; }.mini-nav span { width:18px; height:18px; border-radius:50%; }.mini-nav i { width:22px; height:3px; margin-left:auto; border-radius:3px; background:currentColor; opacity:.35; }.mini-nav i + i { margin-left:-1px; }.mini-hero { display:grid; gap:8px; width:78%; margin-top:26px; }.mini-hero b { font-size:8px; letter-spacing:.08em; text-transform:uppercase; }.mini-hero strong { font-family:var(--font-serif); font-size:20px; line-height:1.05; }.mini-hero em { display:block; width:54px; height:8px; border-radius:8px; }.mini-section { display:flex; gap:6px; margin-top:22px; }.mini-section span { display:block; height:29px; flex:1; border-radius:4px; background:rgba(255,255,255,.45); }.mini-preview.sans .mini-hero strong { font-family:var(--font-sans); font-size:18px; font-weight:700; }.mini-preview.rounded { border-radius:25px 25px 0 0; }.mini-preview.bold .mini-hero strong { font-family:var(--font-sans); font-weight:800; }.mini-preview.grid .mini-section span { border-radius:0; }.mini-preview.soft .mini-hero strong { font-weight:400; }
+.mini-preview { min-height: 190px; padding: 14px; overflow: hidden; }.mini-nav { display:flex; align-items:center; gap:5px; }.mini-nav span { width:18px; height:18px; border-radius:50%; }.mini-nav i { width:22px; height:3px; margin-left:auto; border-radius:3px; background:currentColor; opacity:.35; }.mini-nav i + i { margin-left:-1px; }.mini-hero { display:grid; gap:8px; width:78%; margin-top:26px; }.mini-hero b { font-size:8px; letter-spacing:.08em; text-transform:uppercase; }.mini-hero strong { font-family:var(--font-editorial); font-size:20px; line-height:1.05; }.mini-hero em { display:block; width:54px; height:8px; border-radius:8px; }.mini-section { display:flex; gap:6px; margin-top:22px; }.mini-section span { display:block; height:29px; flex:1; border-radius:4px; background:rgba(255,255,255,.45); }.mini-preview.sans .mini-hero strong { font-family:var(--font-sans); font-size:18px; font-weight:700; }.mini-preview.rounded { border-radius:25px 25px 0 0; }.mini-preview.bold .mini-hero strong { font-family:var(--font-sans); font-weight:800; }.mini-preview.grid .mini-section span { border-radius:0; }.mini-preview.soft .mini-hero strong { font-weight:400; }
 .site-model-photo { position:relative; overflow:hidden; isolation:isolate; }.site-model-photo img { object-fit:cover; }
 .model-modern .site-model-preview { padding:0; }.model-modern .site-model-header, .model-modern .site-model-hero, .model-modern .site-model-services, .model-modern .site-model-proof, .model-modern .site-model-final-cta, .model-modern .site-model-footer { margin-left:12px; margin-right:12px; }.model-modern .site-model-hero { grid-template-columns:1fr; padding-top:12px; }.model-modern .site-model-photo { grid-row:1; min-height:132px; }.model-modern .site-model-hero > span:first-child { margin-top:-52px; position:relative; z-index:1; padding:8px; color:#fff; background:linear-gradient(90deg,rgba(23,60,54,.9),transparent); }.model-modern .site-model-hero small { color:#fff; }
 .model-premium .site-model-hero { grid-template-columns:.8fr 1.2fr; min-height:145px; align-items:center; }.model-premium .site-model-photo { min-height:145px; border-radius:0; }.model-premium .site-model-services { grid-template-columns:1fr; gap:0; }.model-premium .site-model-services i { border-width:1px 0 0; padding:5px 0; }

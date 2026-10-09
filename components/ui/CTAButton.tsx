@@ -2,11 +2,17 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 const base =
-  "group inline-flex items-center justify-center gap-2 rounded-sm px-6 py-3 text-[15px] font-medium transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
+  "inline-flex min-h-12 items-center justify-center rounded-sm px-6 py-3 text-[15px] font-semibold tracking-[-0.005em] transition-[background-color,border-color,color,transform] duration-200 active:translate-y-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
 
 const variants = {
-  primary: "bg-brand text-white hover:bg-brand-dark",
-  secondary: "border border-line text-ink hover:border-ink bg-transparent",
+  primary: "bg-brand text-white hover:bg-brand-dark focus-visible:outline-brand",
+  secondary:
+    "border border-ink/20 bg-transparent text-ink hover:border-ink focus-visible:outline-brand",
+  // Sur fond vert nuit (accueil, appel final).
+  brass:
+    "bg-accent text-night hover:bg-accent-soft focus-visible:outline-accent-soft",
+  outlineLight:
+    "border border-white/30 bg-transparent text-white hover:border-white focus-visible:outline-white",
 } as const;
 
 export function CTAButton({
@@ -21,12 +27,6 @@ export function CTAButton({
   return (
     <Link href={href} className={`${base} ${variants[variant]}`}>
       {children}
-      <span
-        aria-hidden="true"
-        className="inline-block transition-transform duration-200 group-hover:translate-x-1"
-      >
-        →
-      </span>
     </Link>
   );
 }

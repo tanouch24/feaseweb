@@ -29,7 +29,7 @@ describe("FinalCTA", () => {
       "href",
       "/creer-mon-site"
     );
-    expect(screen.getByRole("link", { name: "J'ai déjà un site →" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "J'ai déjà un site" })).toHaveAttribute(
       "href",
       "/refaire-mon-site"
     );

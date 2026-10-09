@@ -28,7 +28,7 @@ export default function TarifsPage() {
       <section className="border-t border-line py-20 md:py-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="max-w-3xl">
-            <p className="text-xs font-medium uppercase tracking-widest text-brand-dark">Prix site internet</p>
+            <p className="text-sm font-medium text-brand-dark">Prix site internet</p>
             <h2 className="mt-3 font-serif text-3xl leading-tight text-ink md:text-4xl">Le prix d’un site internet, expliqué simplement</h2>
             <p className="mt-5 leading-relaxed text-ink-soft">
               Le modèle FeaseWeb sépare les frais de création de l’accompagnement dans la durée :

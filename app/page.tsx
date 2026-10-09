@@ -1,6 +1,4 @@
 import { Hero } from "@/components/home/Hero";
-import { BreakSection } from "@/components/home/BreakSection";
-import { TwoPathsCards } from "@/components/home/TwoPathsCards";
 import { PageLinksGrid } from "@/components/home/PageLinksGrid";
 import { FinalCTA } from "@/components/home/FinalCTA";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
@@ -9,7 +7,6 @@ import { ExamplesSection } from "@/components/home/ExamplesSection";
 import { TransformationSection } from "@/components/home/TransformationSection";
 import { OfferSection } from "@/components/home/OfferSection";
 import { SEOSection } from "@/components/home/SEOSection";
-import { ClientSpaceSection } from "@/components/home/ClientSpaceSection";
 import { ModificationFlow } from "@/components/home/ModificationFlow";
 import { FAQSection } from "@/components/home/FAQSection";
 import { pageMetadata } from "@/lib/seo-metadata";
@@ -21,16 +18,14 @@ export const metadata = pageMetadata({
   path: "/",
 });
 
+// Accueil volontairement resserré : une idée par section, pas de redite.
+// Les questions mises en avant renvoient vers /faq pour le reste.
+const HOME_FAQ = [0, 1, 2, 6, 12, 15];
+
 export default function HomePage() {
   return (
     <main>
       <Hero />
-      <RevealOnScroll>
-        <BreakSection />
-      </RevealOnScroll>
-      <RevealOnScroll>
-        <TwoPathsCards />
-      </RevealOnScroll>
       <RevealOnScroll>
         <ProcessSteps />
       </RevealOnScroll>
@@ -45,13 +40,10 @@ export default function HomePage() {
         <SEOSection />
       </RevealOnScroll>
       <RevealOnScroll>
-        <ClientSpaceSection />
-      </RevealOnScroll>
-      <RevealOnScroll>
         <ModificationFlow />
       </RevealOnScroll>
       <RevealOnScroll>
-        <FAQSection />
+        <FAQSection only={HOME_FAQ} />
       </RevealOnScroll>
       <RevealOnScroll>
         <PageLinksGrid />

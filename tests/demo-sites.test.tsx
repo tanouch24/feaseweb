@@ -36,7 +36,7 @@ describe("demo site components", () => {
     const { container: dupont } = render(<DupontPlomberieSite variant="detail" />);
     const { container: eclat } = render(<MaisonEclatSite variant="detail" />);
     expect(dupont.firstElementChild?.className).toContain("font-sans");
-    expect(eclat.firstElementChild?.className).toContain("font-serif");
+    expect(eclat.firstElementChild?.className).toContain("font-editorial");
   });
 });
 

@@ -15,7 +15,7 @@ export function MaisonEclatSite({
   const isDetail = variant === "detail";
 
   return (
-    <div className="bg-[#fbf3ef] font-serif text-[#3a2e2c]">
+    <div className="bg-[#fbf3ef] font-editorial text-[#3a2e2c]">
       <header
         className={`flex items-center justify-center border-b border-[#e7d9d1] ${
           isDetail ? "py-4" : "py-2.5"

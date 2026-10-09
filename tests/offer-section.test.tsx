@@ -8,7 +8,7 @@ describe("OfferSection", () => {
     render(<OfferSection />);
     expect(screen.getByText("0 €")).toBeInTheDocument();
     expect(screen.getByText("49 €")).toBeInTheDocument();
-    expect(screen.getByText("Tout compris")).toBeInTheDocument();
+    expect(screen.getByText("Tout compris, sans option payante")).toBeInTheDocument();
     expect(screen.queryByText(/SEO \+49/)).not.toBeInTheDocument();
   });
 

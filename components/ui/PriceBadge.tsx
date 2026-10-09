@@ -18,14 +18,14 @@ export function PriceBadge({
   return (
     <div className="inline-flex flex-col gap-3 rounded-md border border-line bg-white px-6 py-5 sm:flex-row sm:items-center sm:gap-6">
       <div>
-        <p className="text-xs uppercase tracking-wide text-ink-soft">
+        <p className="text-sm text-ink-soft">
           Création ou refonte
         </p>
         <p className="font-serif text-2xl text-ink">0 €</p>
       </div>
       <span className="hidden h-10 w-px bg-line sm:block" />
       <div>
-        <p className="text-xs uppercase tracking-wide text-ink-soft">
+        <p className="text-sm text-ink-soft">
           Ensuite, tout compris
         </p>
         <p className="font-serif text-2xl text-brand-dark">

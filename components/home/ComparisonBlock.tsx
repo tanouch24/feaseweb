@@ -16,7 +16,7 @@ export function ComparisonBlock() {
         <SectionHeading title="Vous ne construisez rien. FeaseWeb le fait pour vous." />
         <div className="mt-12 grid gap-6 md:grid-cols-2">
           <div className="rounded-lg border border-line bg-white p-8">
-            <p className="text-sm font-medium uppercase tracking-wide text-ink-soft">
+            <p className="text-[15px] font-medium text-ink-soft">
               Avec un constructeur classique
             </p>
             <ul className="mt-5 space-y-3 text-ink-soft">
@@ -26,7 +26,7 @@ export function ComparisonBlock() {
             </ul>
           </div>
           <div className="rounded-lg bg-brand p-8 text-white">
-            <p className="text-sm font-medium uppercase tracking-wide text-white/70">
+            <p className="text-[15px] font-medium text-white/70">
               Avec FeaseWeb
             </p>
             <p className="mt-5 font-serif text-2xl">

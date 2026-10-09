@@ -44,14 +44,14 @@ export function HeroVisual() {
           </div>
         </div>
       </div>
-      <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2.5 border-t border-line pt-5 sm:absolute sm:inset-x-0 sm:bottom-0 sm:mt-0 sm:border-t-0 sm:pt-0">
+      <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2.5 border-t border-white/15 pt-5 sm:absolute sm:inset-x-0 sm:bottom-0 sm:mt-0 sm:border-t-0 sm:pt-0">
         {statusItems.map((label, index) => (
           <span
             key={label}
-            className="animate-rise flex items-center gap-1.5 text-xs font-medium text-ink-soft"
+            className="animate-rise flex items-center gap-1.5 text-[13px] font-medium text-white/70"
             style={{ animationDelay: `${700 + index * 110}ms` }}
           >
-            <CheckIcon className="h-3.5 w-3.5 text-brand" />
+            <CheckIcon className="h-3.5 w-3.5 text-accent" />
             {label}
           </span>
         ))}

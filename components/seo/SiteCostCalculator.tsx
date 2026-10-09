@@ -120,7 +120,7 @@ export function SiteCostCalculator() {
       <section className="rounded-lg border border-line bg-bg-alt p-5 md:p-8" aria-labelledby="calculateur-heading">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-medium uppercase tracking-widest text-brand-dark">Outil gratuit</p>
+            <p className="text-sm font-medium text-brand-dark">Outil gratuit</p>
             <h2 id="calculateur-heading" className="mt-2 font-serif text-3xl text-ink">Calculez votre coût total</h2>
           </div>
           <div>
@@ -155,7 +155,7 @@ export function SiteCostCalculator() {
 
       <section className="mt-8" aria-labelledby="calculator-results-heading" aria-live="polite">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div><p className="text-xs font-medium uppercase tracking-widest text-brand-dark">Résultat</p><h2 id="calculator-results-heading" className="mt-2 font-serif text-3xl text-ink">Sur {years} an{years > 1 ? "s" : ""}</h2></div>
+          <div><p className="text-sm font-medium text-brand-dark">Résultat</p><h2 id="calculator-results-heading" className="mt-2 font-serif text-3xl text-ink">Sur {years} an{years > 1 ? "s" : ""}</h2></div>
           <button type="button" onClick={copyResult} className="min-h-11 rounded-sm border border-brand px-4 py-2 text-sm font-medium text-brand-dark hover:bg-bg-alt focus:outline-none focus:ring-2 focus:ring-brand/30">{copied ? "Résultat copié" : "Copier le résultat"}</button>
         </div>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">

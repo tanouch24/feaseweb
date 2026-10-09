@@ -30,13 +30,13 @@ export default function CostCalculatorPage() {
       <Breadcrumbs items={[{ label: "Accueil", href: "/" }, { label: "Calculateur coût site internet", href: "/calculateur-cout-site-internet" }]} />
       {jsonLd.map((schema) => <script key={schema["@type"]} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />)}
       <header className="mt-10 max-w-3xl">
-        <p className="text-xs font-medium uppercase tracking-widest text-brand-dark">Coût total d’un site internet</p>
+        <p className="text-sm font-medium text-brand-dark">Coût total d’un site internet</p>
         <h1 className="mt-3 font-serif text-4xl leading-tight text-ink md:text-6xl">Combien peut coûter votre site internet sur 3 ans ?</h1>
         <p className="mt-5 text-lg leading-relaxed text-ink-soft">Comparez plusieurs scénarios en séparant le coût de création et les dépenses récurrentes. Les valeurs restent modifiables : utilisez vos devis, vos hypothèses ou l’offre que vous étudiez.</p>
       </header>
       <SiteCostCalculator />
       <section className="mt-20 max-w-4xl" aria-labelledby="understanding-cost">
-        <p className="text-xs font-medium uppercase tracking-widest text-brand-dark">Comprendre le résultat</p>
+        <p className="text-sm font-medium text-brand-dark">Comprendre le résultat</p>
         <h2 id="understanding-cost" className="mt-3 font-serif text-3xl text-ink">Le coût d’un site ne se résume pas à sa création</h2>
         <div className="mt-6 space-y-5 text-ink-soft leading-relaxed">
           <p>Un devis peut afficher un coût initial, puis laisser certaines dépenses à prévoir dans le temps. Le domaine, l’hébergement, la maintenance, la sécurité, le SEO, les évolutions et le support doivent être identifiés avant de comparer deux solutions.</p>

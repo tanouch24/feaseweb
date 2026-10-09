@@ -16,7 +16,7 @@ export function PostCard({ post }: { post: PostSummary }) {
       className="group block rounded-lg border border-line bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
     >
       <div className="flex items-center gap-3 text-xs text-ink-soft">
-        <span className="rounded-sm bg-bg-alt px-2 py-1 uppercase tracking-wide">
+        <span className="rounded-sm bg-bg-alt px-2 py-1">
           {post.category}
         </span>
         <time dateTime={post.date}>{formatDate(post.date)}</time>

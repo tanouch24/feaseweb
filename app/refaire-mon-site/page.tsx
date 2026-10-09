@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function RefaireMonSitePage() {
   return (
     <main className="mx-auto max-w-2xl px-6 py-20">
-      <p className="text-xs font-medium uppercase tracking-widest text-brand-dark">
+      <p className="text-sm font-medium text-brand-dark">
         On peut faire beaucoup mieux
       </p>
       <h1 className="mt-3 font-serif text-3xl text-ink md:text-4xl">

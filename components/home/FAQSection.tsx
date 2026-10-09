@@ -1,18 +1,27 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { faqItems } from "@/lib/faq.demo";
 
-export function FAQSection({ headingLevel = "h2" }: { headingLevel?: "h1" | "h2" }) {
+export function FAQSection({
+  headingLevel = "h2",
+  only,
+}: {
+  headingLevel?: "h1" | "h2";
+  /** Indices des questions à afficher (accueil) ; toutes par défaut. */
+  only?: number[];
+}) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const items = only ? only.map((i) => faqItems[i]).filter(Boolean) : faqItems;
 
   return (
     <section id="faq" className="bg-bg-alt py-20 md:py-28">
       <div className="mx-auto max-w-3xl px-6">
         <SectionHeading title="Questions fréquentes" level={headingLevel} />
         <div className="mt-8 divide-y divide-line border-y border-line">
-          {faqItems.map((item, index) => {
+          {items.map((item, index) => {
             const isOpen = openIndex === index;
             return (
               <div key={item.question}>
@@ -22,7 +31,7 @@ export function FAQSection({ headingLevel = "h2" }: { headingLevel?: "h1" | "h2"
                   aria-expanded={isOpen}
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                 >
-                  <span className="font-medium text-ink">{item.question}</span>
+                  <span className="text-[17px] font-medium text-ink">{item.question}</span>
                   <span
                     aria-hidden="true"
                     className={`relative flex h-4 w-4 flex-shrink-0 items-center justify-center transition-transform duration-300 ${
@@ -46,6 +55,14 @@ export function FAQSection({ headingLevel = "h2" }: { headingLevel?: "h1" | "h2"
             );
           })}
         </div>
+        {only && (
+          <Link
+            href="/faq"
+            className="mt-6 inline-block text-[15px] font-medium text-brand underline decoration-brand/30 underline-offset-4 hover:decoration-brand"
+          >
+            Voir toutes les questions
+          </Link>
+        )}
       </div>
     </section>
   );
