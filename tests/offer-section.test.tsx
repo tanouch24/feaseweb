@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { OfferSection } from "@/components/home/OfferSection";
 
 describe("OfferSection", () => {
@@ -20,12 +19,9 @@ describe("OfferSection", () => {
     );
   });
 
-  it("shows what each included item means when hovered/focused", async () => {
+  it("shows what each included item means, without needing a hover", () => {
     render(<OfferSection />);
-    const seoNode = screen.getByRole("button", { name: /SEO/ });
-    await userEvent.hover(seoNode);
-    expect(
-      screen.getByText(/référencement travaillé et suivi/)
-    ).toBeInTheDocument();
+    expect(screen.getByText("SEO")).toBeInTheDocument();
+    expect(screen.getByText(/référencement travaillé et suivi/)).toBeInTheDocument();
   });
 });

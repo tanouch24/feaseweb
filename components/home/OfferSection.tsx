@@ -1,10 +1,4 @@
-"use client";
-
-import { useState } from "react";
-import { SectionHeading } from "@/components/ui/SectionHeading";
 import { CTAButton } from "@/components/ui/CTAButton";
-import { MockupFrame } from "@/components/ui/MockupFrame";
-import { useInView } from "@/hooks/useInView";
 import {
   GlobeIcon,
   ShieldIcon,
@@ -14,7 +8,7 @@ import {
   HomeIcon,
 } from "@/components/ui/icons";
 
-const nodes = [
+const included = [
   {
     label: "Site",
     Icon: GlobeIcon,
@@ -48,107 +42,56 @@ const nodes = [
   },
 ];
 
-export function OfferSection({ headingLevel = "h2", heading = "Et on s'occupe du reste." }: { headingLevel?: "h1" | "h2"; heading?: string }) {
-  const { ref, inView } = useInView({ threshold: 0.35 });
-  const [active, setActive] = useState(0);
-  const left = nodes.slice(0, 3);
-  const right = nodes.slice(3);
-  const ActiveIcon = nodes[active].Icon;
+export function OfferSection({
+  headingLevel = "h2",
+  heading = "Un seul prix. Tout est compris.",
+}: {
+  headingLevel?: "h1" | "h2";
+  heading?: string;
+}) {
+  const Heading = headingLevel;
 
   return (
     <section id="tarif" className="px-3 py-6 md:px-5 md:py-8">
       <div className="rounded-lg bg-white py-16 shadow-[0_1px_0_rgba(23,37,33,0.05)] md:py-24">
-      <div
-        ref={ref as (node: HTMLDivElement | null) => void}
-        className="mx-auto max-w-4xl px-6 text-center"
-      >
-        <SectionHeading title={heading} level={headingLevel} />
-
-        <div className="mt-10 flex flex-col items-center">
-          <p className="text-sm text-ink-soft">
-            Création ou refonte
-          </p>
-          <p
-            className={`mt-2 font-serif text-6xl text-ink transition-all duration-700 ease-out md:text-7xl ${
-              inView ? "scale-100 opacity-100" : "scale-90 opacity-0"
-            }`}
-          >
-            0 €
-          </p>
-          <p className="mt-4 text-sm font-medium text-ink-soft">ensuite</p>
-          <p
-            className={`mt-2 font-serif text-7xl text-brand transition-all duration-700 ease-out md:text-8xl ${
-              inView ? "scale-100 opacity-100" : "scale-90 opacity-0"
-            }`}
-            style={{ transitionDelay: "150ms" }}
-          >
-            49 €
-          </p>
-          <p className="text-lg text-ink-soft">/ mois</p>
-          <p className="mt-4 rounded-full bg-accent/15 px-3 py-1 text-sm font-medium text-ink">
-            Tout compris, sans option payante
-          </p>
-        </div>
-
-        <div className="mt-14 grid gap-6 md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-4">
-          <div className="grid grid-cols-3 gap-3 md:grid-cols-1">
-            {left.map((node, index) => (
-              <button
-                key={node.label}
-                type="button"
-                onMouseEnter={() => setActive(index)}
-                onFocus={() => setActive(index)}
-                className={`flex flex-col items-center gap-1.5 rounded-md border px-2 py-3 text-xs transition-colors md:flex-row md:justify-end md:gap-2 md:px-3 ${
-                  active === index
-                    ? "border-brand bg-brand/5 text-brand-dark"
-                    : "border-line text-ink-soft hover:border-ink"
-                }`}
-              >
-                <node.Icon className="h-4 w-4" />
-                {node.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="order-first md:order-none">
-            <MockupFrame>
-              <div className="flex w-56 flex-col items-center rounded-md border border-line bg-white px-6 py-8 shadow-sm">
-                <ActiveIcon className="h-8 w-8 text-brand" />
-                <p className="mt-3 font-serif text-lg text-ink">Votre site</p>
-                <p key={active} className="animate-rise mt-3 text-sm text-ink-soft">
-                  {nodes[active].description}
-                </p>
+        <div className="mx-auto grid max-w-6xl gap-14 px-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-20">
+          <div>
+            <Heading className="font-serif text-[2rem] leading-[1.05] text-ink md:text-[2.75rem]">
+              {heading}
+            </Heading>
+            <div className="mt-10 rounded-md bg-night p-7 text-white">
+              <div className="flex items-baseline justify-between gap-4 border-b border-white/15 pb-5">
+                <span className="text-white/70">Création ou refonte</span>
+                <span className="font-serif text-4xl font-semibold">0 €</span>
               </div>
-            </MockupFrame>
+              <div className="flex items-baseline justify-between gap-4 pt-5">
+                <span className="text-white/70">Ensuite, chaque mois</span>
+                <span className="font-serif text-6xl font-semibold tracking-[-0.04em] text-accent">
+                  49 €
+                </span>
+              </div>
+              <p className="mt-5 inline-block rounded-full bg-accent/15 px-3 py-1 text-sm font-medium text-accent-soft">
+                Tout compris, sans option payante
+              </p>
+            </div>
+            <p className="mt-6 text-ink-soft">
+              Vous voyez votre site avant de vous engager.
+            </p>
+            <div className="mt-8">
+              <CTAButton href="/creer-mon-site">Démarrer mon site</CTAButton>
+            </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3 md:grid-cols-1">
-            {right.map((node, index) => {
-              const realIndex = index + 3;
-              return (
-                <button
-                  key={node.label}
-                  type="button"
-                  onMouseEnter={() => setActive(realIndex)}
-                  onFocus={() => setActive(realIndex)}
-                  className={`flex flex-col items-center gap-1.5 rounded-md border px-2 py-3 text-xs transition-colors md:flex-row md:gap-2 md:px-3 ${
-                    active === realIndex
-                      ? "border-brand bg-brand/5 text-brand-dark"
-                      : "border-line text-ink-soft hover:border-ink"
-                  }`}
-                >
-                  <node.Icon className="h-4 w-4" />
-                  {node.label}
-                </button>
-              );
-            })}
-          </div>
+          <ul className="grid content-start gap-x-10 sm:grid-cols-2">
+            {included.map(({ label, Icon, description }) => (
+              <li key={label} className="border-t border-line py-6">
+                <Icon className="h-6 w-6 text-accent" />
+                <p className="mt-4 text-lg font-semibold text-ink">{label}</p>
+                <p className="mt-1 text-ink-soft">{description}</p>
+              </li>
+            ))}
+          </ul>
         </div>
-
-        <div className="mt-12">
-          <CTAButton href="/creer-mon-site">Démarrer mon site</CTAButton>
-        </div>
-      </div>
       </div>
     </section>
   );

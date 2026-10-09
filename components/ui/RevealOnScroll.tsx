@@ -10,7 +10,7 @@ export function RevealOnScroll({
   children: ReactNode;
   className?: string;
 }) {
-  const { ref, inView } = useInView({ threshold: 0, rootMargin: "0px 0px -6% 0px" });
+  const { ref, inView } = useInView({ threshold: 0, rootMargin: "0px 0px 12% 0px" });
 
   return (
     <div

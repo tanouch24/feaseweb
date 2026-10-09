@@ -8,9 +8,13 @@ export function ExamplesSection() {
       <div className="mx-auto max-w-6xl px-6">
         <SectionHeading
           eyebrow="Exemples de sites FeaseWeb"
-          title="Si votre site ressemble à ça, c'est normal."
+          title="Un site qui ressemble à votre métier."
         />
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <p className="mt-4 max-w-xl text-lg text-ink-soft">
+          Quatre démonstrations, quatre métiers. Chaque site est pensé pour
+          son activité et ses clients, pas copié d&apos;un modèle.
+        </p>
+        <div className="mt-12 grid gap-x-10 gap-y-14 md:grid-cols-2">
           {demoSites.map((site) => (
             <DemoSiteCard key={site.slug} site={site} />
           ))}
