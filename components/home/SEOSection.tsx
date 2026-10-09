@@ -33,7 +33,7 @@ function GoogleSnippetMockup() {
 
 export function SEOSection({ headingLevel = "h2", heading = "Un beau site ne suffit pas. Il faut aussi qu'on puisse le trouver.", detailed = false }: { headingLevel?: "h1" | "h2"; heading?: string; detailed?: boolean }) {
   return (
-    <section id="seo" className="py-20 md:py-28">
+    <section id="seo" className="py-16 md:py-24">
       <div className="mx-auto max-w-5xl px-6">
         <div className="grid gap-12 md:grid-cols-2 md:items-center">
           <div>

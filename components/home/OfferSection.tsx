@@ -56,7 +56,8 @@ export function OfferSection({ headingLevel = "h2", heading = "Et on s'occupe du
   const ActiveIcon = nodes[active].Icon;
 
   return (
-    <section id="tarif" className="py-20 md:py-28">
+    <section id="tarif" className="px-3 py-6 md:px-5 md:py-8">
+      <div className="rounded-lg bg-white py-16 shadow-[0_1px_0_rgba(23,37,33,0.05)] md:py-24">
       <div
         ref={ref as (node: HTMLDivElement | null) => void}
         className="mx-auto max-w-4xl px-6 text-center"
@@ -147,6 +148,7 @@ export function OfferSection({ headingLevel = "h2", heading = "Et on s'occupe du
         <div className="mt-12">
           <CTAButton href="/creer-mon-site">Démarrer mon site</CTAButton>
         </div>
+      </div>
       </div>
     </section>
   );

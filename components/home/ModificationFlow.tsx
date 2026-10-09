@@ -36,7 +36,7 @@ export function ModificationFlow() {
   }, [inView]);
 
   return (
-    <section className="bg-bg-alt py-20 md:py-28">
+    <section className="bg-bg-alt py-16 md:py-24">
       <div
         ref={ref as (node: HTMLDivElement | null) => void}
         className="mx-auto max-w-4xl px-6"

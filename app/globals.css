@@ -85,6 +85,15 @@ body {
   }
 }
 
+@keyframes step-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.step-progress {
+  animation: step-progress linear forwards;
+}
+
 @keyframes draw-line {
   to {
     stroke-dashoffset: 0;

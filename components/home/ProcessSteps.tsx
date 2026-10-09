@@ -4,7 +4,8 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { DemoSitePreview } from "@/components/demo-sites/DemoSitePreview";
 import { MockupFrame } from "@/components/ui/MockupFrame";
 import { CheckIcon } from "@/components/ui/icons";
-import { useActiveStep } from "@/hooks/useActiveStep";
+import { useEffect, useState } from "react";
+import { useInView } from "@/hooks/useInView";
 
 const steps = [
   {
@@ -127,51 +128,92 @@ function LiveVisual() {
 
 const visuals = [QuestionnaireVisual, WireframeVisual, ValidationVisual, LiveVisual];
 
+const STEP_DURATION_MS = 5000;
+
 export function ProcessSteps({ headingLevel = "h2" }: { headingLevel?: "h1" | "h2" }) {
-  const { active, setStepRef } = useActiveStep(steps.length);
+  const [active, setActive] = useState(0);
+  // Défilement automatique tant que le visiteur n'a pas choisi une étape lui-même.
+  const [auto, setAuto] = useState(true);
+  const { ref, inView } = useInView({ threshold: 0.3 });
   const ActiveVisual = visuals[active];
 
+  useEffect(() => {
+    if (!auto || !inView) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = setTimeout(
+      () => setActive((current) => (current + 1) % steps.length),
+      STEP_DURATION_MS
+    );
+    return () => clearTimeout(timer);
+  }, [active, auto, inView]);
+
   return (
-    <section id="comment-ca-marche" className="bg-bg-alt py-20 md:py-28">
-      <div className="mx-auto max-w-6xl px-6">
+    <section id="comment-ca-marche" className="py-16 md:py-24">
+      <div
+        ref={ref as (node: HTMLDivElement | null) => void}
+        className="mx-auto max-w-6xl px-6"
+      >
         <SectionHeading title="Comment ça marche" level={headingLevel} />
-        <div className="mt-12 grid gap-10 md:grid-cols-2 md:gap-16">
-          <div>
-            {steps.map((step, index) => (
-              <div
-                key={step.number}
-                ref={setStepRef(index)}
-                className="flex min-h-[45vh] flex-col justify-center border-l-2 pl-6 transition-colors duration-300 md:min-h-[55vh]"
-                style={{
-                  borderColor:
-                    index === active
-                      ? "var(--color-brand)"
-                      : "var(--color-line)",
-                }}
-              >
-                <p
-                  className={`font-serif text-3xl transition-colors duration-300 ${
-                    index === active ? "text-brand-dark" : "text-line"
-                  }`}
-                >
-                  {step.number}
-                </p>
-                <p className="mt-3 text-xl font-medium text-ink">{step.title}</p>
-                <p className="mt-2 text-ink-soft">{step.body}</p>
-                <div className="mt-6 md:hidden">
-                  {(() => {
-                    const StepVisual = visuals[index];
-                    return <StepVisual />;
-                  })()}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="hidden md:block">
-            <div className="sticky top-32">
-              <div key={active} className="animate-rise">
-                <ActiveVisual />
-              </div>
+        <p className="mt-4 max-w-xl text-lg text-ink-soft">
+          Quatre étapes, et vous n&apos;avez qu&apos;une seule chose à faire :
+          valider.
+        </p>
+        <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-16">
+          <ol className="grid gap-2">
+            {steps.map((step, index) => {
+              const isActive = index === active;
+              return (
+                <li key={step.number}>
+                  <button
+                    type="button"
+                    aria-current={isActive ? "step" : undefined}
+                    onClick={() => {
+                      setActive(index);
+                      setAuto(false);
+                    }}
+                    className={`relative w-full overflow-hidden rounded-md border px-5 py-4 text-left transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
+                      isActive
+                        ? "border-brand/25 bg-white shadow-[0_1px_0_rgba(23,37,33,0.04),0_12px_32px_-18px_rgba(23,37,33,0.35)]"
+                        : "border-transparent hover:bg-white/60"
+                    }`}
+                  >
+                    <span className="flex items-baseline gap-4">
+                      <span
+                        className={`font-serif text-lg tabular-nums transition-colors ${
+                          isActive ? "text-accent" : "text-ink-soft/50"
+                        }`}
+                      >
+                        {step.number}
+                      </span>
+                      <span>
+                        <span className="block text-lg font-semibold text-ink">{step.title}</span>
+                        <span
+                          className={`grid transition-[grid-template-rows] duration-300 ${
+                            isActive ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                          }`}
+                        >
+                          <span className="overflow-hidden">
+                            <span className="block pt-1 text-ink-soft">{step.body}</span>
+                          </span>
+                        </span>
+                      </span>
+                    </span>
+                    {isActive && auto && inView && (
+                      <span
+                        key={`progress-${active}`}
+                        aria-hidden="true"
+                        className="step-progress absolute inset-x-0 bottom-0 h-0.5 origin-left bg-accent"
+                        style={{ animationDuration: `${STEP_DURATION_MS}ms` }}
+                      />
+                    )}
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+          <div className="min-w-0">
+            <div key={active} className="animate-rise">
+              <ActiveVisual />
             </div>
           </div>
         </div>

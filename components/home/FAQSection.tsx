@@ -17,7 +17,7 @@ export function FAQSection({
   const items = only ? only.map((i) => faqItems[i]).filter(Boolean) : faqItems;
 
   return (
-    <section id="faq" className="bg-bg-alt py-20 md:py-28">
+    <section id="faq" className="py-16 md:py-24">
       <div className="mx-auto max-w-3xl px-6">
         <SectionHeading title="Questions fréquentes" level={headingLevel} />
         <div className="mt-8 divide-y divide-line border-y border-line">

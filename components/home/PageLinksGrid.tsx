@@ -61,7 +61,7 @@ const links = [
 
 export function PageLinksGrid() {
   return (
-    <section className="py-20 md:py-24">
+    <section className="bg-bg-alt py-16 md:py-20">
       <div className="mx-auto max-w-6xl px-6">
         <SectionHeading title="Pour aller plus loin" />
         <ul className="mt-10 grid border-t border-line sm:grid-cols-2 sm:gap-x-12 lg:grid-cols-3">

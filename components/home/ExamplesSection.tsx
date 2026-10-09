@@ -4,7 +4,7 @@ import { demoSites } from "@/lib/demo-sites.demo";
 
 export function ExamplesSection() {
   return (
-    <section id="exemples" className="bg-bg-alt py-20 md:py-28">
+    <section id="exemples" className="bg-bg-alt py-16 md:py-24">
       <div className="mx-auto max-w-6xl px-6">
         <SectionHeading
           eyebrow="Exemples de sites FeaseWeb"
