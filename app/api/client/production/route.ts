@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireClient } from "@/lib/authz";
+import { requireApiClient } from "@/lib/authz";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { calculateProductionCompleteness, mapProductionDossier, productionDossierSchema, productionDossierSelect, type ProductionAccess, type ProductionMedia } from "@/lib/production";
@@ -9,13 +9,15 @@ import { sendMetaConversionEvent } from "@/lib/meta-conversions";
 export const dynamic = "force-dynamic";
 
 async function getContext() {
-  const current = await requireClient();
+  const auth = await requireApiClient();
+  if ("response" in auth) return { response: auth.response, current: null, supabase: null, admin: null, client: null, intake: null };
+  const { current } = auth;
   const supabase = await createClient();
   const admin = createAdminClient();
-  if (!supabase || !admin) return { current, supabase: null, admin: null, client: null, intake: null };
+  if (!supabase || !admin) return { response: null, current, supabase: null, admin: null, client: null, intake: null };
   const { data: client } = await supabase.from("clients").select("id, first_name, last_name, company, email, phone").eq("user_id", current.user.id).maybeSingle();
   const { data: intake } = client ? await supabase.from("project_intakes").select(`id, ${onboardingProjectSelect}`).eq("client_id", client.id).maybeSingle() : { data: null };
-  return { current, supabase, admin, client, intake };
+  return { response: null, current, supabase, admin, client, intake };
 }
 
 export async function GET() {

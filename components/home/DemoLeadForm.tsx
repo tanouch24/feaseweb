@@ -11,7 +11,7 @@ export function DemoLeadForm({ mode }: { mode: "create" | "redesign" }) {
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault(); setError(""); setLoading(true);
     const values = Object.fromEntries(new FormData(event.currentTarget).entries());
-    const response = await fetch("/api/prospects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...values, hasExistingSite: mode === "redesign", source: "site FeaseWeb" }) });
+    const response = await fetch("/api/prospects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...values, hasExistingSite: mode === "redesign", source: mode === "redesign" ? "Refaire mon site" : "Page contact" }) });
     const body = await response.json().catch(() => null);
     setLoading(false);
     if (!response.ok) { setError(body?.error ?? "Impossible d'envoyer la demande pour le moment."); return; }

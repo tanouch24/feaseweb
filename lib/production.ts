@@ -2,7 +2,8 @@ import { z } from "zod";
 import type { OnboardingProject } from "@/lib/onboarding";
 
 export const PRODUCTION_MEDIA_BUCKET = "feaseweb-production-media";
-export const MAX_PRODUCTION_MEDIA_BYTES = 10 * 1024 * 1024;
+// Les fichiers transitent par une fonction Netlify (corps limité à ~6 Mo) : 5 Mo max.
+export const MAX_PRODUCTION_MEDIA_BYTES = 5 * 1024 * 1024;
 export const PRODUCTION_MEDIA_TYPES = ["logo", "photo", "realisation", "avis_document", "certification", "document_utile"] as const;
 export const PRODUCTION_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf"] as const;
 

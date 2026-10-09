@@ -17,12 +17,25 @@ const navLinks = [
   { label: "FAQ", href: "/faq" },
 ];
 
-export function Header({ role = null }: { role?: Role | null }) {
+export function Header({ role: initialRole }: { role?: Role | null }) {
+  const [fetchedRole, setFetchedRole] = useState<Role | null>(null);
+  const role = initialRole === undefined ? fetchedRole : initialRole;
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
 
   const accountHref = role === "admin" ? "/admin" : "/espace-client";
+
+  // La session est lue côté navigateur pour que les pages publiques restent statiques.
+  useEffect(() => {
+    if (initialRole !== undefined) return;
+    let cancelled = false;
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((body: { role?: Role | null } | null) => { if (!cancelled && body?.role) setFetchedRole(body.role); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [initialRole]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);

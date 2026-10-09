@@ -5,7 +5,6 @@ import { Footer } from "@/components/layout/Footer";
 import { TrackingConsent } from "@/components/analytics/TrackingConsent";
 import { siteUrl } from "@/lib/site-config";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/structured-data";
-import { getAuthenticatedProfile } from "@/lib/authz";
 import "./globals.css";
 
 const SITE_URL = siteUrl;
@@ -33,12 +32,11 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: "FeaseWeb — Votre site internet, sans avoir à vous en occuper", description: "Création ou refonte sans frais, puis 49 €/mois tout compris." },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const current = await getAuthenticatedProfile();
   return (
     <html lang="fr" className={bricolage.variable}>
       <body className="min-h-screen font-sans antialiased">
@@ -50,7 +48,7 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
-        <Header role={current.role} />
+        <Header />
         {children}
         <Footer />
         <TrackingConsent />

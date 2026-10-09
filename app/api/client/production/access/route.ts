@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { requireClient } from "@/lib/authz";
+import { requireApiClient } from "@/lib/authz";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -11,7 +11,9 @@ const schema = z.object({
 });
 
 export async function PATCH(request: Request) {
-  const current = await requireClient();
+  const auth = await requireApiClient();
+  if ("response" in auth) return auth.response;
+  const { current } = auth;
   const supabase = await createClient();
   if (!supabase) return NextResponse.json({ error: "Service indisponible." }, { status: 503 });
   const { data: client } = await supabase.from("clients").select("id").eq("user_id", current.user.id).maybeSingle();

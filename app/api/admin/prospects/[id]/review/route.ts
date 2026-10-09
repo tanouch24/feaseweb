@@ -21,6 +21,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!intake) return NextResponse.json({ error: "Configuration prospect introuvable." }, { status: 404 });
 
   if (parsed.data.action === "schedule_appointment") {
+    const { data: taken } = await admin.from("project_appointments").select("id").eq("appointment_date", parsed.data.date).eq("appointment_time", parsed.data.time).eq("appointment_status", "scheduled").neq("project_intake_id", intake.id).limit(1);
+    if (taken?.length) return NextResponse.json({ error: "Ce créneau est déjà pris par un autre rendez-vous." }, { status: 409 });
     const { error } = await admin.from("project_appointments").upsert({ project_intake_id: intake.id, appointment_status: "scheduled", appointment_date: parsed.data.date, appointment_time: parsed.data.time }, { onConflict: "project_intake_id" });
     if (error) { console.error("admin_appointment_schedule_failed", error.code); return NextResponse.json({ error: "Impossible d'enregistrer le rendez-vous." }, { status: 500 }); }
     await onAppointmentScheduledByAdmin({ email: intake.email, firstName: intake.first_name, company: intake.company }, parsed.data.date, parsed.data.time);

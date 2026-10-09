@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { requireClient } from "@/lib/authz";
+import { requireApiClient } from "@/lib/authz";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { MAX_PRODUCTION_MEDIA_BYTES, PRODUCTION_MEDIA_BUCKET, PRODUCTION_MEDIA_TYPES, PRODUCTION_MIME_TYPES } from "@/lib/production";
@@ -10,17 +10,20 @@ const typeSchema = z.enum(PRODUCTION_MEDIA_TYPES);
 const extensionByMime: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif", "application/pdf": "pdf" };
 
 async function context() {
-  const current = await requireClient();
+  const auth = await requireApiClient();
+  if ("response" in auth) return { response: auth.response, current: null, supabase: null, admin: null, client: null, intake: null };
+  const { current } = auth;
   const supabase = await createClient();
   const admin = createAdminClient();
-  if (!supabase || !admin) return { current, supabase: null, admin: null, client: null, intake: null };
+  if (!supabase || !admin) return { response: null, current, supabase: null, admin: null, client: null, intake: null };
   const { data: client } = await supabase.from("clients").select("id").eq("user_id", current.user.id).maybeSingle();
   const { data: intake } = client ? await supabase.from("project_intakes").select("id").eq("client_id", client.id).maybeSingle() : { data: null };
-  return { current, supabase, admin, client, intake };
+  return { response: null, current, supabase, admin, client, intake };
 }
 
 export async function GET() {
-  const { admin, client } = await context();
+  const { response: denied, admin, client } = await context();
+  if (denied) return denied;
   if (!admin) return NextResponse.json({ error: "Service indisponible." }, { status: 503 });
   if (!client) return NextResponse.json({ error: "Dossier client introuvable." }, { status: 404 });
   const { data, error } = await admin.from("project_media").select("id, original_name, media_type, mime_type, size_bytes, status, created_at, storage_path").eq("client_id", client.id).order("created_at", { ascending: false });
@@ -33,7 +36,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { admin, client, intake } = await context();
+  const { response: denied, admin, client, intake } = await context();
+  if (denied) return denied;
   if (!admin) return NextResponse.json({ error: "Service indisponible." }, { status: 503 });
   if (!client || !intake) return NextResponse.json({ error: "Dossier client introuvable." }, { status: 404 });
   const formData = await request.formData();
@@ -41,7 +45,7 @@ export async function POST(request: Request) {
   const mediaType = typeSchema.safeParse(formData.get("mediaType"));
   if (!(fileValue instanceof File) || !mediaType.success) return NextResponse.json({ error: "Fichier ou catégorie invalide." }, { status: 400 });
   if (!PRODUCTION_MIME_TYPES.includes(fileValue.type as typeof PRODUCTION_MIME_TYPES[number])) return NextResponse.json({ error: "Ce format de fichier n'est pas accepté." }, { status: 415 });
-  if (fileValue.size <= 0 || fileValue.size > MAX_PRODUCTION_MEDIA_BYTES) return NextResponse.json({ error: "Le fichier doit peser au maximum 10 Mo." }, { status: 413 });
+  if (fileValue.size <= 0 || fileValue.size > MAX_PRODUCTION_MEDIA_BYTES) return NextResponse.json({ error: "Le fichier doit peser au maximum 5 Mo." }, { status: 413 });
   const extension = extensionByMime[fileValue.type];
   const path = `${client.id}/${intake.id}/${randomUUID()}.${extension}`;
   const { error: uploadError } = await admin.storage.from(PRODUCTION_MEDIA_BUCKET).upload(path, await fileValue.arrayBuffer(), { contentType: fileValue.type, upsert: false });
@@ -52,7 +56,8 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const { admin, client } = await context();
+  const { response: denied, admin, client } = await context();
+  if (denied) return denied;
   if (!admin) return NextResponse.json({ error: "Service indisponible." }, { status: 503 });
   if (!client) return NextResponse.json({ error: "Dossier client introuvable." }, { status: 404 });
   const body = await request.json().catch(() => null) as { id?: unknown } | null;

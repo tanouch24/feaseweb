@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { onModificationRequest } from "@/lib/notifications";
-import { requireClient } from "@/lib/authz";
+import { requireApiClient } from "@/lib/authz";
 import { createClient } from "@/lib/supabase/server";
 import { clientRequestSchema } from "@/lib/validation";
 import { sendClientRequestEmail } from "@/lib/brevo";
@@ -14,7 +14,9 @@ function monthWindow() {
 }
 
 export async function POST(request: Request) {
-  const current = await requireClient();
+  const auth = await requireApiClient();
+  if ("response" in auth) return auth.response;
+  const { current } = auth;
   const limit = await checkRateLimit({ category: "client-request", key: authenticatedRateLimitKey(current.user.id), limit: 3, windowSeconds: 3600 });
   if (limit.status === "limited") return rateLimitResponse(limit.retryAfter);
   if (limit.status === "unavailable") return rateLimitUnavailableResponse();

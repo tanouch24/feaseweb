@@ -64,6 +64,9 @@ export async function POST(request: Request) {
   const parsed = (context.current.role === "client" ? clientAppointmentInputSchema : appointmentInputSchema).safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Les informations du rendez-vous sont invalides." }, { status: 422 });
   if (!isBookableAppointment(parsed.data.date, parsed.data.time)) return NextResponse.json({ error: "Ce créneau n'est plus disponible. Choisissez une autre date ou une autre heure." }, { status: 409 });
+  // Un créneau = un seul rendez-vous : on refuse s'il est déjà pris par un autre dossier.
+  const { data: taken } = await context.admin.from("project_appointments").select("id").eq("appointment_date", parsed.data.date).eq("appointment_time", parsed.data.time).eq("appointment_status", "scheduled").neq("project_intake_id", context.intake.id).limit(1);
+  if (taken?.length) return NextResponse.json({ error: "Ce créneau vient d'être réservé. Choisissez une autre heure." }, { status: 409 });
   const phone = context.current.role === "client" ? context.clientPhone : "phone" in parsed.data ? parsed.data.phone : null;
   const { data, error } = await context.admin.from("project_appointments").upsert({ project_intake_id: context.intake.id, appointment_status: "scheduled", appointment_date: parsed.data.date, appointment_time: parsed.data.time, phone, note: parsed.data.note || null }, { onConflict: "project_intake_id" }).select("id, project_intake_id, appointment_status, appointment_date, appointment_time, phone, note").single();
   if (error) { console.error("prospect_appointment_save_failed", error.code); return NextResponse.json({ error: "Impossible d'enregistrer votre rendez-vous." }, { status: 500 }); }

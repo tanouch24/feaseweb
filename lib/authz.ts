@@ -35,6 +35,15 @@ export async function requireClient() {
   return current;
 }
 
+/** Variante API de requireClient : répond 401/403 en JSON au lieu de rediriger. */
+export async function requireApiClient() {
+  const current = await getAuthenticatedProfile();
+  if (!current.configured) return { response: NextResponse.json({ error: "Service indisponible." }, { status: 503 }) };
+  if (!current.user) return { response: NextResponse.json({ error: "Authentification requise." }, { status: 401 }) };
+  if (current.role !== "client") return { response: NextResponse.json({ error: "Accès réservé aux clients." }, { status: 403 }) };
+  return { current: { ...current, user: current.user } };
+}
+
 export async function requireClientSpace() {
   const current = await getAuthenticatedProfile();
   if (!current.configured) redirect("/connexion?reason=configuration");

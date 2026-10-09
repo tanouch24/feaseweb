@@ -75,3 +75,16 @@ describe("final client UX safeguards", () => {
     expect(styles).toContain(".client-profile-drawer");
   });
 });
+
+describe("appointment slots use Paris time", () => {
+  it("refuses a slot already past in Paris even when the server clock is UTC", () => {
+    // 08:30 UTC = 10:30 à Paris (heure d'été) : 10:00 est passé, 11:00 non.
+    const now = new Date("2026-09-28T08:30:00Z");
+    expect(isBookableAppointment("2026-09-28", "10:00", now)).toBe(false);
+    expect(isBookableAppointment("2026-09-28", "11:00", now)).toBe(true);
+  });
+  it("uses the Paris calendar day around midnight UTC", () => {
+    // 22:30 UTC le dimanche = 00:30 lundi à Paris : lundi est déjà « aujourd'hui ».
+    expect(availableAppointmentSlots("2026-09-28", new Date("2026-09-27T22:30:00Z"))[0]).toBe("09:00");
+  });
+});

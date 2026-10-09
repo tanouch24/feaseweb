@@ -69,7 +69,7 @@ describe("server auth boundaries", () => {
     const adminRoute = readFileSync(resolve(process.cwd(), "app/api/admin/client-updates/route.ts"), "utf8");
     const clientRoute = readFileSync(resolve(process.cwd(), "app/api/client/requests/route.ts"), "utf8");
     expect(adminRoute).toContain("requireApiAdmin");
-    expect(clientRoute).toContain("requireClient");
+    expect(clientRoute).toContain("requireApiClient");
     expect(clientRoute).not.toContain("internal_notes");
   });
 

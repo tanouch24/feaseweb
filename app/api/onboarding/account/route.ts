@@ -29,15 +29,24 @@ export async function POST(request: Request) {
     options: { data: { first_name: parsed.data.firstName, last_name: parsed.data.lastName }, emailRedirectTo: `${appUrl}/auth/callback?next=/creer-mon-site` },
   });
   if (error || !data.user) return NextResponse.json({ error: "Impossible de créer cet espace. Vérifiez les informations saisies." }, { status: 400 });
+  // Adresse déjà confirmée : Supabase renvoie un utilisateur factice sans
+  // identité. On s'arrête avant de créer un prospect orphelin.
+  if (Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    return NextResponse.json({ error: "Un espace existe déjà avec cet e-mail. Connectez-vous, ou utilisez « Mot de passe oublié »." }, { status: 409 });
+  }
   const admin = createAdminClient();
   if (!admin) return NextResponse.json({ error: "Configuration serveur incomplète." }, { status: 503 });
   const profile = await admin.from("profiles").update({ role: "prospect", first_name: parsed.data.firstName, last_name: parsed.data.lastName, email: parsed.data.email }).eq("id", data.user.id);
   if (profile.error) return NextResponse.json({ error: "Impossible de préparer l'espace." }, { status: 500 });
-  const prospect = await admin.from("prospects").insert({ first_name: parsed.data.firstName, last_name: parsed.data.lastName, company: parsed.data.company, email: parsed.data.email, phone: parsed.data.phone ?? null, source: "Tunnel Créer mon site", status: "nouveau", privacy_consent: true, privacy_consent_at: new Date().toISOString() }).select("id").single();
+  // Nouvel envoi avant confirmation : on réutilise le prospect déjà créé.
+  const { data: previousIntake } = await admin.from("project_intakes").select("prospect_id").eq("user_id", data.user.id).maybeSingle();
+  const prospect = previousIntake?.prospect_id
+    ? { data: { id: previousIntake.prospect_id as string }, error: null }
+    : await admin.from("prospects").insert({ first_name: parsed.data.firstName, last_name: parsed.data.lastName, company: parsed.data.company, email: parsed.data.email, phone: parsed.data.phone ?? null, source: "Tunnel Créer mon site", status: "nouveau", privacy_consent: true, privacy_consent_at: new Date().toISOString() }).select("id").single();
   if (prospect.error) return NextResponse.json({ error: "Impossible de préparer le dossier." }, { status: 500 });
   const intake = await admin.from("project_intakes").upsert({ user_id: data.user.id, prospect_id: prospect.data.id, first_name: parsed.data.firstName, last_name: parsed.data.lastName, company: parsed.data.company, email: parsed.data.email, phone: parsed.data.phone ?? null }, { onConflict: "user_id" });
   if (intake.error) return NextResponse.json({ error: "Impossible de préparer le projet." }, { status: 500 });
-  await onAccountCreated({ email: parsed.data.email, firstName: parsed.data.firstName, company: parsed.data.company, phone: parsed.data.phone ?? null });
+  if (!previousIntake) await onAccountCreated({ email: parsed.data.email, firstName: parsed.data.firstName, company: parsed.data.company, phone: parsed.data.phone ?? null });
   const trackingEventId = `account_created:${data.user.id}`;
   void sendMetaConversionEvent({ eventName: "account_created", eventId: trackingEventId, eventSourceUrl: request.url, userData: { email: parsed.data.email, phone: parsed.data.phone } });
   if (!data.session) return NextResponse.json({ needsConfirmation: true, trackingEventId });

@@ -10,6 +10,10 @@ describe("request origin protection", () => {
     expect(isAllowedRequestOrigin("https://feaseweb.fr")).toBe(true);
   });
 
+  it("WWW_ORIGIN_ALLOWED", () => {
+    expect(isAllowedRequestOrigin("https://www.feaseweb.fr")).toBe(true);
+  });
+
   it("EVIL_ORIGIN_BLOCKED", () => {
     expect(isAllowedRequestOrigin("https://evil.example")).toBe(false);
   });

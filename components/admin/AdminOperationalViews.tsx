@@ -29,7 +29,7 @@ export function DossiersPage() {
     const payment = paymentFor(client?.id);
     const paymentState = payment?.status === "paye" ? "Paiement effectué" : payment?.status === "echoue" ? "Paiement rejeté" : prospect.review?.validationStatus === "approved" ? "Demande envoyée" : "Demande à envoyer";
     const appointmentState = prospect.review?.appointmentStatus === "completed" ? "Effectué" : prospect.review?.appointmentStatus === "scheduled" ? `Prévu le ${prospect.review.appointmentDate ?? "date à préciser"}${prospect.review.appointmentTime ? ` à ${prospect.review.appointmentTime}` : ""}` : "À planifier";
-    const openTasks = (prospect.review?.appointmentStatus === "completed" || prospect.review?.appointmentStatus === "scheduled" ? 1 : 1) + (!payment || payment.status !== "paye" ? 1 : 0) + (project && project.currentStep >= 8 || project?.completedAt ? 0 : 1) + (client ? data.requests.filter((request) => request.clientId === client.id && !["terminee", "hors_perimetre"].includes(request.status)).length : 0);
+    const openTasks = (prospect.review?.appointmentStatus === "completed" ? 0 : 1) + (!payment || payment.status !== "paye" ? 1 : 0) + (project && project.currentStep >= 8 || project?.completedAt ? 0 : 1) + (client ? data.requests.filter((request) => request.clientId === client.id && !["terminee", "hors_perimetre"].includes(request.status)).length : 0);
     return { id: `prospect-${prospect.id}`, company: prospect.company, contact: `${prospect.firstName} ${prospect.lastName}`.trim(), email: prospect.email, paymentState, appointmentState, openTasks, href: `/admin/dossiers/${prospect.id}` };
   });
   const clientRows = data.clients.filter((client) => !client.prospectId).map((client) => {
