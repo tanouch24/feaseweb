@@ -4,6 +4,9 @@ import { getStripe } from "@/lib/stripe/server";
 import { stripeWebhookSecret } from "@/lib/stripe/config";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureClientForProject, resolveClientId, syncPaymentFromInvoice, syncSubscriptionFromStripe } from "@/lib/stripe/sync";
+import { onFirstPaymentReceived, onPaymentFailed, onSubscriptionCanceled } from "@/lib/notifications";
+
+type Notice = { kind: "first_payment" | "payment_failed" | "canceled"; clientId: string };
 
 const HANDLED_EVENTS = new Set([
   "checkout.session.completed",
@@ -73,6 +76,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true, ignored: event.type });
   }
 
+  let notice: Notice | null = null;
   try {
     switch (event.type) {
       case "checkout.session.completed": {
@@ -91,6 +95,7 @@ export async function POST(request: Request) {
         const subscription = event.data.object as Stripe.Subscription;
         const clientId = await resolveClientId(subscription);
         if (clientId) await syncSubscriptionFromStripe(subscription, clientId);
+        if (clientId && event.type === "customer.subscription.deleted") notice = { kind: "canceled", clientId };
         break;
       }
       case "invoice.paid":
@@ -111,6 +116,8 @@ export async function POST(request: Request) {
               subRow?.id ?? null,
               event.type === "invoice.paid" ? "paye" : "echoue"
             );
+            if (event.type === "invoice.payment_failed") notice = { kind: "payment_failed", clientId };
+            else if (invoice.billing_reason === "subscription_create") notice = { kind: "first_payment", clientId };
           }
         }
         break;
@@ -120,6 +127,20 @@ export async function POST(request: Request) {
     await admin.from("stripe_webhook_events").delete().eq("stripe_event_id", event.id);
     console.error("stripe_webhook_processing_failed", event.type, error instanceof Error ? error.name : "unknown_error");
     return NextResponse.json({ error: "Traitement impossible." }, { status: 500 });
+  }
+
+  // E-mails après traitement : un échec d'envoi ne doit jamais faire
+  // rejouer l'événement par Stripe (l'idempotence est déjà enregistrée).
+  if (notice) {
+    try {
+      const { data: client } = await admin.from("clients").select("email, first_name, company").eq("id", notice.clientId).maybeSingle();
+      const person = { email: client?.email ?? null, firstName: client?.first_name ?? null, company: client?.company ?? null };
+      if (notice.kind === "first_payment") await onFirstPaymentReceived(person);
+      else if (notice.kind === "payment_failed") await onPaymentFailed(person);
+      else await onSubscriptionCanceled(person);
+    } catch (error) {
+      console.error("stripe_webhook_notification_failed", notice.kind, error instanceof Error ? error.name : "unknown");
+    }
   }
 
   return NextResponse.json({ received: true });

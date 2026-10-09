@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { onProjectConfigured } from "@/lib/notifications";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthenticatedProfile } from "@/lib/authz";
 import { onboardingPatchSchema } from "@/lib/validation";
@@ -36,6 +37,7 @@ export async function PATCH(request: Request) {
       const completed = await admin.from("project_intakes").update({ completed_at: new Date().toISOString(), project_status: "project_configured" }).eq("user_id", current.user.id).select(onboardingProjectSelect).single();
       if (!completed.error && completed.data) result = completed.data;
       if (!completed.error) {
+        await onProjectConfigured({ email: result?.email ?? null, firstName: result?.first_name ?? null, company: result?.company ?? null });
         const trackingEventId = `configurator_completed:${current.user.id}`;
         void sendMetaConversionEvent({ eventName: "configurator_completed", eventId: trackingEventId, eventSourceUrl: request.url, userData: { email: current.user.email } });
         return NextResponse.json({ project: mapProjectIntake(result), trackingEventId });

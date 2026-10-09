@@ -9,7 +9,9 @@ const {
   resolveClientIdMock,
   syncSubscriptionFromStripeMock,
   syncPaymentFromInvoiceMock,
+  notifications,
 } = vi.hoisted(() => ({
+  notifications: { onFirstPaymentReceived: vi.fn(), onPaymentFailed: vi.fn(), onSubscriptionCanceled: vi.fn() },
   constructEventMock: vi.fn(),
   subscriptionsRetrieveMock: vi.fn(),
   webhookEventsInsertMock: vi.fn(),
@@ -37,6 +39,9 @@ vi.mock("@/lib/supabase/admin", () => ({
       if (table === "stripe_webhook_events") {
         return { insert: webhookEventsInsertMock, delete: () => ({ eq: webhookEventsDeleteEqMock }) };
       }
+      if (table === "clients") {
+        return { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { email: "client@example.test", first_name: "Claire", company: "Atelier" } }) }) }) };
+      }
       if (table === "subscriptions") {
         return { select: () => ({ eq: () => ({ maybeSingle: subscriptionSelectMaybeSingleMock }) }) };
       }
@@ -50,6 +55,8 @@ vi.mock("@/lib/stripe/sync", () => ({
   syncSubscriptionFromStripe: syncSubscriptionFromStripeMock,
   syncPaymentFromInvoice: syncPaymentFromInvoiceMock,
 }));
+
+vi.mock("@/lib/notifications", () => notifications);
 
 import { POST } from "@/app/api/stripe/webhook/route";
 
@@ -70,6 +77,7 @@ describe("POST /api/stripe/webhook", () => {
     syncSubscriptionFromStripeMock.mockReset();
     syncPaymentFromInvoiceMock.mockReset();
     webhookEventsInsertMock.mockResolvedValue({ error: null });
+    Object.values(notifications).forEach((mock) => mock.mockReset());
   });
 
   it("rejects a request with no Stripe-Signature header", async () => {
@@ -135,6 +143,30 @@ describe("POST /api/stripe/webhook", () => {
     const response = await POST(makeRequest("{}", "t=1,v1=valid"));
     expect(response.status).toBe(200);
     expect(syncPaymentFromInvoiceMock).toHaveBeenCalledWith(invoiceObject, "client-1", "subscription-row-1", "paye");
+    // Renouvellement mensuel : pas d'e-mail de bienvenue.
+    expect(notifications.onFirstPaymentReceived).not.toHaveBeenCalled();
+  });
+
+  it("welcomes the client and alerts FeaseWeb on the very first payment", async () => {
+    const invoiceObject = { id: "in_first", billing_reason: "subscription_create", parent: { subscription_details: { subscription: "sub_1" } }, amount_paid: 4900, currency: "eur", lines: { data: [] } };
+    constructEventMock.mockReturnValue({ id: "evt_first", type: "invoice.paid", data: { object: invoiceObject } });
+    subscriptionsRetrieveMock.mockResolvedValue({ id: "sub_1", metadata: { feaseweb_client_id: "client-1" } });
+    resolveClientIdMock.mockResolvedValue("client-1");
+    subscriptionSelectMaybeSingleMock.mockResolvedValue({ data: { id: "subscription-row-1" } });
+
+    const response = await POST(makeRequest("{}", "t=1,v1=valid"));
+    expect(response.status).toBe(200);
+    expect(notifications.onFirstPaymentReceived).toHaveBeenCalledWith({ email: "client@example.test", firstName: "Claire", company: "Atelier" });
+  });
+
+  it("tells the client and FeaseWeb when a subscription is cancelled", async () => {
+    const subscriptionObject = { id: "sub_end", metadata: { feaseweb_client_id: "client-1" } };
+    constructEventMock.mockReturnValue({ id: "evt_end", type: "customer.subscription.deleted", data: { object: subscriptionObject } });
+    resolveClientIdMock.mockResolvedValue("client-1");
+
+    const response = await POST(makeRequest("{}", "t=1,v1=valid"));
+    expect(response.status).toBe(200);
+    expect(notifications.onSubscriptionCanceled).toHaveBeenCalledTimes(1);
   });
 
   it("syncs a failed invoice as a failed payment", async () => {
@@ -157,6 +189,7 @@ describe("POST /api/stripe/webhook", () => {
     const response = await POST(makeRequest("{}", "t=1,v1=valid"));
     expect(response.status).toBe(200);
     expect(syncPaymentFromInvoiceMock).toHaveBeenCalledWith(invoiceObject, "client-1", "subscription-row-1", "echoue");
+    expect(notifications.onPaymentFailed).toHaveBeenCalledTimes(1);
   });
 
   it("releases the idempotency claim when processing fails so Stripe can retry", async () => {

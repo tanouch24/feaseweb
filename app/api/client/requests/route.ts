@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { onModificationRequest } from "@/lib/notifications";
 import { requireClient } from "@/lib/authz";
 import { createClient } from "@/lib/supabase/server";
 import { clientRequestSchema } from "@/lib/validation";
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
   if (!supabase) return NextResponse.json({ error: "Supabase n'est pas configuré." }, { status: 503 });
   const parsed = clientRequestSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Demande invalide." }, { status: 422 });
-  const { data: client } = await supabase.from("clients").select("id, email, first_name").eq("user_id", current.user.id).maybeSingle();
+  const { data: client } = await supabase.from("clients").select("id, email, first_name, company").eq("user_id", current.user.id).maybeSingle();
   if (!client) return NextResponse.json({ error: "Aucun dossier client associé." }, { status: 404 });
   const window = monthWindow();
   const { count, error: countError } = await supabase.from("modification_requests").select("id", { count: "exact", head: true }).eq("client_id", client.id).gte("created_at", window.start).lt("created_at", window.end);
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
   if (!site) return NextResponse.json({ error: "Aucun site associé à ce dossier." }, { status: 422 });
   const { data: created, error } = await supabase.from("modification_requests").insert({ client_id: client.id, site_id: site.id, title: parsed.data.title, category: parsed.data.category, message: parsed.data.message, priority: "normale" }).select("id, title").single();
   if (error || !created) return NextResponse.json({ error: "Impossible d'envoyer la demande." }, { status: 500 });
+  await onModificationRequest({ email: client.email, firstName: client.first_name, company: client.company }, created.title, parsed.data.message);
   const emailResult = client.email ? await sendClientRequestEmail({ firstName: client.first_name, email: client.email, title: created.title, status: "received" }) : { ok: false as const, reason: "not_configured" as const };
   return NextResponse.json({ ok: true, emailSent: emailResult.ok });
 }

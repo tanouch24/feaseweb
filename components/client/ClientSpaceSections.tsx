@@ -30,6 +30,8 @@ export type ClientSpaceSectionsProps = {
   appointment?: { appointment_status?: string | null; appointment_date?: string | null; appointment_time?: string | null } | null;
   validation?: { validation_status?: string | null } | null;
   projectComplete?: boolean;
+  /** Le client a envoyé son dossier de production (textes, photos, logo). */
+  productionSubmitted?: boolean;
 };
 
 function date(value: string) { return new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(new Date(value)); }
@@ -50,16 +52,17 @@ function requiredAction(update: UpdateRecord): RequiredAction {
   if (["rendez_vous", "rendez-vous", "appointment"].some((value) => action.includes(value)) || /rendez[- ]vous|créneau|creneau/.test(content)) return { kind: "appointment", label: "Planifier votre rendez-vous", text: "Choisissez un moment pour parler de votre projet.", href: "#rendez-vous", cta: "Choisir mon rendez-vous" };
   return { kind: "reply", label: "FeaseWeb a besoin de vous", text: update.description || update.title, href: "#message-client", cta: "Répondre" };
 }
-function nextRequiredAction({ projectComplete, approved, paymentConfirmed, appointment, updates }: { projectComplete: boolean; approved: boolean; paymentConfirmed: boolean; appointment?: ClientSpaceSectionsProps["appointment"]; updates: UpdateRecord[] }): RequiredAction | undefined {
+function nextRequiredAction({ projectComplete, approved, paymentConfirmed, appointment, updates, needsContent = false }: { projectComplete: boolean; approved: boolean; paymentConfirmed: boolean; appointment?: ClientSpaceSectionsProps["appointment"]; updates: UpdateRecord[]; needsContent?: boolean }): RequiredAction | undefined {
   const unreadAction = updates.find((update) => update.update_type === "action_requise" && !update.read_at);
   if (unreadAction) return requiredAction(unreadAction);
   if (!projectComplete) return { kind: "reply", label: "Finaliser votre demande", text: "Quelques informations manquent encore.", href: "/creer-mon-site", cta: "Continuer" };
   if (!appointment?.appointment_status || appointment.appointment_status === "cancelled") return { kind: "appointment", label: "Planifier votre rendez-vous", text: "Choisissez un moment pour parler de votre projet.", href: "#rendez-vous", cta: "Choisir mon rendez-vous" };
   if (approved && !paymentConfirmed) return { kind: "payment", label: "Finaliser votre abonnement", text: "49 € / mois", cta: "Payer mon abonnement" };
+  if (needsContent) return { kind: "reply", label: "Envoyez-nous vos contenus", text: "Textes, photos, logo : tout ce qu'il faut pour créer votre site.", href: "/espace-client/production", cta: "Envoyer mes contenus" };
   return undefined;
 }
-function ActionRequired({ projectComplete, approved, paymentConfirmed, appointment, updates }: { projectComplete: boolean; approved: boolean; paymentConfirmed: boolean; appointment?: ClientSpaceSectionsProps["appointment"]; updates: UpdateRecord[] }) {
-  const item = nextRequiredAction({ projectComplete, approved, paymentConfirmed, appointment, updates });
+function ActionRequired({ projectComplete, approved, paymentConfirmed, appointment, updates, needsContent }: { projectComplete: boolean; approved: boolean; paymentConfirmed: boolean; appointment?: ClientSpaceSectionsProps["appointment"]; updates: UpdateRecord[]; needsContent?: boolean }) {
+  const item = nextRequiredAction({ projectComplete, approved, paymentConfirmed, appointment, updates, needsContent });
   return <aside className="client-next-action" aria-labelledby="client-next-action-title"><p className="client-eyebrow">PROCHAINE ÉTAPE</p>{item ? <><h2 id="client-next-action-title">{item.label}</h2><p>{item.text}</p>{item.kind === "payment" ? <StartSubscriptionButton label={item.cta} /> : <a className="client-button" href={item.href}>{item.cta} <ArrowUpRightIcon size={16} /></a>}</> : <><h2 id="client-next-action-title">Tout est à jour ✓</h2><p>Vous n&apos;avez rien à faire pour le moment.</p></>}</aside>;
 }
 
@@ -81,7 +84,7 @@ function SubscriptionCard({ state, approved, paymentPending }: { state: Subscrip
   return <section id="paiement" className={`client-card client-payment-status${state.kind === "payment_issue" ? " client-payment-alert" : ""}`}>{head}<h2>{title}</h2><p className="client-muted-note" role={state.kind === "payment_issue" ? "alert" : undefined}>{note}</p>{state.kind !== "canceled" && <div className="client-payment-manage"><ManageSubscriptionButton /></div>}</section>;
 }
 
-export function ClientSpaceSections({ client, project, site, subscription, payments, updates, requests, seoActions, appointment, validation, projectComplete = true }: ClientSpaceSectionsProps) {
+export function ClientSpaceSections({ client, project, site, subscription, payments, updates, requests, seoActions, appointment, validation, projectComplete = true, productionSubmitted = true }: ClientSpaceSectionsProps) {
   const firstPayment = payments.filter((payment) => payment.status === "paye").sort((a, b) => a.created_at.localeCompare(b.created_at))[0];
   const paymentConfirmed = Boolean(firstPayment);
   const billing = subscriptionState(subscription, paymentConfirmed);
@@ -89,11 +92,12 @@ export function ClientSpaceSections({ client, project, site, subscription, payme
   const siteUrlLabel = displayPublicSiteUrl(site?.production_url || site?.domain);
   const live = Boolean(siteUrl && (site?.status === "actif" || project?.projectStatus === "live"));
   const approved = validation?.validation_status === "approved";
-  const nextAction = nextRequiredAction({ projectComplete, approved, paymentConfirmed, appointment, updates });
+  const needsContent = paymentConfirmed && !live && !productionSubmitted;
+  const nextAction = nextRequiredAction({ projectComplete, approved, paymentConfirmed, appointment, updates, needsContent });
   const openRequests = requests.filter((request) => !["terminee", "hors_perimetre"].includes(request.status));
   const deliveryEstimate = paymentConfirmed && !live && firstPayment ? addCalendarDays(firstPayment.created_at) : null;
   return <section id="tableau-de-bord" className="client-space-section client-dashboard-section client-simple-dashboard">
-    <div className="client-project-grid"><section id="mon-site" className="client-card client-main-site-card" aria-labelledby="client-main-site-title"><div className="client-project-card-icon"><GlobeIcon /></div><p className="client-eyebrow">MON SITE</p><h2 id="client-main-site-title">{site?.name || "Votre site internet"}</h2><h3>{live ? "Votre site est en ligne ✓" : siteUrl ? "Votre site est en construction" : "Votre site est en préparation"}</h3>{siteUrl ? <><p className="client-site-url">{siteUrlLabel}</p><a className="client-button" href={siteUrl} target="_blank" rel="noreferrer">Voir mon site <ArrowUpRightIcon size={16} /></a></> : <p className="client-muted-note">{deliveryEstimate ? `Livraison estimée : ${formatClientDate(deliveryEstimate)}` : "FeaseWeb prépare actuellement votre projet."}</p>}<div className="client-project-meta"><span>État <strong>{live ? "En ligne" : siteUrl ? "En construction" : "En préparation"}</strong></span>{site?.launched_at && <span>Mise en ligne <strong>{date(site.launched_at)}</strong></span>}</div></section><ActionRequired projectComplete={projectComplete} approved={approved} paymentConfirmed={paymentConfirmed} appointment={appointment} updates={updates} /></div>
+    <div className="client-project-grid"><section id="mon-site" className="client-card client-main-site-card" aria-labelledby="client-main-site-title"><div className="client-project-card-icon"><GlobeIcon /></div><p className="client-eyebrow">MON SITE</p><h2 id="client-main-site-title">{site?.name || "Votre site internet"}</h2><h3>{live ? "Votre site est en ligne ✓" : siteUrl ? "Votre site est en construction" : "Votre site est en préparation"}</h3>{siteUrl ? <><p className="client-site-url">{siteUrlLabel}</p><a className="client-button" href={siteUrl} target="_blank" rel="noreferrer">Voir mon site <ArrowUpRightIcon size={16} /></a></> : <p className="client-muted-note">{deliveryEstimate ? `Livraison estimée : ${formatClientDate(deliveryEstimate)}` : "FeaseWeb prépare actuellement votre projet."}</p>}<div className="client-project-meta"><span>État <strong>{live ? "En ligne" : siteUrl ? "En construction" : "En préparation"}</strong></span>{site?.launched_at && <span>Mise en ligne <strong>{date(site.launched_at)}</strong></span>}</div></section><ActionRequired projectComplete={projectComplete} approved={approved} paymentConfirmed={paymentConfirmed} appointment={appointment} updates={updates} needsContent={needsContent} /></div>
     <section className="client-card client-project-status-card"><p className="client-eyebrow">VOTRE PARCOURS</p><ProjectTimeline project={project} appointment={appointment} paymentConfirmed={paymentConfirmed} paymentDate={firstPayment?.created_at} live={live} /></section>
     <div className="client-dashboard-grid"><div id="rendez-vous"><div className="client-card-icon"><CalendarIcon /></div><ClientAppointmentCard initialAppointment={appointment ?? null} /></div><SubscriptionCard state={billing} approved={approved} paymentPending={nextAction?.kind === "payment"} /></div>
     <WorkHistory actions={seoActions} updates={updates} />

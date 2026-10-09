@@ -36,3 +36,20 @@ describe("ClientSpaceSections subscription card", async () => {
     expect(screen.queryByText("Abonnement actif ✓")).not.toBeInTheDocument();
   });
 });
+
+describe("ClientSpaceSections next step after payment", async () => {
+  const { ClientSpaceSections } = await import("@/components/client/ClientSpaceSections");
+  const paid = {
+    client: null, profile: null, project: null, site: null, updates: [], requests: [], seoActions: [], subscription: { status: "actif" },
+    payments: [{ id: "p1", amount_cents: 4900, status: "paye", created_at: "2026-09-24T10:00:00.000Z", invoice_reference: null, period_start: null, period_end: null }],
+    appointment: { appointment_status: "completed" },
+  };
+  it("asks a new paying client to send their content", () => {
+    render(<ClientSpaceSections {...paid} productionSubmitted={false} />);
+    expect(screen.getByRole("link", { name: /Envoyer mes contenus/ })).toHaveAttribute("href", "/espace-client/production");
+  });
+  it("stops asking once the content has been sent", () => {
+    render(<ClientSpaceSections {...paid} productionSubmitted />);
+    expect(screen.queryByRole("link", { name: /Envoyer mes contenus/ })).not.toBeInTheDocument();
+  });
+});

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { onAppointmentBooked } from "@/lib/notifications";
 import { getAuthenticatedProfile } from "@/lib/authz";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -66,6 +67,7 @@ export async function POST(request: Request) {
   const phone = context.current.role === "client" ? context.clientPhone : "phone" in parsed.data ? parsed.data.phone : null;
   const { data, error } = await context.admin.from("project_appointments").upsert({ project_intake_id: context.intake.id, appointment_status: "scheduled", appointment_date: parsed.data.date, appointment_time: parsed.data.time, phone, note: parsed.data.note || null }, { onConflict: "project_intake_id" }).select("id, project_intake_id, appointment_status, appointment_date, appointment_time, phone, note").single();
   if (error) { console.error("prospect_appointment_save_failed", error.code); return NextResponse.json({ error: "Impossible d'enregistrer votre rendez-vous." }, { status: 500 }); }
+  await onAppointmentBooked({ email: project.email || context.current.user.email, firstName: project.firstName, company: project.company }, data.appointment_date, data.appointment_time, data.phone);
   const trackingEventId = `appointment_scheduled:${data.id}:${data.appointment_date}:${data.appointment_time}`;
   if (context.current.role === "prospect") void sendMetaConversionEvent({ eventName: "appointment_scheduled", eventId: trackingEventId, eventSourceUrl: request.url, userData: { email: context.current.user.email, phone: data.phone } });
   return NextResponse.json({ appointment: mapProjectAppointment(data), trackingEventId }, { status: 201 });
