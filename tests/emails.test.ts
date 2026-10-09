@@ -37,7 +37,7 @@ describe("invite route", () => {
   it("emails a lead without an account a link to create their space", async () => {
     const { POST } = await import("@/app/api/admin/prospects/[id]/invite/route");
     const response = await POST(new Request("http://localhost/x", { method: "POST" }), { params: Promise.resolve({ id: "p1" }) });
-    expect(response.status).toBe(200);
+    expect(response?.status).toBe(200);
     expect(sendEmail).toHaveBeenCalledWith({ email: "lea@example.test", name: "Léa" }, expect.any(String), expect.objectContaining({ cta: { label: "Créer mon espace", url: "https://feaseweb.fr/creer-mon-site" } }));
     expect(inserts).toEqual(["internal_notes", "activity_log"]);
   });
@@ -46,7 +46,7 @@ describe("invite route", () => {
     intake = { id: "intake-1" };
     const { POST } = await import("@/app/api/admin/prospects/[id]/invite/route");
     const response = await POST(new Request("http://localhost/x", { method: "POST" }), { params: Promise.resolve({ id: "p1" }) });
-    expect(response.status).toBe(409);
+    expect(response?.status).toBe(409);
     expect(sendEmail).not.toHaveBeenCalled();
   });
 });
