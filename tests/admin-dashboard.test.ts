@@ -15,6 +15,23 @@ const project = (id: string, clientId: string, status: string, currentStep = 8):
 const site = (id: string, clientId: string, status: Site["status"]): Site => ({ id, clientId, name: "Site", slug: id, previewUrl: "", finalDomain: status === "actif" ? "https://example.test" : "", repository: "", host: "", createdAt: "2026-09-01", status, technicalNotes: "" });
 
 describe("simple admin dashboard", () => {
+  it("surfaces cancelled and past-due subscriptions instead of hiding them", () => {
+    const cancelled = client("cancelled", "Résilié");
+    const late = client("late", "En retard");
+    const data = {
+      ...emptyData,
+      clients: [cancelled, late],
+      payments: [payment("p1", "cancelled", "paye", "2026-09-01"), payment("p2", "late", "paye", "2026-09-01")],
+      subscriptions: [
+        { id: "s1", clientId: "cancelled", status: "annule", amountCents: 4900, provider: "stripe", lastPaymentStatus: "paye" },
+        { id: "s2", clientId: "late", status: "retard", amountCents: 4900, provider: "stripe", lastPaymentStatus: "echoue" },
+      ] as never,
+    };
+    const sections = getAdminDashboardSections(data);
+    expect(sections["Abonnements à surveiller"].map((item) => [item.company, item.detail])).toEqual([["Résilié", "Abonnement résilié"], ["En retard", "Paiement en retard"]]);
+    expect(sections["Paiements reçus"]).toHaveLength(0);
+  });
+
   it("shows scheduled appointments sorted and flags overdue appointments", () => {
     const data = { ...emptyData, prospects: [prospect("next", "Prochain", "scheduled", "2026-10-01", "14:30"), prospect("late", "En retard", "scheduled", "2026-09-29", "09:00")] };
     const sections = getAdminDashboardSections(data, new Date("2026-09-30T12:00:00"));

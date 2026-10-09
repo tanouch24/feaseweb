@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { AdminOverview, ProspectsPage } from "@/components/admin/AdminApp";
 import { BackofficeProvider } from "@/lib/backoffice-store";
 import { demoData } from "@/lib/backoffice";
+import { adminDashboardStages } from "@/lib/admin-dashboard";
 
 function renderAdmin(node: React.ReactNode) { return render(<BackofficeProvider>{node}</BackofficeProvider>); }
 
@@ -15,14 +16,14 @@ describe("back-office local console", () => {
   it("does not present fictional metrics when the dataset is empty", async () => {
     renderAdmin(<AdminOverview />);
     await waitFor(() => expect(screen.getByText("Le suivi, simplement.")).toBeInTheDocument());
-    expect(screen.getAllByText("Aucun dossier")).toHaveLength(7);
+    expect(screen.getAllByText("Aucun dossier")).toHaveLength(adminDashboardStages.length);
   });
 
   it("does not read localStorage for business data", async () => {
     window.localStorage.setItem("feaseweb-backoffice-v1", JSON.stringify(demoData()));
     renderAdmin(<AdminOverview />);
     await waitFor(() => expect(screen.getByText("Le suivi, simplement.")).toBeInTheDocument());
-    expect(screen.getAllByText("Aucun dossier")).toHaveLength(7);
+    expect(screen.getAllByText("Aucun dossier")).toHaveLength(adminDashboardStages.length);
   });
 
   it("filters prospects by company or email", async () => {

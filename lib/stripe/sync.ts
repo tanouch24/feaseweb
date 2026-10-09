@@ -60,13 +60,24 @@ export async function ensureClientForProject(projectId: string): Promise<string 
   const { data: project, error: projectError } = await admin.from("project_intakes").select("*").eq("id", projectId).maybeSingle();
   if (projectError || !project) return null;
   if (project.client_id) return project.client_id;
-  const { data: existing } = await admin.from("clients").select("id").eq("user_id", project.user_id).maybeSingle();
-  let clientId = existing?.id as string | undefined;
+  // Le client est relié à sa fiche prospect (prospect_id) : sans ce lien, le
+  // back-office le voyait en double et le laissait dans « Paiements en attente ».
+  const findClient = async () => {
+    const byUser = await admin.from("clients").select("id, prospect_id").eq("user_id", project.user_id).maybeSingle();
+    if (byUser.data) return byUser.data as { id: string; prospect_id: string | null };
+    if (!project.prospect_id) return null;
+    const byProspect = await admin.from("clients").select("id, prospect_id").eq("prospect_id", project.prospect_id).maybeSingle();
+    return (byProspect.data as { id: string; prospect_id: string | null } | null) ?? null;
+  };
+  const existing = await findClient();
+  let clientId = existing?.id;
+  if (existing && !existing.prospect_id && project.prospect_id) {
+    await admin.from("clients").update({ prospect_id: project.prospect_id }).eq("id", existing.id);
+  }
   if (!clientId) {
-    const created = await admin.from("clients").insert({ user_id: project.user_id, first_name: project.first_name, last_name: project.last_name, company: project.company, email: project.email, phone: project.phone, status: "actif", started_at: new Date().toISOString(), access_status: "actif", activated_at: new Date().toISOString() }).select("id").single();
+    const created = await admin.from("clients").insert({ user_id: project.user_id, prospect_id: project.prospect_id ?? null, first_name: project.first_name, last_name: project.last_name, company: project.company, email: project.email, phone: project.phone, status: "actif", started_at: new Date().toISOString(), access_status: "actif", activated_at: new Date().toISOString() }).select("id").single();
     if (created.error?.code === "23505") {
-      const retry = await admin.from("clients").select("id").eq("user_id", project.user_id).single();
-      clientId = retry.data?.id;
+      clientId = (await findClient())?.id;
     } else if (created.error) throw created.error;
     else clientId = created.data.id;
   }

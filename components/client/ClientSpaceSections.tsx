@@ -1,6 +1,7 @@
 import { ClientRequestForm } from "@/components/client/ClientRequestForm";
 import { ClientAppointmentCard } from "@/components/client/ClientAppointmentCard";
-import { StartSubscriptionButton } from "@/components/billing/BillingActions";
+import { ManageSubscriptionButton, StartSubscriptionButton } from "@/components/billing/BillingActions";
+import { subscriptionState, type SubscriptionRecord, type SubscriptionState } from "@/lib/subscription-state";
 import { isOnboardingComplete, type OnboardingProject } from "@/lib/onboarding";
 import { addCalendarDays, clientOrderTimeline, formatClientDate } from "@/lib/client-order-timeline";
 import { whatsappContactUrl } from "@/lib/whatsapp";
@@ -21,7 +22,7 @@ export type ClientSpaceSectionsProps = {
   profile: ProfileRecord;
   project: OnboardingProject | null;
   site: SiteRecord;
-  subscription: unknown;
+  subscription: SubscriptionRecord;
   payments: PaymentRecord[];
   updates: UpdateRecord[];
   requests: RequestRecord[];
@@ -62,9 +63,28 @@ function ActionRequired({ projectComplete, approved, paymentConfirmed, appointme
   return <aside className="client-next-action" aria-labelledby="client-next-action-title"><p className="client-eyebrow">PROCHAINE ÉTAPE</p>{item ? <><h2 id="client-next-action-title">{item.label}</h2><p>{item.text}</p>{item.kind === "payment" ? <StartSubscriptionButton label={item.cta} /> : <a className="client-button" href={item.href}>{item.cta} <ArrowUpRightIcon size={16} /></a>}</> : <><h2 id="client-next-action-title">Tout est à jour ✓</h2><p>Vous n&apos;avez rien à faire pour le moment.</p></>}</aside>;
 }
 
-export function ClientSpaceSections({ client, project, site, payments, updates, requests, seoActions, appointment, validation, projectComplete = true }: ClientSpaceSectionsProps) {
+function SubscriptionCard({ state, approved, paymentPending }: { state: SubscriptionState; approved: boolean; paymentPending: boolean }) {
+  const head = <><CreditCardIcon /><p className="client-eyebrow">ABONNEMENT</p></>;
+  if (state.kind === "none") {
+    return <section id="paiement" className="client-card client-payment-status">{head}<h2>{approved ? "Votre abonnement FeaseWeb" : "Abonnement"}</h2>{approved ? <><p className="client-price">49 €<span>/mois</span></p>{paymentPending ? <p className="client-muted-note">Paiement à effectuer.</p> : <StartSubscriptionButton label="Payer mon abonnement" />}<p className="client-footnote">Création ou refonte du site, hébergement, maintenance et suivi.</p></> : <p className="client-muted-note">Il sera disponible lorsque votre dossier sera prêt.</p>}</section>;
+  }
+  const title = state.kind === "active" ? "Abonnement actif ✓" : state.kind === "ending" ? "Résiliation programmée" : state.kind === "payment_issue" ? "Paiement à régulariser" : state.kind === "paused" ? "Abonnement en pause" : "Abonnement résilié";
+  const note = state.kind === "active"
+    ? `49 €/mois${state.nextBillingAt ? ` · Prochain prélèvement le ${date(state.nextBillingAt)}` : " · Paiement confirmé."}`
+    : state.kind === "ending"
+      ? `Votre abonnement s'arrêtera${state.endsAt ? ` le ${date(state.endsAt)}` : " à la fin de la période en cours"}.`
+      : state.kind === "payment_issue"
+        ? "Le dernier prélèvement n'a pas abouti. Mettez à jour votre moyen de paiement pour que votre site reste suivi."
+        : state.kind === "paused"
+          ? "Votre abonnement est suspendu. Contactez-nous pour le reprendre."
+          : `Votre abonnement a pris fin${state.canceledAt ? ` le ${date(state.canceledAt)}` : ""}. Écrivez-nous si vous souhaitez le reprendre.`;
+  return <section id="paiement" className={`client-card client-payment-status${state.kind === "payment_issue" ? " client-payment-alert" : ""}`}>{head}<h2>{title}</h2><p className="client-muted-note" role={state.kind === "payment_issue" ? "alert" : undefined}>{note}</p>{state.kind !== "canceled" && <div className="client-payment-manage"><ManageSubscriptionButton /></div>}</section>;
+}
+
+export function ClientSpaceSections({ client, project, site, subscription, payments, updates, requests, seoActions, appointment, validation, projectComplete = true }: ClientSpaceSectionsProps) {
   const firstPayment = payments.filter((payment) => payment.status === "paye").sort((a, b) => a.created_at.localeCompare(b.created_at))[0];
   const paymentConfirmed = Boolean(firstPayment);
+  const billing = subscriptionState(subscription, paymentConfirmed);
   const siteUrl = normalizePublicSiteUrl(site?.production_url || site?.domain);
   const siteUrlLabel = displayPublicSiteUrl(site?.production_url || site?.domain);
   const live = Boolean(siteUrl && (site?.status === "actif" || project?.projectStatus === "live"));
@@ -75,7 +95,7 @@ export function ClientSpaceSections({ client, project, site, payments, updates, 
   return <section id="tableau-de-bord" className="client-space-section client-dashboard-section client-simple-dashboard">
     <div className="client-project-grid"><section id="mon-site" className="client-card client-main-site-card" aria-labelledby="client-main-site-title"><div className="client-project-card-icon"><GlobeIcon /></div><p className="client-eyebrow">MON SITE</p><h2 id="client-main-site-title">{site?.name || "Votre site internet"}</h2><h3>{live ? "Votre site est en ligne ✓" : siteUrl ? "Votre site est en construction" : "Votre site est en préparation"}</h3>{siteUrl ? <><p className="client-site-url">{siteUrlLabel}</p><a className="client-button" href={siteUrl} target="_blank" rel="noreferrer">Voir mon site <ArrowUpRightIcon size={16} /></a></> : <p className="client-muted-note">{deliveryEstimate ? `Livraison estimée : ${formatClientDate(deliveryEstimate)}` : "FeaseWeb prépare actuellement votre projet."}</p>}<div className="client-project-meta"><span>État <strong>{live ? "En ligne" : siteUrl ? "En construction" : "En préparation"}</strong></span>{site?.launched_at && <span>Mise en ligne <strong>{date(site.launched_at)}</strong></span>}</div></section><ActionRequired projectComplete={projectComplete} approved={approved} paymentConfirmed={paymentConfirmed} appointment={appointment} updates={updates} /></div>
     <section className="client-card client-project-status-card"><p className="client-eyebrow">VOTRE PARCOURS</p><ProjectTimeline project={project} appointment={appointment} paymentConfirmed={paymentConfirmed} paymentDate={firstPayment?.created_at} live={live} /></section>
-    <div className="client-dashboard-grid"><div id="rendez-vous"><div className="client-card-icon"><CalendarIcon /></div><ClientAppointmentCard initialAppointment={appointment ?? null} /></div><section id="paiement" className="client-card client-payment-status"><CreditCardIcon /><p className="client-eyebrow">ABONNEMENT</p><h2>{paymentConfirmed ? "Abonnement actif ✓" : approved ? "Votre abonnement FeaseWeb" : "Abonnement"}</h2>{paymentConfirmed ? <p className="client-muted-note">49 €/mois · Paiement confirmé.</p> : approved ? <><p className="client-price">49 €<span>/mois</span></p>{nextAction?.kind === "payment" ? <p className="client-muted-note">Paiement à effectuer.</p> : <StartSubscriptionButton label="Payer mon abonnement" />}<p className="client-footnote">Création ou refonte du site, hébergement, maintenance et suivi.</p></> : <p className="client-muted-note">Il sera disponible lorsque votre dossier sera prêt.</p>}</section></div>
+    <div className="client-dashboard-grid"><div id="rendez-vous"><div className="client-card-icon"><CalendarIcon /></div><ClientAppointmentCard initialAppointment={appointment ?? null} /></div><SubscriptionCard state={billing} approved={approved} paymentPending={nextAction?.kind === "payment"} /></div>
     <WorkHistory actions={seoActions} updates={updates} />
      <section id="contact" className="client-contact-panel" aria-labelledby="client-contact-title"><MessageIcon /><div className="client-contact-intro"><p className="client-eyebrow">BESOIN DE NOUS ?</p><h2 id="client-contact-title">Une question ou une modification concernant votre site ?</h2></div><div className="client-contact-actions"><ClientRequestForm compact supportOnly openHash="message-client" />{client && <ClientRequestForm compact label="Faire une demande de modification" />}<a className="client-contact-whatsapp" href={whatsappContactUrl} target="_blank" rel="noopener noreferrer">Besoin d&apos;une réponse rapide ? <strong>WhatsApp →</strong></a></div>{openRequests.length > 0 && <div className="client-request-list">{openRequests.map((request) => <RequestItem key={request.id} request={request} />)}</div>}</section>
   </section>;

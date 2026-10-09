@@ -568,3 +568,6 @@ body {
   .client-space-simple .client-project-status-card .client-project-timeline-item { min-height: 0; align-items: start; padding-top: 0; padding-bottom: 18px; }
   .client-space-simple .client-project-status-card .client-project-timeline-item:not(:last-child)::after { top: 14px; }
 }
+
+.client-payment-alert { border-color: #e6c48c; background: #fff8ec; }
+.client-payment-manage { margin-top: 14px; }

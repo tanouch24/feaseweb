@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireClient } from "@/lib/authz";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const schema = z.object({
   category: z.enum(["cms", "hebergement", "domaine", "dns"]),
@@ -21,7 +22,12 @@ export async function PATCH(request: Request) {
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Choix d'accès invalide." }, { status: 400 });
   const { category, clientChoice, clientNote } = parsed.data;
-  const { error } = await supabase.from("project_access_requirements").upsert({ project_intake_id: intake.id, category, client_choice: clientChoice === "non_necessaire" ? null : clientChoice, client_note: clientNote ?? null }, { onConflict: "project_intake_id,category" });
+  // Le dossier vient d'être lu avec la session du client : il lui appartient.
+  // La base n'autorise pas le client à modifier une ligne existante (pas de
+  // règle UPDATE), d'où l'écriture côté serveur, limitée à ces champs.
+  const admin = createAdminClient();
+  if (!admin) return NextResponse.json({ error: "Service indisponible." }, { status: 503 });
+  const { error } = await admin.from("project_access_requirements").upsert({ project_intake_id: intake.id, category, client_choice: clientChoice === "non_necessaire" ? null : clientChoice, client_note: clientNote ?? null }, { onConflict: "project_intake_id,category" });
   if (error) return NextResponse.json({ error: "Impossible d'enregistrer ce choix." }, { status: 500 });
   return NextResponse.json({ ok: true });
 }

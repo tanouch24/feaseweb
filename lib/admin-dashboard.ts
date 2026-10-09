@@ -1,4 +1,5 @@
 import type { BackofficeData, Client, Payment, ProjectIntake, Prospect, Site } from "@/lib/backoffice";
+import { needsBillingAttention } from "@/lib/subscription-state";
 
 export const adminDashboardStages = [
   "Rendez-vous à faire",
@@ -8,7 +9,17 @@ export const adminDashboardStages = [
   "Sites à faire",
   "Sites en ligne",
   "Paiements rejetés",
+  "Abonnements à surveiller",
 ] as const;
+
+const subscriptionAttentionLabel: Record<string, string> = {
+  retard: "Paiement en retard",
+  impaye: "Abonnement impayé",
+  incomplet: "Paiement incomplet",
+  annule: "Abonnement résilié",
+  incomplet_expire: "Abonnement jamais activé",
+  en_pause: "Abonnement en pause",
+};
 
 export type AdminDashboardStage = (typeof adminDashboardStages)[number];
 
@@ -119,6 +130,14 @@ export function getAdminDashboardSections(data: BackofficeData, now = new Date()
     if (failedPayment) {
       sections["Paiements rejetés"].push(clientItem(client, "Paiements rejetés", "Paiement rejeté", { paymentDate: latestPayment.paidAt }));
       continue;
+    }
+    const subscription = (data.subscriptions ?? []).find((item) => item.clientId === client.id);
+    if (subscription && needsBillingAttention(subscription.status)) {
+      sections["Abonnements à surveiller"].push(clientItem(client, "Abonnements à surveiller", subscriptionAttentionLabel[subscription.status] ?? "À vérifier"));
+      continue;
+    }
+    if (subscription?.cancelAtPeriodEnd) {
+      sections["Abonnements à surveiller"].push(clientItem(client, "Abonnements à surveiller", "Résiliation programmée"));
     }
     if (!hasConfirmedFirstPayment(payments, client.id)) continue;
     if (isSiteDone(project, site)) {
