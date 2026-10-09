@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KineticWords } from "@/components/home/KineticWords";
 import { OfferSection } from "@/components/home/OfferSection";
 import { ServiceEditorialGrid } from "@/components/home/ServiceEditorialGrid";
 import { FinalCTA } from "@/components/home/FinalCTA";
 import { RelatedLinks } from "@/components/home/RelatedLinks";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { pageMetadata } from "@/lib/seo-metadata";
+import { CheckIcon } from "@/components/ui/icons";
 
 export const metadata: Metadata = pageMetadata({
   title: "Tarif site internet : 0 € puis 49 €/mois | FeaseWeb",
@@ -18,9 +18,6 @@ export const metadata: Metadata = pageMetadata({
 export default function TarifsPage() {
   return (
     <main>
-      <RevealOnScroll>
-        <KineticWords />
-      </RevealOnScroll>
       <OfferSection headingLevel="h1" heading="Un site internet professionnel à 49 €/mois, tout compris." />
       <RevealOnScroll>
         <ServiceEditorialGrid />
@@ -54,7 +51,7 @@ export default function TarifsPage() {
                   "Petites modifications raisonnables",
                   "Support dans le cadre du service géré",
                 ].map((item) => (
-                  <li key={item} className="border-b border-line py-2"><span className="mr-3 text-brand">✓</span>{item}</li>
+                  <li key={item} className="flex gap-3 border-b border-line py-2"><CheckIcon className="mt-1 h-4 w-4 flex-shrink-0 text-accent" />{item}</li>
                 ))}
               </ul>
             </div>
