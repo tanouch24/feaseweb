@@ -94,6 +94,31 @@ body {
   animation: step-progress linear forwards;
 }
 
+/* Accueil : « le site qui se construit » (components/home/HeroVisual.tsx). */
+.build-bit { position: relative; animation: build-in .45s cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--in); }
+.build-bit::after { content: ""; position: absolute; inset: 0; border-radius: 6px; background: #e3e7e2; pointer-events: none; animation: build-unskin .5s ease-out both; animation-delay: var(--skin); }
+.build-chip { animation: build-in .35s ease-out both; animation-delay: var(--in); }
+.build-chip path { stroke-dasharray: 20; animation: build-draw .4s ease-out both; animation-delay: calc(var(--in) + .1s); }
+.build-live { animation: build-pop .5s cubic-bezier(.3,1.6,.5,1) both, build-glow 1.6s ease-out 1; animation-delay: var(--in), calc(var(--in) + .4s); }
+@keyframes build-in { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes build-unskin { from { opacity: 1; } to { opacity: 0; } }
+@keyframes build-draw { from { stroke-dashoffset: 20; } to { stroke-dashoffset: 0; } }
+@keyframes build-pop { from { opacity: 0; transform: scale(.5); } to { opacity: 1; transform: none; } }
+@keyframes build-glow { from { box-shadow: 0 0 0 0 rgba(199,150,74,.65); } to { box-shadow: 0 0 0 22px rgba(199,150,74,0); } }
+@media (prefers-reduced-motion: reduce) {
+  .build-bit, .build-chip, .build-chip path, .build-live { animation: none !important; }
+  .build-bit::after { display: none; }
+}
+
+@keyframes old-marquee {
+  from { transform: translateX(100%); }
+  to { transform: translateX(-100%); }
+}
+
+.old-marquee {
+  animation: old-marquee 9s linear infinite;
+}
+
 @keyframes draw-line {
   to {
     stroke-dashoffset: 0;

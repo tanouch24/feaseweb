@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useInView } from "@/hooks/useInView";
 import Image from "next/image";
 import { MockupFrame } from "@/components/ui/MockupFrame";
 import { DupontPlomberieSite } from "@/components/demo-sites/DupontPlomberieSite";
@@ -18,6 +19,9 @@ function BeforeSitePreview() {
       <p className="mt-3 text-lg font-bold text-blue-800 underline">
         DUPONT PLOMBERIE - Plombier a Lyon
       </p>
+      <div className="mt-2 overflow-hidden whitespace-nowrap border-2 border-gray-400 bg-[#ffff99] px-1 py-0.5 text-[11px]">
+        <span className="old-marquee inline-block">*** PROMO *** Devis gratuit *** Nous intervenons pour tous vos problemes ***</span>
+      </div>
       <p className="mt-2 text-[12px] leading-tight text-gray-700">
         Bienvenue sur notre site. Nous intervenons pour tous vos problemes de
         plomberie. Devis gratuit au 04.XX.XX.XX.XX.
@@ -33,7 +37,8 @@ function BeforeSitePreview() {
         />
       </div>
       <p className="mt-4 text-[10px] text-gray-500">
-        Optimisé pour Internet Explorer — 800x600
+        Optimisé pour Internet Explorer — 800x600 · Visiteurs :{" "}
+        <span className="bg-black px-1 font-mono text-[#00ff00]">001234</span>
       </p>
     </div>
   );
@@ -42,10 +47,41 @@ function BeforeSitePreview() {
 export function BeforeAfterSlider() {
   const [percent, setPercent] = useState(50);
   const [focused, setFocused] = useState(false);
+  const { ref, inView } = useInView({ threshold: 0.45 });
+  const touched = useRef(false);
+
+  // À la première apparition, le nouveau site balaie l'ancien puis s'arrête au
+  // milieu. Une seule fois, interrompu dès que le visiteur touche le curseur.
+  useEffect(() => {
+    if (!inView || touched.current) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const keyframes = [
+      { at: 0, value: 0 },
+      { at: 0.65, value: 100 },
+      { at: 1, value: 50 },
+    ];
+    const duration = 2600;
+    const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    let frame = 0;
+    let start = 0;
+    const tick = (now: number) => {
+      if (touched.current) return;
+      if (!start) start = now;
+      const t = Math.min(1, (now - start) / duration);
+      const segment = t < keyframes[1].at ? 0 : 1;
+      const from = keyframes[segment];
+      const to = keyframes[segment + 1];
+      const local = ease((t - from.at) / (to.at - from.at));
+      setPercent(Math.round(from.value + (to.value - from.value) * local));
+      if (t < 1) frame = requestAnimationFrame(tick);
+    };
+    const delay = setTimeout(() => { frame = requestAnimationFrame(tick); }, 250);
+    return () => { clearTimeout(delay); cancelAnimationFrame(frame); };
+  }, [inView]);
 
   return (
     <MockupFrame>
-      <div className="overflow-hidden rounded-md border border-line shadow-sm">
+      <div ref={ref as (node: HTMLDivElement | null) => void} className="overflow-hidden rounded-md border border-line shadow-sm">
         <div className="flex items-center gap-2 border-b border-line bg-bg-alt px-4 py-2.5">
           <div className="flex gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full bg-line" />
@@ -84,7 +120,8 @@ export function BeforeAfterSlider() {
             min={0}
             max={100}
             value={percent}
-            onChange={(event) => setPercent(Number(event.target.value))}
+            onChange={(event) => { touched.current = true; setPercent(Number(event.target.value)); }}
+            onPointerDown={() => { touched.current = true; }}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             aria-label="Comparer l'ancien site et le site FeaseWeb"
@@ -93,7 +130,7 @@ export function BeforeAfterSlider() {
         </div>
         <div className="flex items-center justify-between border-t border-line bg-white px-4 py-2 text-xs text-ink-soft">
           <span>Avant</span>
-          <span>Après — FeaseWeb</span>
+          <span>Après FeaseWeb</span>
         </div>
       </div>
     </MockupFrame>
