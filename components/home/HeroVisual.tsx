@@ -1,6 +1,6 @@
-import Image from "next/image";
-import type { CSSProperties, ReactNode } from "react";
-import { demoSiteImages } from "@/lib/demo-site-images";
+"use client";
+
+import { useEffect, useRef, type CSSProperties } from "react";
 
 const statusItems = [
   "Site en ligne",
@@ -11,74 +11,47 @@ const statusItems = [
 ];
 
 /**
- * « Le site qui se construit » : chaque pièce de la maquette apparaît en
- * squelette gris, prend sa vraie forme, puis les étapes se cochent et le site
- * passe « En ligne ». Animation 100 % CSS (classes .build-* dans globals.css),
- * jouée une fois au chargement ; sans animation, la maquette est terminée.
+ * Vidéo du haut de page (8 s en boucle, sans son, sans texte), réalisée avec
+ * Remotion dans ~/Developer/feaseweb-video (composition HeroLoop). Son fond
+ * est le vert nuit du bloc d'accueil. L'image fixe s'affiche tout de suite ;
+ * la vidéo ne se charge qu'une fois la page prête, pour ne pas ralentir
+ * l'affichage. Pas de lecture automatique si l'appareil demande moins
+ * d'animations.
  */
-function Bit({ children, inAt, skinAt, className = "" }: { children: ReactNode; inAt: number; skinAt: number; className?: string }) {
-  return (
-    <div className={`build-bit ${className}`} style={{ "--in": `${inAt}s`, "--skin": `${skinAt}s` } as CSSProperties}>
-      {children}
-    </div>
-  );
-}
-
 export function HeroVisual() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const start = () => {
+      video.preload = "auto";
+      const result = video.play() as Promise<void> | undefined;
+      result?.catch(() => {});
+    };
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
+    return () => window.removeEventListener("load", start);
+  }, []);
+
   return (
     <div className="relative min-w-0">
-      <div className="overflow-hidden rounded-md bg-white text-slate-900 shadow-[0_30px_60px_-30px_rgba(0,0,0,0.6)]">
-        <div className="flex items-center gap-1.5 border-b border-slate-200 bg-slate-100 px-3.5 py-2.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-          <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-          <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-          <span className="ml-2 min-w-0 truncate rounded bg-white px-2.5 py-0.5 text-[11px] text-slate-500">
-            dupontplomberie.feaseweb.fr
-          </span>
-        </div>
-        <div className="grid gap-4 p-4 sm:p-5">
-          <div className="flex items-center justify-between gap-3">
-            <Bit inAt={0.4} skinAt={1.4}><span className="text-sm font-bold text-blue-800">Dupont Plomberie</span></Bit>
-            <Bit inAt={0.5} skinAt={1.55}><span className="block rounded-md bg-blue-700 px-3 py-1.5 text-[11px] font-medium text-white">06 12 34 56 78</span></Bit>
-          </div>
-          <div className="grid items-center gap-4 sm:grid-cols-[1.1fr_1fr]">
-            <div className="min-w-0">
-              <Bit inAt={0.6} skinAt={1.7}><p className="text-[10px] font-medium tracking-wide text-blue-700">PLOMBIER AGRÉÉ · LYON ET ALENTOURS</p></Bit>
-              <Bit inAt={0.7} skinAt={1.85} className="mt-2"><p className="text-xl leading-tight font-extrabold sm:text-2xl">Un dépannage rapide, 7j/7.</p></Bit>
-              <Bit inAt={0.8} skinAt={2} className="mt-2"><p className="text-[12px] leading-snug text-slate-600">Fuite, chauffe-eau en panne : intervention le jour même.</p></Bit>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Bit inAt={0.9} skinAt={2.15}><span className="block rounded-md bg-blue-700 px-3 py-1.5 text-[11px] font-semibold text-white">Appeler</span></Bit>
-                <Bit inAt={0.95} skinAt={2.25}><span className="block rounded-md border border-blue-700 px-3 py-1.5 text-[11px] font-semibold text-blue-700">Demander un devis</span></Bit>
-              </div>
-            </div>
-            <Bit inAt={0.75} skinAt={2.4} className="relative aspect-[4/3] overflow-hidden rounded-md">
-              <Image
-                src={demoSiteImages.plumbingHero.src}
-                alt={demoSiteImages.plumbingHero.alt}
-                fill
-                priority
-                sizes="(min-width: 1024px) 260px, 45vw"
-                className="object-cover object-[center_35%]"
-              />
-            </Bit>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {[["Dépannage", 1.05, 2.5], ["Installation", 1.1, 2.6], ["Rénovation", 1.15, 2.7]].map(([label, inAt, skinAt]) => (
-              <Bit key={label as string} inAt={inAt as number} skinAt={skinAt as number}>
-                <span className="block rounded-md border border-slate-200 px-2.5 py-2 text-[11px] font-semibold">{label}</span>
-              </Bit>
-            ))}
-          </div>
-        </div>
-      </div>
+      <video
+        ref={videoRef}
+        className="block aspect-[4/3] w-full max-w-full"
+        poster="/videos/feaseweb-hero-poster.jpg"
+        muted
+        loop
+        playsInline
+        preload="none"
+        aria-label="Un curseur clique sur le site Dupont Plomberie qui passe en ligne, la version mobile défile, puis quatre sites de métiers s'enchaînent."
+      >
+        <source src="/videos/feaseweb-hero.mp4" type="video/mp4" />
+      </video>
 
-      <span className="build-live absolute -top-3 right-4 rounded-full bg-accent px-3.5 py-1.5 text-sm font-semibold text-night" style={{ "--in": "4s" } as CSSProperties}>
-        En ligne ✓
-      </span>
-
-      <ul className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2.5" aria-label="Inclus dans le service">
+      <ul className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2.5" aria-label="Inclus dans le service">
         {statusItems.map((label, index) => (
-          <li key={label} className="build-chip flex items-center gap-1.5 text-[13px] font-medium text-white/75" style={{ "--in": `${2.9 + index * 0.2}s` } as CSSProperties}>
+          <li key={label} className="build-chip flex items-center gap-1.5 text-[13px] font-medium text-white/75" style={{ "--in": `${0.6 + index * 0.15}s` } as CSSProperties}>
             <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" aria-hidden="true">
               <path d="M3 8.5 6.5 12 13 4.5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="text-accent" />
             </svg>
