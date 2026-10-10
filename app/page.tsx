@@ -10,6 +10,7 @@ import { SEOSection } from "@/components/home/SEOSection";
 import { ModificationFlow } from "@/components/home/ModificationFlow";
 import { FAQSection } from "@/components/home/FAQSection";
 import { ClientVideos } from "@/components/home/ClientVideos";
+import { PresentationVideo } from "@/components/home/PresentationVideo";
 import { pageMetadata } from "@/lib/seo-metadata";
 
 export const metadata = pageMetadata({
@@ -27,6 +28,7 @@ export default function HomePage() {
   return (
     <main>
       <Hero />
+      <PresentationVideo />
       <RevealOnScroll>
         <ProcessSteps />
       </RevealOnScroll>
